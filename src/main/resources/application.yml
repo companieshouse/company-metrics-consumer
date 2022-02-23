@@ -1,0 +1,28 @@
+server:
+  port: 8081
+
+springfox:
+  documentation:
+    auto-startup: false
+
+spring:
+  kafka:
+    bootstrap-servers: ${DATA_SYNC_KAFKA_BROKER_URL:localhost:9092}
+    producer-timeout: ${KAFKA_PRODUCER_TIMEOUT:3000}
+    producer-retries: ${KAFKA_PRODUCER_RETRIES:10}
+
+company:
+  metrics:
+    group-id: company-metrics-consumer
+    main-id:  company-metrics-main-consumer
+    retry-id: company-metrics-retry-consumer
+    topic:
+      main: company-metrics
+      retry: company-metrics-retry
+      error: company-metrics-error
+
+logger:
+  namespace: company-metrics-consumer
+
+api:
+  endpoint: ${COMPANY_METRICS_DATA_API_URL:localhost}
