@@ -1,62 +1,80 @@
 package uk.gov.companieshouse.company.metrics.processor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.RetryableException;
 import uk.gov.companieshouse.company.metrics.producer.CompanyMetricsProducer;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
-import uk.gov.companieshouse.delta.ChsDelta;
-
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
 
 @Component
 public class CompanyMetricsProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompanyMetricsProcessor.class);
     private final CompanyMetricsProducer metricsProducer;
     private final CompanyMetricsApiTransformer transformer;
+    private final Logger logger;
 
+    /**
+     * Construct a Company Metrics processor.
+     */
     @Autowired
     public CompanyMetricsProcessor(CompanyMetricsProducer metricsProducer,
-                                   CompanyMetricsApiTransformer transformer) {
+                                   CompanyMetricsApiTransformer transformer,
+                                   Logger logger) {
         this.metricsProducer = metricsProducer;
         this.transformer = transformer;
+        this.logger = logger;
     }
 
     /**
-     * Process CHS Delta message.
+     * Process ResourceChangedData message.
      */
-    public void processMetrics(Message<ChsDelta> chsDelta) {
+    public void process(Message<ResourceChangedData> resourceChangedMessage) {
         try {
-            MessageHeaders headers = chsDelta.getHeaders();
-            final String receivedTopic =
-                    Objects.requireNonNull(headers.get(KafkaHeaders.RECEIVED_TOPIC)).toString();
-            final ChsDelta payload = chsDelta.getPayload();
-            ObjectMapper mapper = new ObjectMapper();
+            logger.trace(String.format("DSND-599: ResourceChangedData extracted "
+                    + "from a Kafka message: %s", resourceChangedMessage));
 
-            //FIXME this should be a model from private sdk
-            /* CompanyMetrics companyMetrics = mapper.readValue(payload.getData(),
-                    CompanyMetrics.class);
-            transformer.transform(companyMetrics);*/
+            MessageHeaders headers = resourceChangedMessage.getHeaders();
+            final ResourceChangedData payload = resourceChangedMessage.getPayload();
+
+            final String companyNumber = extractCompanyNumber(payload.getResourceUri());
+
+            logger.trace(String.format("Company number %s extracted from"
+                            + " ResourceURI %s the payload is %s ", companyNumber,
+                    payload.getResourceUri(), payload));
         } catch (RetryableException ex) {
-            retryMetricsMessage(chsDelta);
+            retryMetricsMessage(resourceChangedMessage);
         } catch (Exception ex) {
-            handleErrorMessage(chsDelta);
+            handleErrorMessage(resourceChangedMessage);
             // send to error topic
         }
     }
 
-    public void retryMetricsMessage(Message<ChsDelta> chsDelta) {
+    public void retryMetricsMessage(Message<ResourceChangedData> resourceChangedMessage) {
     }
 
-    private void handleErrorMessage(Message<ChsDelta> chsDelta) {
+    private void handleErrorMessage(Message<ResourceChangedData> resourceChangedMessage) {
     }
+
+    private String extractCompanyNumber(String resourceUri) {
+
+        if (StringUtils.isNotBlank(resourceUri)) {
+            //matches all characters between company/ and /
+            Pattern companyNo = Pattern.compile("(?<=company/)(.*?)(?=/)");
+            Matcher matcher = companyNo.matcher(resourceUri);
+            if (matcher.find()) {
+                return matcher.group(0).length() > 1 ? matcher.group(0) : null;
+            }
+        }
+        return null;
+    }
+
 
 }

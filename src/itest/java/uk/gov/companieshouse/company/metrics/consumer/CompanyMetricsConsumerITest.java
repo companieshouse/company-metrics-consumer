@@ -5,20 +5,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import uk.gov.companieshouse.company.metrics.AbstractIntegrationTest;
-import uk.gov.companieshouse.delta.ChsDelta;
+import uk.gov.companieshouse.stream.EventRecord;
+import uk.gov.companieshouse.stream.ResourceChangedData;
+
+import java.util.Arrays;
 
 public class CompanyMetricsConsumerITest extends AbstractIntegrationTest {
 
     @Autowired
-    public KafkaTemplate<String, ChsDelta> kafkaTemplate;
+    public KafkaTemplate<String, ResourceChangedData> kafkaTemplate;
 
-    @Value("${company.metrics.topic.main}")
+    @Value("${charges.stream.topic.main}")
     private String mainTopic;
 
     @Test
     public void testSendingKafkaMessage() {
-        ChsDelta chsDelta = new ChsDelta("{ \"key\": \"value\" }", 1, "some_id");
-        kafkaTemplate.send(mainTopic, chsDelta);
+        EventRecord event = EventRecord.newBuilder()
+                .setType("changed")
+                .setPublishedAt("2022-03-18T10:51:30")
+                .setFieldsChanged(Arrays.asList("abc", "xyz"))
+                .build();
+
+        ResourceChangedData resourceChanged = ResourceChangedData.newBuilder()
+                .setContextId("context_id")
+                .setResourceId("12345678")
+                .setResourceKind("company-metrics")
+                .setResourceUri("/company/12345678/charges")
+                .setData("{ \"key\": \"value\" }")
+                .setEvent(event)
+                .build();
+
+        kafkaTemplate.send(mainTopic, resourceChanged);
     }
 
 }
