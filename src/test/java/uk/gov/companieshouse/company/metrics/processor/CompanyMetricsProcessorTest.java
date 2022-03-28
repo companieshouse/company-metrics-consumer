@@ -1,22 +1,25 @@
 package uk.gov.companieshouse.company.metrics.processor;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.FileCopyUtils;
+import uk.gov.companieshouse.company.metrics.model.TestData;
 import uk.gov.companieshouse.company.metrics.producer.CompanyMetricsProducer;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
-import uk.gov.companieshouse.delta.ChsDelta;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class CompanyMetricsProcessorTest {
@@ -29,43 +32,26 @@ public class CompanyMetricsProcessorTest {
     @Mock
     private CompanyMetricsApiTransformer transformer;
 
+    @Mock
+    private Logger logger;
+    private TestData testData;
+
     @BeforeEach
     void setUp() {
-        companyMetricsProcessor = new CompanyMetricsProcessor(companyMetricsProducer, transformer);
+        companyMetricsProcessor = new CompanyMetricsProcessor(companyMetricsProducer, transformer, logger);
+        testData = new TestData();
     }
 
     @Test
-    @DisplayName("Transforms a kafka message containing a ChsDelta payload into an CompanyMetrics")
-    void When_ValidChsDeltaMessage_Expect_ValidCompanyMetricsMapping() throws IOException {
-        Message<ChsDelta> mockChsDeltaMessage = createChsDeltaMessage();
-        // FIXME - When processor and data model is ready please uncomment it and make required changes.
+    @DisplayName("Successfully processes a kafka message containing a ResourceChangedData payload and extract companyNumber")
+    void When_ValidResourceChangedDataMessage_Expect_MessageProcessedAndExtractedCompanyNumber() throws IOException {
+        Message<ResourceChangedData> resourceChangedDataMessage = testData.createResourceChangedMessage();
+        companyMetricsProcessor.process(resourceChangedDataMessage);
 
-        /*Object expectedCompanyMetrics = createCompanyMetrics();
-        when(transformer.transform(expectedCompanyMetrics)).thenCallRealMethod();
-        companyMetricsProcessor.processMetrics(mockChsDeltaMessage);
-        verify(transformer).transform(expectedCompanyMetrics);*/
+        verify(logger, atLeastOnce()).trace((
+                String.format("Company number %s extracted from"
+                                + " ResourceURI %s the payload is %s ", "02588581",
+                        resourceChangedDataMessage.getPayload().getResourceUri(), resourceChangedDataMessage.getPayload())));
     }
 
-    private Message<ChsDelta> createChsDeltaMessage() throws IOException {
-        InputStreamReader exampleCompanyMetricsJsonPayload = new InputStreamReader(
-                Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResourceAsStream("company-metrics-example.json")));
-        String companyMetricsData = FileCopyUtils.copyToString(exampleCompanyMetricsJsonPayload);
-
-        ChsDelta mockChsDelta = ChsDelta.newBuilder()
-                .setData(companyMetricsData)
-                .setContextId("context_id")
-                .setAttempt(1)
-                .build();
-
-        return MessageBuilder
-                .withPayload(mockChsDelta)
-                .setHeader(KafkaHeaders.RECEIVED_TOPIC, "test")
-                .setHeader("COMPANY_METRICS_RETRY_COUNT", 1)
-                .build();
-    }
-
-    private Object createCompanyMetrics() {
-        // FIXME - When Company Metrics Model is ready set an object with data.
-        return new Object();
-    }
 }

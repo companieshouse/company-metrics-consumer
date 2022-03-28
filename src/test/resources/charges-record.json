@@ -1,0 +1,35 @@
+{
+  "charges": [
+    {
+      "company_number": "01099198",
+      "delta_at": "20211029142043360560",
+      "id": "3387778",
+      "persons_entitled": [
+        {
+          "person": "LOMBARD NORTH CENTRAL PLC"
+        }
+      ],
+      "notice_type": "395",
+      "trans_desc": "PARTICULARS OF MORTGAGE/CHARGE",
+      "submission_type": "9",
+      "delivered_on": "20070609",
+      "additional_notices": [
+        {
+          "notice_type": "403a",
+          "trans_id": "3387778",
+          "trans_desc": "DECLARATION OF SATISFACTION OF MORTGAGE/CHARGE",
+          "submission_type": "9",
+          "delivered_on": "20070809"
+        }
+      ],
+      "charge_number": "577",
+      "migrated_from": "STEM",
+      "amount_secured": "£48,000.00                               AND ALL OTHER MONIES DUE OR TO BECOME DUE",
+      "type": "MARINE MORTGAGE                         ",
+      "short_particulars": "LEGEND 33 HULL ID: LUH33057L405         ",
+      "status": "1",
+      "satisfied_on": "20070809",
+      "created_on": "20070605"
+    }
+  ]
+}

@@ -4,21 +4,35 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
-import uk.gov.companieshouse.delta.ChsDelta;
-import uk.gov.companieshouse.company.metrics.serialization.ChsDeltaDeserializer;
-import uk.gov.companieshouse.company.metrics.serialization.ChsDeltaSerializer;
+import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
+import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataSerializer;
+import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @TestConfiguration
 public class KafkaTestContainerConfig {
+
+    @MockBean
+    private CHKafkaProducer chKafkaProducer;
+
+     private final ResourceChangedDataDeserializer resourceChangedDataDeserializer;
+
+
+    @Autowired
+    public KafkaTestContainerConfig(ResourceChangedDataDeserializer resourceChangedDataDeserializer) {
+        this.resourceChangedDataDeserializer = resourceChangedDataDeserializer;
+    }
 
     @Bean
     public KafkaContainer kafkaContainer() {
@@ -28,16 +42,18 @@ public class KafkaTestContainerConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<Integer, String> listenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<Integer, String> factory =
+    ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(kafkaConsumerFactory());
         return factory;
     }
 
     @Bean
-    public ConsumerFactory<Integer, String> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(kafkaContainer()));
+    public ConsumerFactory<String, ResourceChangedData> kafkaConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(consumerConfigs(kafkaContainer()),
+                new StringDeserializer(),
+                resourceChangedDataDeserializer);
     }
 
     @Bean
@@ -47,21 +63,21 @@ public class KafkaTestContainerConfig {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "company-metrics-consumer");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ChsDeltaDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ResourceChangedDataDeserializer.class);
         return props;
     }
 
     @Bean
-    public ProducerFactory<String, ChsDelta> producerFactory(KafkaContainer kafkaContainer) {
+    public ProducerFactory<String, ResourceChangedData> producerFactory(KafkaContainer kafkaContainer) {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers());
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ChsDeltaSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ResourceChangedDataSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
     @Bean
-    public KafkaTemplate<String, ChsDelta> kafkaTemplate() {
+    public KafkaTemplate<String, ResourceChangedData> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory(kafkaContainer()));
     }
 

@@ -31,12 +31,13 @@
 		<ch-kafka.version>1.4.2</ch-kafka.version>
 		<structured-logging.version>1.9.12</structured-logging.version>
 		<kafka-models.version>1.0.27</kafka-models.version>
-		<private-api-sdk-java.version>2.0.109</private-api-sdk-java.version>
+		<private-api-sdk-java.version>2.0.125</private-api-sdk-java.version>
 		<api-sdk-manager-java-library.version>1.0.4</api-sdk-manager-java-library.version>
 		<jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
 		<io-cucumber.version>7.2.3</io-cucumber.version>
 		<skip.integration.tests>false</skip.integration.tests>
 		<skip.unit.tests>false</skip.unit.tests>
+		<springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
 
 		<!--sonar configuration-->
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
@@ -102,6 +103,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-boot-starter</artifactId>
+			<version>${springfox-boot-starter.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
