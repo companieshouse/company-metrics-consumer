@@ -7,7 +7,7 @@ springfox:
 
 spring:
   kafka:
-    bootstrap-servers: ${DATA_STREAM_KAFKA_BROKER_URL:localhost:9092}
+    bootstrap-servers: ${STREAMING_KAFKA_BROKER_URL:localhost:9092}
     producer-timeout: ${KAFKA_PRODUCER_TIMEOUT:3000}
     producer-retries: ${KAFKA_PRODUCER_RETRIES:10}
 
