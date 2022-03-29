@@ -29,7 +29,7 @@ public class CompanyMetricsConsumerITest extends AbstractIntegrationTest {
         ResourceChangedData resourceChanged = ResourceChangedData.newBuilder()
                 .setContextId("context_id")
                 .setResourceId("12345678")
-                .setResourceKind("company-metrics")
+                .setResourceKind("company-charges")
                 .setResourceUri("/company/12345678/charges")
                 .setData("{ \"key\": \"value\" }")
                 .setEvent(event)
