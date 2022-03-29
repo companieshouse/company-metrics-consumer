@@ -29,7 +29,7 @@ public class TestData {
         ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
                 .setContextId("context_id")
                 .setResourceId(COMPANY_NUMBER)
-                .setResourceKind("company-metrics")
+                .setResourceKind("company-charges")
                 .setResourceUri(String.format("/company/%s/charges", COMPANY_NUMBER))
                 .setEvent(eventRecord)
                 .setData(chargesRecord)
