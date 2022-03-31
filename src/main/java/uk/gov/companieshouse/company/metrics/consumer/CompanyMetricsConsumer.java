@@ -3,7 +3,6 @@ package uk.gov.companieshouse.company.metrics.consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.Message;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.processor.CompanyMetricsProcessor;
 import uk.gov.companieshouse.stream.ResourceChangedData;
