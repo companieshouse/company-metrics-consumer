@@ -24,12 +24,13 @@ public class CompanyMetricsConsumer {
     /**
      * Receives Main topic messages.
      */
-    @KafkaListener(topics = "${charges.stream.topic.main}", groupId = "charges.stream.topic.main",
-            autoStartup = "${company-metrics.consumer.charges.enable}")
+    @KafkaListener(topics = "${charges.stream.topic.main}",
+            groupId = "${charges.stream.group-id}",
+            autoStartup = "${company-metrics.consumer.charges.enable}",
+            containerFactory = "listenerContainerFactory")
     public void receive(Message<ResourceChangedData> resourceChangedMessage) {
-        logger.info(
-                "A new message read from MAIN topic with payload: "
-                        + resourceChangedMessage.getPayload());
+        logger.info("A new message read from MAIN topic with payload: "
+                + resourceChangedMessage.getPayload());
         metricsProcessor.process(resourceChangedMessage);
     }
 
