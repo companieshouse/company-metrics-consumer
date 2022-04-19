@@ -12,8 +12,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
-import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
-import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataSerializer;
+import uk.gov.companieshouse.company.metrics.service.api.serialization.ResourceChangedDataDeserializer;
+import uk.gov.companieshouse.company.metrics.service.api.serialization.ResourceChangedDataSerializer;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
