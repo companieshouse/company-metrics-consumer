@@ -13,9 +13,9 @@ import java.util.Arrays;
 public class CompanyMetricsConsumerITest extends AbstractIntegrationTest {
 
     @Autowired
-    public KafkaTemplate<String, ResourceChangedData> kafkaTemplate;
+    public KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("${charges.stream.topic.main}")
+    @Value("${charges.stream.topic}")
     private String mainTopic;
 
     @Test

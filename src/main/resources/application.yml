@@ -14,8 +14,9 @@ spring:
 charges:
   stream:
     group-id: company-metrics-consumer
-    topic:
-      main: stream-company-charges
+    topic: stream-company-charges
+    retry-attempts: 4
+    backoff-delay: 100
 
 logger:
   namespace: company-metrics-consumer

@@ -37,7 +37,7 @@ public class ResourceChangedDataDeserializerTest {
     }
 
     private byte[] encodedData(ResourceChangedData resourceChangedData){
-        ResourceChangedDataSerializer serializer = new ResourceChangedDataSerializer();
+        ResourceChangedDataSerializer serializer = new ResourceChangedDataSerializer(this.logger);
         return serializer.serialize("", resourceChangedData);
     }
 }
