@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
+import uk.gov.companieshouse.company.metrics.service.api.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 

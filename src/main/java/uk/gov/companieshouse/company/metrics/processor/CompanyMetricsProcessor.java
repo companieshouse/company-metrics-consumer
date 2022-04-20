@@ -1,17 +1,27 @@
 package uk.gov.companieshouse.company.metrics.processor;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.metrics.InternalData;
+import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.company.metrics.exception.RetryableException;
 import uk.gov.companieshouse.company.metrics.producer.CompanyMetricsProducer;
+import uk.gov.companieshouse.company.metrics.service.CompanyMetricsApiService;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static uk.gov.companieshouse.company.metrics.processor.ResponseHandler.handleResponse;
 
 
 @Component
@@ -20,6 +30,7 @@ public class CompanyMetricsProcessor {
     private final CompanyMetricsProducer metricsProducer;
     private final CompanyMetricsApiTransformer transformer;
     private final Logger logger;
+    private final CompanyMetricsApiService companyMetricsApiService;
 
     /**
      * Construct a Company Metrics processor.
@@ -27,28 +38,62 @@ public class CompanyMetricsProcessor {
     @Autowired
     public CompanyMetricsProcessor(CompanyMetricsProducer metricsProducer,
                                    CompanyMetricsApiTransformer transformer,
-                                   Logger logger) {
+                                   Logger logger,
+                                   CompanyMetricsApiService companyMetricsApiService
+                                    ) {
         this.metricsProducer = metricsProducer;
         this.transformer = transformer;
         this.logger = logger;
+        this.companyMetricsApiService = companyMetricsApiService;
     }
 
     /**
      * Process ResourceChangedData message.
      */
-    public void process(Message<ResourceChangedData> resourceChangedMessage) {
+    public void process(Message<ResourceChangedData> resourceChangedMessage,
+                        String topic,
+                        String partition,
+                        String offset) {
         try {
             logger.trace(String.format("DSND-599: ResourceChangedData extracted "
                     + "from a Kafka message: %s", resourceChangedMessage));
 
             MessageHeaders headers = resourceChangedMessage.getHeaders();
             final ResourceChangedData payload = resourceChangedMessage.getPayload();
-
+            final String contextId = payload.getContextId();
+            final Map<String, Object> logMap = new HashMap<>();
             final String companyNumber = extractCompanyNumber(payload.getResourceUri());
+            final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
+
 
             logger.trace(String.format("Company number %s extracted from"
                             + " ResourceURI %s the payload is %s ", companyNumber,
                     payload.getResourceUri(), payload));
+
+            MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
+            InternalData internalData = new InternalData();
+            internalData.setUpdatedBy(updatedBy);
+            metricsRecalculateApi.setMortgage(Boolean.TRUE);
+            metricsRecalculateApi.setAppointments(Boolean.FALSE);
+            metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
+            metricsRecalculateApi.setInternalData(internalData);
+
+
+
+            final ApiResponse<Void> postResponse =
+                    companyMetricsApiService.postCompanyMetrics(
+                            contextId, companyNumber,
+                            metricsRecalculateApi
+                    );
+
+            logger.trace(String.format("Performing a POST with company profile %s",
+                    metricsRecalculateApi));
+            handleResponse(HttpStatus.valueOf(postResponse.getStatusCode()), contextId,
+                    "Response from PATCH call to company profile api", logMap, logger);
+
+
+
+
         } catch (RetryableException ex) {
             retryMetricsMessage(resourceChangedMessage);
         } catch (Exception ex) {
