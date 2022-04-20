@@ -15,8 +15,8 @@ charges:
   stream:
     group-id: company-metrics-consumer
     topic:
-      main: stream-charges
-      retry: stream-charges-retry
+      main: stream-company-charges
+
 logger:
   namespace: company-metrics-consumer
 

@@ -1,5 +1,11 @@
 package uk.gov.companieshouse.company.metrics.processor;
 
+import static uk.gov.companieshouse.company.metrics.processor.ResponseHandler.handleResponse;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,14 +21,6 @@ import uk.gov.companieshouse.company.metrics.service.CompanyMetricsApiService;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static uk.gov.companieshouse.company.metrics.processor.ResponseHandler.handleResponse;
-
 
 @Component
 public class CompanyMetricsProcessor {
@@ -40,7 +38,7 @@ public class CompanyMetricsProcessor {
                                    CompanyMetricsApiTransformer transformer,
                                    Logger logger,
                                    CompanyMetricsApiService companyMetricsApiService
-                                    ) {
+    ) {
         this.metricsProducer = metricsProducer;
         this.transformer = transformer;
         this.logger = logger;

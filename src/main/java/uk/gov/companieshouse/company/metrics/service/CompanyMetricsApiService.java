@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.service;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,9 +13,6 @@ import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.company.metrics.service.api.BaseApiClientServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class CompanyMetricsApiService extends BaseApiClientServiceImpl {
@@ -39,6 +38,10 @@ public class CompanyMetricsApiService extends BaseApiClientServiceImpl {
         return null;
     }
 
+    /**
+     * get the internal Api client.
+     *  @param contextId the contextId.
+     */
     public InternalApiClient getApiClient(String contextId) {
         InternalApiClient apiClient = new InternalApiClient(getHttpClient(contextId));
         apiClient.setBasePath("apiUrl");
