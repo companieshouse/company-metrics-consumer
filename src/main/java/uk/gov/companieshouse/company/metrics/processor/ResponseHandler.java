@@ -9,8 +9,6 @@ import java.util.Map;
 
 public final class ResponseHandler {
 
-    private ResponseHandler() {
-    }
 
     /**
      * Common response handler.
