@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.company.metrics.service.api.serialization.ResourceChangedDataDeserializer;
+import uk.gov.companieshouse.company.metrics.service.api.serialization.ResourceChangedDataSerializer;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.company.metrics.serialization;
+package uk.gov.companieshouse.company.metrics.service.api.serialization;
 
 import java.nio.charset.StandardCharsets;
 
