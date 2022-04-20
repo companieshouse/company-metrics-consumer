@@ -81,6 +81,6 @@ public class CompanyMetricsApiServiceTest {
         final ApiResponse<Void> response = companyMetricsApiService.postCompanyMetrics(
                 MOCK_CONTEXT_ID, MOCK_COMPANY_NUMBER, metricsRecalculateApi);
 
-        assertThat(response).isSameAs(expected);
+        assertThat(response).isEqualTo(expected);
     }
 }

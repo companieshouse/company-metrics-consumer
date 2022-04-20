@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.company.metrics.service.api;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -10,11 +8,14 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public abstract class BaseApiClientServiceImpl {
-    protected Logger logger;
+    protected final Logger logger;
 
-    protected BaseApiClientServiceImpl(final Logger logger) {
+    protected BaseApiClientServiceImpl(Logger logger) {
         this.logger = logger;
     }
 
