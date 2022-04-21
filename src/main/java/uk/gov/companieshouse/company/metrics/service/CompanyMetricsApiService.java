@@ -28,16 +28,6 @@ public class CompanyMetricsApiService extends BaseClientApiService {
     }
 
     /**
-     * Invoke Company Metrics API.
-     */
-    public ApiResponse<?> invokeCompanyMetricsApi() {
-        InternalApiClient internalApiClient = getInternalApiClient();
-        internalApiClient.setBasePath(companyMetricsApiUrl);
-
-        return null;
-    }
-
-    /**
      * get the internal Api client.
      *  @param contextId the contextId.
      */
