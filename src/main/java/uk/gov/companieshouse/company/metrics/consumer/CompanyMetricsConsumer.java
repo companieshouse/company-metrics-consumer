@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.processor.CompanyMetricsProcessor;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-
 @Component
 public class CompanyMetricsConsumer {
 
@@ -41,20 +40,6 @@ public class CompanyMetricsConsumer {
         metricsProcessor.process(resourceChangedMessage, topic, partition, offset);
     }
 
-    /**
-     * Receives Retry topic messages.
-     */
-    @KafkaListener(topics = "${charges.stream.topic.retry}", groupId = "charges.stream.topic.retry",
-            autoStartup = "${company-metrics.consumer.charges.enable}")
-    public void retry(Message<ResourceChangedData> resourceChangedMessage,
-                      @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                      @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
-                      @Header(KafkaHeaders.OFFSET) String offset) {
-        logger.info(
-                String.format("A new message read from RETRY topic with payload:%s and headers:%s ",
-                        resourceChangedMessage.getPayload(), resourceChangedMessage.getHeaders()));
-        metricsProcessor.process(resourceChangedMessage, topic, partition, offset);
-    }
 
 
 

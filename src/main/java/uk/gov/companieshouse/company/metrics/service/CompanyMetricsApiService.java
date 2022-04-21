@@ -17,11 +17,11 @@ import uk.gov.companieshouse.logging.Logger;
 @Service
 public class CompanyMetricsApiService extends BaseApiClientServiceImpl {
 
-    @Value("${api.company-profile-api-key}")
-    private String companyProfileApiKey;
+    @Value("${api.company-metrics-api-key}")
+    private String companyMetricsApiKey;
 
-    @Value("${api.endpoint}")
-    private String companyProfileApiUrl;
+    @Value("${api.api-url}")
+    private String companyMetricsApiUrl;
 
     @Autowired
     public CompanyMetricsApiService(Logger logger) {
@@ -33,7 +33,7 @@ public class CompanyMetricsApiService extends BaseApiClientServiceImpl {
      */
     public ApiResponse<?> invokeCompanyMetricsApi() {
         InternalApiClient internalApiClient = getInternalApiClient();
-        internalApiClient.setBasePath("apiUrl");
+        internalApiClient.setBasePath(companyMetricsApiUrl);
 
         return null;
     }
@@ -44,12 +44,12 @@ public class CompanyMetricsApiService extends BaseApiClientServiceImpl {
      */
     public InternalApiClient getApiClient(String contextId) {
         InternalApiClient apiClient = new InternalApiClient(getHttpClient(contextId));
-        apiClient.setBasePath("apiUrl");
+        apiClient.setBasePath(companyMetricsApiUrl);
         return apiClient;
     }
 
     private HttpClient getHttpClient(String contextId) {
-        ApiKeyHttpClient httpClient = new ApiKeyHttpClient(companyProfileApiKey);
+        ApiKeyHttpClient httpClient = new ApiKeyHttpClient(companyMetricsApiKey);
         httpClient.setRequestId(contextId);
         return httpClient;
     }

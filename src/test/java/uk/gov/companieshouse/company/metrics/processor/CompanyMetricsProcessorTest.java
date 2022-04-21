@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import uk.gov.companieshouse.company.metrics.model.TestData;
-import uk.gov.companieshouse.company.metrics.producer.CompanyMetricsProducer;
+import uk.gov.companieshouse.company.metrics.service.api.serialization.producer.CompanyMetricsProducer;
 import uk.gov.companieshouse.company.metrics.service.CompanyMetricsApiService;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 import uk.gov.companieshouse.logging.Logger;
