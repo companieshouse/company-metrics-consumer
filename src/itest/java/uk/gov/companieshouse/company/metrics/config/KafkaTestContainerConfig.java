@@ -6,15 +6,13 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
-import uk.gov.companieshouse.company.metrics.service.api.serialization.ResourceChangedDataDeserializer;
-import uk.gov.companieshouse.company.metrics.service.api.serialization.ResourceChangedDataSerializer;
-import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
+import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
+import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataSerializer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 import java.util.HashMap;
@@ -23,11 +21,7 @@ import java.util.Map;
 @TestConfiguration
 public class KafkaTestContainerConfig {
 
-    @MockBean
-    private CHKafkaProducer chKafkaProducer;
-
-     private final ResourceChangedDataDeserializer resourceChangedDataDeserializer;
-
+    private final ResourceChangedDataDeserializer resourceChangedDataDeserializer;
 
     @Autowired
     public KafkaTestContainerConfig(ResourceChangedDataDeserializer resourceChangedDataDeserializer) {
