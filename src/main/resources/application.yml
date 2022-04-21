@@ -24,10 +24,7 @@ api:
   api-url: ${API_URL:localhost}
   company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}
 
-
 company-metrics:
   consumer:
     charges:
       enable: true
-      group-id: company-metrics-consumer
-      topic: stream-company-charges

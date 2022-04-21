@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.company.metrics.service.api.serialization;
+package uk.gov.companieshouse.company.metrics.serialization;
 
 import java.util.Arrays;
 import org.apache.avro.io.DatumReader;

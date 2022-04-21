@@ -11,11 +11,10 @@ import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.company.metrics.service.api.BaseApiClientServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
 
 @Service
-public class CompanyMetricsApiService extends BaseApiClientServiceImpl {
+public class CompanyMetricsApiService extends BaseClientApiService {
 
     @Value("${api.company-metrics-api-key}")
     private String companyMetricsApiKey;

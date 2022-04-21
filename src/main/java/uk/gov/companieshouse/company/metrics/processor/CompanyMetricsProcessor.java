@@ -6,18 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.metrics.InternalData;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.company.metrics.exception.RetryableException;
 import uk.gov.companieshouse.company.metrics.service.CompanyMetricsApiService;
-import uk.gov.companieshouse.company.metrics.service.api.serialization.producer.CompanyMetricsProducer;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -25,44 +22,37 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class CompanyMetricsProcessor {
 
-    private final CompanyMetricsProducer metricsProducer;
     private final CompanyMetricsApiTransformer transformer;
-    private final Logger logger;
     private final CompanyMetricsApiService companyMetricsApiService;
+    private final Logger logger;
 
     /**
      * Construct a Company Metrics processor.
      */
     @Autowired
-    public CompanyMetricsProcessor(CompanyMetricsProducer metricsProducer,
-                                   CompanyMetricsApiTransformer transformer,
-                                   Logger logger,
-                                   CompanyMetricsApiService companyMetricsApiService
-    ) {
-        this.metricsProducer = metricsProducer;
+    public CompanyMetricsProcessor(CompanyMetricsApiTransformer transformer,
+                                   CompanyMetricsApiService companyMetricsApiService,
+                                   Logger logger) {
         this.transformer = transformer;
-        this.logger = logger;
         this.companyMetricsApiService = companyMetricsApiService;
+        this.logger = logger;
     }
 
     /**
      * Process ResourceChangedData message.
      */
-    public void process(Message<ResourceChangedData> resourceChangedMessage,
+    public void process(ResourceChangedData payload,
                         String topic,
                         String partition,
                         String offset) {
         try {
             logger.trace(String.format("DSND-599: ResourceChangedData extracted "
-                    + "from a Kafka message: %s", resourceChangedMessage));
+                    + "from a Kafka message: %s", payload));
 
-            MessageHeaders headers = resourceChangedMessage.getHeaders();
-            final ResourceChangedData payload = resourceChangedMessage.getPayload();
             final String contextId = payload.getContextId();
             final Map<String, Object> logMap = new HashMap<>();
             final String companyNumber = extractCompanyNumber(payload.getResourceUri());
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
-
 
             logger.trace(String.format("Company number %s extracted from"
                             + " ResourceURI %s the payload is %s ", companyNumber,
@@ -76,8 +66,6 @@ public class CompanyMetricsProcessor {
             metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
             metricsRecalculateApi.setInternalData(internalData);
 
-
-
             final ApiResponse<Void> postResponse =
                     companyMetricsApiService.postCompanyMetrics(
                             contextId, companyNumber,
@@ -89,21 +77,10 @@ public class CompanyMetricsProcessor {
             handleResponse(HttpStatus.valueOf(postResponse.getStatusCode()), contextId,
                     "Response from PATCH call to company profile api", logMap, logger);
 
-
-
-
-        } catch (RetryableException ex) {
-            retryMetricsMessage(resourceChangedMessage);
         } catch (Exception ex) {
-            handleErrorMessage(resourceChangedMessage);
+            logger.error("Unexpected error while processing message", ex);
             // send to error topic
         }
-    }
-
-    public void retryMetricsMessage(Message<ResourceChangedData> resourceChangedMessage) {
-    }
-
-    private void handleErrorMessage(Message<ResourceChangedData> resourceChangedMessage) {
     }
 
     private String extractCompanyNumber(String resourceUri) {
