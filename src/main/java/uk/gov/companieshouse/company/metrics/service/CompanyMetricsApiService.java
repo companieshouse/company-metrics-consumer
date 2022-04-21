@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.service;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,20 +11,16 @@ import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.company.metrics.service.api.BaseApiClientServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
-public class CompanyMetricsApiService extends BaseApiClientServiceImpl {
+public class CompanyMetricsApiService extends BaseClientApiService {
 
-    @Value("${api.company-profile-api-key}")
-    private String companyProfileApiKey;
+    @Value("${api.company-metrics-api-key}")
+    private String companyMetricsApiKey;
 
-    @Value("${api.endpoint}")
-    private String companyProfileApiUrl;
+    @Value("${api.api-url}")
+    private String companyMetricsApiUrl;
 
     @Autowired
     public CompanyMetricsApiService(Logger logger) {
@@ -30,23 +28,17 @@ public class CompanyMetricsApiService extends BaseApiClientServiceImpl {
     }
 
     /**
-     * Invoke Company Metrics API.
+     * get the internal Api client.
+     *  @param contextId the contextId.
      */
-    public ApiResponse<?> invokeCompanyMetricsApi() {
-        InternalApiClient internalApiClient = getInternalApiClient();
-        internalApiClient.setBasePath("apiUrl");
-
-        return null;
-    }
-
     public InternalApiClient getApiClient(String contextId) {
         InternalApiClient apiClient = new InternalApiClient(getHttpClient(contextId));
-        apiClient.setBasePath("apiUrl");
+        apiClient.setBasePath(companyMetricsApiUrl);
         return apiClient;
     }
 
     private HttpClient getHttpClient(String contextId) {
-        ApiKeyHttpClient httpClient = new ApiKeyHttpClient(companyProfileApiKey);
+        ApiKeyHttpClient httpClient = new ApiKeyHttpClient(companyMetricsApiKey);
         httpClient.setRequestId(contextId);
         return httpClient;
     }

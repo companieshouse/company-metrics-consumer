@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.company.metrics.service.api;
+package uk.gov.companieshouse.company.metrics.service;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,11 +10,10 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
 
-
-public abstract class BaseApiClientServiceImpl {
+public abstract class BaseClientApiService {
     protected final Logger logger;
 
-    protected BaseApiClientServiceImpl(Logger logger) {
+    protected BaseClientApiService(Logger logger) {
         this.logger = logger;
     }
 
