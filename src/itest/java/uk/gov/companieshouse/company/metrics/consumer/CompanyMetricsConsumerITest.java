@@ -15,7 +15,8 @@ public class CompanyMetricsConsumerITest extends AbstractIntegrationTest {
     @Autowired
     public KafkaTemplate<String, ResourceChangedData> kafkaTemplate;
 
-    @Value("${charges.stream.topic.main}")
+
+    @Value("${company-metrics.consumer.charges.topic}")
     private String mainTopic;
 
     @Test

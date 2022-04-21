@@ -10,7 +10,6 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
 
-
 public abstract class BaseApiClientServiceImpl {
     protected final Logger logger;
 

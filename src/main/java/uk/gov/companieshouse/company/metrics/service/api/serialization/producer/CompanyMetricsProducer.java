@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.company.metrics.producer;
+package uk.gov.companieshouse.company.metrics.service.api.serialization.producer;
 
 import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
