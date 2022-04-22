@@ -43,10 +43,10 @@ public class RetryableTopicErrorInterceptor implements ProducerInterceptor<Strin
         Header header1 = record.headers().lastHeader(EXCEPTION_CAUSE_FQCN);
         Header header2 = record.headers().lastHeader(EXCEPTION_STACKTRACE);
         return ((header1 != null
-                && new String(header1.value()).contains(NonRetryableException.class.getName()))
+                && new String(header1.value()).contains(NonRetryableErrorException.class.getName()))
                 || (header2 != null
                 && new String(header2.value()).contains(
-                        NonRetryableException.class.getName())))
+                        NonRetryableErrorException.class.getName())))
                 ? record.topic().replace("-error", "-invalid") : record.topic();
     }
 }

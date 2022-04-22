@@ -8,7 +8,7 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.kafka.common.serialization.Serializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.company.metrics.exception.NonRetryableException;
+import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.kafka.serialization.AvroSerializer;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -50,7 +50,7 @@ public class ResourceChangedDataSerializer implements Serializer<Object> {
             return payload.toString().getBytes(StandardCharsets.UTF_8);
         } catch (Exception ex) {
             logger.error("Serialization exception while writing to byte array", ex);
-            throw new NonRetryableException("Serialization exception while "
+            throw new NonRetryableErrorException("Serialization exception while "
                     + "writing to byte array", ex);
         }
     }

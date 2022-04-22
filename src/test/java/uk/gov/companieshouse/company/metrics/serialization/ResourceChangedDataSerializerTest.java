@@ -44,7 +44,7 @@ public class ResourceChangedDataSerializerTest {
 
     @Test
     void When_serialize_receivesBytes_returnsBytes() {
-        byte[] byteExample = "Example bytes".getBytes();
+        byte[] byteExample = "Sample bytes".getBytes();
         byte[] serialize = serializer.serialize("", byteExample);
         assertThat(serialize).isEqualTo(byteExample);
     }
