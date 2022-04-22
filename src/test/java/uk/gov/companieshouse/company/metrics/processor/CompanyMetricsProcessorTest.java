@@ -99,7 +99,7 @@ public class CompanyMetricsProcessorTest {
     }
 
     @Test
-    @DisplayName("POST company metrics recalculate returns Bad Request 400, non retryable error")
+    @DisplayName("POST company metrics recalculate returns Bad Request 400, non-retryable error")
     void postCompanyMetricsRecalculateReturnsBadRequest_then_nonRetryableError() throws IOException {
         Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage();
 

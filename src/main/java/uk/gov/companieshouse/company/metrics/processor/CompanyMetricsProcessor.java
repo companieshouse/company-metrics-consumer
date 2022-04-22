@@ -73,7 +73,7 @@ public class CompanyMetricsProcessor {
                         metricsRecalculateApi
                 );
 
-        logger.trace(String.format("Performing a POST with company profile %s",
+        logger.trace(String.format("Performing company metrics recalculate operation %s",
                 metricsRecalculateApi));
 
         handleResponse(HttpStatus.valueOf(postResponse.getStatusCode()), contextId, logMap);
@@ -110,7 +110,7 @@ public class CompanyMetricsProcessor {
             throw new NonRetryableErrorException(message);
         } else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
             // any other client or server status is retry-able
-            String message = "Non-Successful 200 response received from company-metrics-api";
+            String message = "Non-Successful 4xx or 5xx response received from company-metrics-api";
             logger.errorContext(logContext, message + ", retry", null, logMap);
             throw new RetryableErrorException(message);
         } else {

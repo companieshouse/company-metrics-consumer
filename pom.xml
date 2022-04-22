@@ -20,7 +20,6 @@
 
 		<main.class>uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication</main.class>
 
-		<spring.boot.version>2.6.4</spring.boot.version>
 		<assertj-core.version>3.22.0</assertj-core.version>
 		<test-containers.version>1.16.3</test-containers.version>
 		<kafka-test-containers.version>1.16.2</kafka-test-containers.version>

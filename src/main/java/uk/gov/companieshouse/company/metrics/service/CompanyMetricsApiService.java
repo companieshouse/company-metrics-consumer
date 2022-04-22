@@ -55,7 +55,8 @@ public class CompanyMetricsApiService extends BaseClientApiService {
     }
 
     /**
-     * POST a company profile given a company number extracted in CompanyMetricsProcessor.
+     * POST a company metrics api to recalculate the count given a company number
+     * extracted in CompanyMetricsProcessor.
      *
      * @param companyNumber the company's company number
      * @return an ApiResponse containing the metrics recalculate api data model
