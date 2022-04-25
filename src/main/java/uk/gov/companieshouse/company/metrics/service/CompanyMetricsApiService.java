@@ -2,6 +2,7 @@ package uk.gov.companieshouse.company.metrics.service;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
+
 
 @Service
 public class CompanyMetricsApiService extends BaseClientApiService {
@@ -28,8 +30,17 @@ public class CompanyMetricsApiService extends BaseClientApiService {
     }
 
     /**
-     * get the internal Api client.
-     *  @param contextId the contextId.
+     * Invoke Company Metrics API.
+     */
+    public ApiResponse<?> invokeCompanyMetricsApi() {
+        InternalApiClient internalApiClient = getInternalApiClient();
+        internalApiClient.setBasePath("apiUrl");
+
+        return null;
+    }
+
+    /**
+     * Creating API client.
      */
     public InternalApiClient getApiClient(String contextId) {
         InternalApiClient apiClient = new InternalApiClient(getHttpClient(contextId));
@@ -44,7 +55,8 @@ public class CompanyMetricsApiService extends BaseClientApiService {
     }
 
     /**
-     * POST a company profile given a company number extracted in CompanyMetricsProcessor.
+     * POST a company metrics api to recalculate the count given a company number
+     * extracted in CompanyMetricsProcessor.
      *
      * @param companyNumber the company's company number
      * @return an ApiResponse containing the metrics recalculate api data model

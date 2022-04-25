@@ -1,14 +1,13 @@
 package uk.gov.companieshouse.company.metrics.serialization;
 
-import java.util.Arrays;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.reflect.ReflectDatumReader;
-import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -39,12 +38,8 @@ public class ResourceChangedDataDeserializer implements Deserializer<ResourceCha
                     + "Avro ResourceChangedData object: %s", resourceChangedData));
             return resourceChangedData;
         } catch (Exception ex) {
-            logger.error("Serialization exception while converting to Avro schema object", ex);
-            throw new SerializationException(
-                    "Message data [" + Arrays.toString(data)
-                            + "] from topic ["
-                            + topic
-                            + "] cannot be deserialized", ex);
+            logger.error("De-Serialization exception while converting to Avro schema object", ex);
+            throw new NonRetryableErrorException(ex);
         }
     }
 

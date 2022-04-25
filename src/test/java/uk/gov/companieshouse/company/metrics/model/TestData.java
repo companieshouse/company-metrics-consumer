@@ -4,6 +4,8 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.FileCopyUtils;
+import uk.gov.companieshouse.api.metrics.InternalData;
+import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -39,5 +41,17 @@ public class TestData {
                 .withPayload(resourceChangedData)
                 .setHeader(KafkaHeaders.RECEIVED_TOPIC, "test")
                 .build();
+    }
+
+    public MetricsRecalculateApi createMetricsRecalculateApiData() {
+
+        MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
+        InternalData internalData = new InternalData();
+        internalData.setUpdatedBy("topic-partition-offset");
+        metricsRecalculateApi.setMortgage(Boolean.TRUE);
+        metricsRecalculateApi.setAppointments(Boolean.FALSE);
+        metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
+        metricsRecalculateApi.setInternalData(internalData);
+        return metricsRecalculateApi;
     }
 }

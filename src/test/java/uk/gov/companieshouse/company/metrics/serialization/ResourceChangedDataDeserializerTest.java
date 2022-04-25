@@ -5,11 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceChangedDataDeserializerTest {
@@ -37,7 +39,13 @@ public class ResourceChangedDataDeserializerTest {
     }
 
     private byte[] encodedData(ResourceChangedData resourceChangedData){
-        ResourceChangedDataSerializer serializer = new ResourceChangedDataSerializer();
+        ResourceChangedDataSerializer serializer = new ResourceChangedDataSerializer(this.logger);
         return serializer.serialize("", resourceChangedData);
+    }
+
+    @Test
+    void When_deserializeFails_throwsNonRetryableError() {
+        byte[] data = "Invalid message".getBytes();
+        assertThrows(NonRetryableErrorException.class, () -> deserializer.deserialize("", data));
     }
 }

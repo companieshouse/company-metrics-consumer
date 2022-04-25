@@ -14,8 +14,10 @@ spring:
 charges:
   stream:
     group-id: company-metrics-consumer
-    topic:
-      main: stream-company-charges
+    topic: stream-company-charges
+    retry-attempts: 4
+    backoff-delay: 100
+    enable: true
 
 logger:
   namespace: company-metrics-consumer
@@ -23,8 +25,3 @@ logger:
 api:
   api-url: ${COMPANY_METRICS_API_URL:localhost}
   company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}
-
-company-metrics:
-  consumer:
-    charges:
-      enable: true
