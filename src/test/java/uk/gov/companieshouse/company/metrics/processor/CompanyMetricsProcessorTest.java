@@ -182,4 +182,16 @@ public class CompanyMetricsProcessorTest {
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
     }
 
+    @Test
+    @DisplayName("POST company metrics recalculate returns temporary redirect 307, retryable error")
+    void postCompanyMetricsRecalcReturnsTemporaryRedirect_then_nonRetryableError() throws IOException {
+        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage();
+        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.TEMPORARY_REDIRECT.value(),
+                null, null);
+
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+                .thenReturn(response);
+        assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
+    }
+
 }

@@ -108,9 +108,9 @@ public class CompanyMetricsProcessor {
             String message = "400 BAD_REQUEST response received from company-metrics-api";
             logger.errorContext(logContext, message, null, logMap);
             throw new NonRetryableErrorException(message);
-        } else if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()) {
+        } else if (!httpStatus.is2xxSuccessful()) {
             // any other client or server status is retry-able
-            String message = "Non-Successful 4xx or 5xx response received from company-metrics-api";
+            String message = "Non-Successful response received from company-metrics-api";
             logger.errorContext(logContext, message + ", retry", null, logMap);
             throw new RetryableErrorException(message);
         } else {
