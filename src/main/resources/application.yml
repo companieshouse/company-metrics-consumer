@@ -23,5 +23,5 @@ logger:
   namespace: company-metrics-consumer
 
 api:
-  api-url: ${COMPANY_METRICS_API_URL:localhost}
+  api-url: ${COMPANY_METRICS_API_URL:https://localhost}
   company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}

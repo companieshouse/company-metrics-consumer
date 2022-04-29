@@ -1,37 +1,29 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.common.Metadata.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.apache.kafka.common.PartitionInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
 public class CompanyMetricsConsumerSteps {
 
@@ -60,11 +52,11 @@ public class CompanyMetricsConsumerSteps {
         assertThat(wireMockServer.isRunning()).isTrue();
     }
 
-    @When("A valid avro message {string} is sent to the Kafka topic {string}")
-    public void aValidAvroMessageIsSentToTheKafkaTopic(String avroMessgaeFileName, String topic)
-        throws InterruptedException {
-        String avroMessageData = testSupport.loadAvroMessageFile(avroMessgaeFileName);
-        currentCompanyNumber = avroMessageData.split("/")[2];
+    @When("A valid avro message for {string} is generated and sent to the Kafka topic {string}")
+    public void generateAvroMessageSendToTheKafkaTopic(String companyNumber, String topic)
+        throws InterruptedException, IOException {
+        ResourceChangedData avroMessageData = testSupport.createResourceChangedMessage(companyNumber);
+        currentCompanyNumber = companyNumber;
         stubCompanyMetricsApi(currentCompanyNumber, "an_avro_message_is_published_to_topic");
         kafkaTemplate.send(topic, avroMessageData);
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -90,7 +82,7 @@ public class CompanyMetricsConsumerSteps {
 
     private void stubCompanyMetricsApi(String companyNumber, String testMethodIdentifier) {
          stubFor(
-            post(urlPathMatching("/company/([0-9]*)/metrics/recalculate"))
+            post(urlPathMatching("/company/([a-zA-Z0-9]*)/metrics/recalculate"))
                 .willReturn(aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json"))
