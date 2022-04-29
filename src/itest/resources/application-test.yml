@@ -1,0 +1,30 @@
+server:
+  port: 8081
+
+springfox:
+  documentation:
+    auto-startup: false
+
+spring:
+  kafka:
+    bootstrap-servers: ${DATA_SYNC_KAFKA_BROKER_URL:localhost:9092}
+
+company:
+  metrics:
+    group-id: company-metrics-consumer
+    topic: stream-charges
+    retry-attempts: 4
+    backoff-delay: 100
+
+logger:
+  namespace: company-metrics-consumer
+
+api:
+  company-metrics-api-key: ${COMPANY_METRICS_API_KEY:MGQ1MGNlYmFkYzkxZTM2MzlkNGVmMzg4ZjgxMmEz}
+  api-url: ${API_URL:http://localhost:8888}
+  charge-id-salt: ${CHARGE_ID_SALT:chargeId_salt}
+  trans-id-salt: ${TRANS_ID_SALT:transId_salt}
+
+wiremock:
+  server:
+    port: 8888

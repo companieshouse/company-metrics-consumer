@@ -38,7 +38,7 @@
 		<skip.integration.tests>false</skip.integration.tests>
 		<skip.unit.tests>false</skip.unit.tests>
 		<springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
-
+		<wiremock.standalone.version>2.32.0</wiremock.standalone.version>
 		<!--sonar configuration-->
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -55,6 +55,7 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+		<maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -184,6 +185,30 @@
 			<version>${io-cucumber.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock-jre8</artifactId>
+			<version>${wiremock.standalone.version}</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.conscrypt</groupId>
+					<artifactId>conscrypt-openjdk-uber</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.javacrumbs.json-unit</groupId>
+					<artifactId>json-unit-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.jknack</groupId>
+					<artifactId>handlebars</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.jknack</groupId>
+					<artifactId>handlebars-helpers</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -220,7 +245,7 @@
 				</executions>
 			</plugin>
 
-<plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco-maven-plugin.version}</version>
@@ -393,6 +418,33 @@
 					</container>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>${maven-resources-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/test-classes</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/itest/resources</directory>
+									<includes>
+										<include>**/*.*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 
