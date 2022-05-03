@@ -7,7 +7,7 @@ springfox:
 
 spring:
   kafka:
-    bootstrap-servers: ${STREAMING_KAFKA_BROKER_URL:localhost:9092}
+    bootstrap-servers: ${DATA_SYNC_KAFKA_BROKER_URL:localhost:9092}
     producer-timeout: ${KAFKA_PRODUCER_TIMEOUT:3000}
     producer-retries: ${KAFKA_PRODUCER_RETRIES:10}
 
@@ -23,5 +23,9 @@ logger:
   namespace: company-metrics-consumer
 
 api:
-  api-url: ${COMPANY_METRICS_API_URL:https://localhost}
+  api-url: ${COMPANY_METRICS_API_URL:http://localhost:8888}
   company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}
+
+wiremock:
+  server:
+    port: 8888

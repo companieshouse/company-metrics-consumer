@@ -5,6 +5,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +18,10 @@ import org.testcontainers.utility.DockerImageName;
 import uk.gov.companieshouse.company.metrics.exception.RetryableTopicErrorInterceptor;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataSerializer;
+import uk.gov.companieshouse.company.metrics.steps.TestSupport;
 import uk.gov.companieshouse.kafka.producer.CHKafkaProducer;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 import java.util.HashMap;
@@ -25,6 +29,9 @@ import java.util.Map;
 
 @TestConfiguration
 public class KafkaTestContainerConfig {
+
+    @Value("${logger.namespace}")
+    String loggerNamespace;
 
     @MockBean
     private CHKafkaProducer chKafkaProducer;
@@ -38,6 +45,11 @@ public class KafkaTestContainerConfig {
                                     ResourceChangedDataSerializer resourceChangedDataSerializer) {
         this.resourceChangedDataDeserializer = resourceChangedDataDeserializer;
         this.resourceChangedDataSerializer = resourceChangedDataSerializer;
+    }
+
+    @Bean
+    public TestSupport testSupportBean(){
+        return new TestSupport(kafkaTemplate());
     }
 
     @Bean
