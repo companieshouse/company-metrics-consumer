@@ -49,8 +49,7 @@ public class KafkaTestContainerConfig {
 
     @Bean
     public TestSupport testSupportBean(){
-        Logger logger = LoggerFactory.getLogger(loggerNamespace);
-        return new TestSupport(logger, kafkaTemplate());
+        return new TestSupport(kafkaTemplate());
     }
 
     @Bean

@@ -17,18 +17,15 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 
 public class TestSupport {
 
-    private final Logger logger;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     private static WireMockServer wireMockServer = null;
 
-    public TestSupport(Logger logger, KafkaTemplate<String, Object> kafkaTemplate) {
-        this.logger = logger;
+    public TestSupport(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public ResourceChangedData createResourceChangedMessage(String companyNumber)
-        throws IOException {
+    public ResourceChangedData createResourceChangedMessage(String companyNumber) {
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
@@ -44,24 +41,9 @@ public class TestSupport {
             .build();
     }
 
-    public String loadFile(String dir, String fileName) {
-        final String filePath = "classpath:" + dir + "/" + fileName;
-        try {
-            return FileUtils.readFileToString(ResourceUtils.getFile(filePath),
-                StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(
-                String.format("Unable to locate file %s at %s", fileName, filePath));
-        }
-    }
-
-    public String loadAvroMessageFile(String fileName) {
-        return loadFile("Avro_Messages", fileName);
-    }
-
     public List<ServeEvent> getServeEvents() {
         return wireMockServer != null ? wireMockServer.getAllServeEvents() :
-            new ArrayList<ServeEvent>();
+            new ArrayList<>();
     }
 
     public WireMockServer setupWiremock() {

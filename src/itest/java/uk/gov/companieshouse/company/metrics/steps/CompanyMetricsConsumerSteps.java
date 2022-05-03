@@ -54,7 +54,7 @@ public class CompanyMetricsConsumerSteps {
 
     @When("A valid avro message for {string} is generated and sent to the Kafka topic {string}")
     public void generateAvroMessageSendToTheKafkaTopic(String companyNumber, String topic)
-        throws InterruptedException, IOException {
+        throws InterruptedException {
         ResourceChangedData avroMessageData = testSupport.createResourceChangedMessage(companyNumber);
         currentCompanyNumber = companyNumber;
         stubCompanyMetricsApi(currentCompanyNumber, "an_avro_message_is_published_to_topic");
