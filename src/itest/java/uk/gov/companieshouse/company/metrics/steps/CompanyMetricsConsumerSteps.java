@@ -78,6 +78,9 @@ public class CompanyMetricsConsumerSteps {
             e.printStackTrace();
         }
         assertThat(payload).isNotNull();
+        assertThat(payload.getMortgage()).isTrue();
+        assertThat(payload.getAppointments()).isFalse();
+        assertThat(payload.getPersonsWithSignificantControl()).isFalse();
     }
 
     private void stubCompanyMetricsApi(String companyNumber, String testMethodIdentifier) {
