@@ -7,7 +7,7 @@ springfox:
 
 spring:
   kafka:
-    bootstrap-servers: ${DATA_SYNC_KAFKA_BROKER_URL:localhost:9092}
+    bootstrap-servers: ${STREAMING_KAFKA_BROKER_URL:localhost:9092}
     producer-timeout: ${KAFKA_PRODUCER_TIMEOUT:3000}
     producer-retries: ${KAFKA_PRODUCER_RETRIES:10}
 
@@ -15,7 +15,7 @@ charges:
   stream:
     group-id: company-metrics-consumer
     topic: stream-company-charges
-    retry-attempts: 4
+    retry-attempts: 3
     backoff-delay: 100
     enable: true
 

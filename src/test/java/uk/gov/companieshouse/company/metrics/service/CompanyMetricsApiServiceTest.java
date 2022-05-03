@@ -83,4 +83,31 @@ public class CompanyMetricsApiServiceTest {
 
         assertThat(response).isEqualTo(expected);
     }
+
+    @Test
+    @DisplayName("Send a POST request with a company metrics and receive an error from API")
+    void postCompanyMetricsGetsError() throws ApiErrorResponseException, URIValidationException {
+
+        final String updatedBy = String.format("%s-%s-%s", MOCK_TOPIC, MOCK_PARTITION, MOCK_OFFSET);
+
+        MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
+        InternalData internalData = new InternalData();
+        internalData.setUpdatedBy(updatedBy);
+        internalData.setUpdatedAt(OffsetDateTime.now());
+        metricsRecalculateApi.setMortgage(Boolean.TRUE);
+        metricsRecalculateApi.setAppointments(Boolean.FALSE);
+        metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
+        metricsRecalculateApi.setInternalData(internalData);
+
+        final ApiResponse<Void> expected = new ApiResponse<>(
+                HttpStatus.OK.value(), Collections.emptyMap());
+
+        when(privateCompanyMetricsUpsertHandler.postCompanyMetrics(MOCK_COMPANY_METRICS_RECALCULATE_URI, metricsRecalculateApi)).thenReturn(privateCompanyMetricsUpsert);
+        when(privateCompanyMetricsUpsert.execute()).thenReturn(expected);
+
+        final ApiResponse<Void> response = companyMetricsApiService.postCompanyMetrics(
+                MOCK_CONTEXT_ID, MOCK_COMPANY_NUMBER, metricsRecalculateApi);
+
+        assertThat(response).isEqualTo(expected);
+    }
 }

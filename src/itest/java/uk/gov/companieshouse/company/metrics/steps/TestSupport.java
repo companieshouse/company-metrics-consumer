@@ -20,27 +20,42 @@ public class TestSupport {
     KafkaTemplate<String, Object> kafkaTemplate;
 
     private static WireMockServer wireMockServer = null;
+    public static final String RESOURCE_KIND = "company-charges";
+    public static final String CONTEXT_ID = "context_id";
+    public static final String VALID_COMPANY_CHARGES_LINK = "/company/%s/charges";
+    public static final String RESOURCE_ID = "11223344";
+    public static final String TYPE = "charges";
 
     public TestSupport(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public ResourceChangedData createResourceChangedMessage(String companyNumber) {
+    public ResourceChangedData createResourceChangedMessage(String companyChargesLink,
+                                                            String companyNumber)
+            throws IOException {
+
+        String chargesRecord = loadFile("payloads", "charges-record.json");
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
-        eventRecord.setType("changed");
+        eventRecord.setType(TYPE);
 
-        return ResourceChangedData.newBuilder()
-            .setContextId("context_id")
-            .setResourceId(companyNumber)
-            .setResourceKind("company-charges")
-            .setResourceUri(String.format("/company/%s/charges", companyNumber))
-            .setEvent(eventRecord)
-            .setData("")
-            .build();
+        ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
+                .setContextId(CONTEXT_ID)
+                .setResourceId(RESOURCE_ID)
+                .setResourceKind(RESOURCE_KIND)
+                .setResourceUri(String.format(companyChargesLink, companyNumber))
+                .setEvent(eventRecord)
+                .setData(chargesRecord)
+                .build();
+
+        return resourceChangedData;
     }
 
+    public ResourceChangedData createResourceChangedMessage(String companyNumber)
+            throws IOException {
+       return createResourceChangedMessage(TestSupport.VALID_COMPANY_CHARGES_LINK, companyNumber);
+    }
     public List<ServeEvent> getServeEvents() {
         return wireMockServer != null ? wireMockServer.getAllServeEvents() :
             new ArrayList<>();
@@ -62,5 +77,18 @@ public class TestSupport {
             throw new RuntimeException("Wiremock not initialised");
         }
         wireMockServer.resetRequests();
+    }
+
+    public String loadFile(String dir, String fileName) {
+        final String filePath = "classpath:" + dir + "/" + fileName;
+        try {
+            return FileUtils.readFileToString(ResourceUtils.getFile(filePath), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Unable to locate file %s at %s", fileName, filePath));
+        }
+    }
+
+    public String loadAvroMessageFile(String fileName) {
+        return loadFile("payloads", fileName);
     }
 }

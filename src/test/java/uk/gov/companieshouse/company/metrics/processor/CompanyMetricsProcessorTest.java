@@ -23,9 +23,11 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,8 +75,12 @@ public class CompanyMetricsProcessorTest {
     @ParameterizedTest(name = "{index} ==> {2}: is {0} valid? {1}")
     @MethodSource("testExtractCompanyNumberFromResourceUri")
     public void urlPatternTest(String input, String expected) {
-        String companyNumber = companyMetricsProcessor.extractCompanyNumber(input);
-        assertEquals(expected, companyNumber);
+        Optional<String> companyNumber = companyMetricsProcessor.extractCompanyNumber(input);
+        if(expected != null) {
+            assertEquals(expected, companyNumber.get());
+        } else {
+            assertTrue(companyNumber.isEmpty());
+        }
     }
 
     @Test

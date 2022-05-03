@@ -2,6 +2,7 @@ package uk.gov.companieshouse.company.metrics.processor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.metrics.InternalData;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
@@ -51,12 +53,16 @@ public class CompanyMetricsProcessor {
 
         final String contextId = payload.getContextId();
         final Map<String, Object> logMap = new HashMap<>();
-        final String companyNumber = extractCompanyNumber(payload.getResourceUri());
+        final Optional<String> companyNumber = extractCompanyNumber(payload.getResourceUri());
+        companyNumber.orElseThrow(
+                () -> new NonRetryableErrorException("Unable to extract company number due to "
+                        + "invalid resource uri in the message")
+        );
         final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
 
 
         logger.trace(String.format("Company number %s extracted from"
-                        + " ResourceURI %s the payload is %s ", companyNumber,
+                        + " ResourceURI %s the payload is %s ", companyNumber.get(),
                 payload.getResourceUri(), payload));
 
         MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
@@ -67,14 +73,19 @@ public class CompanyMetricsProcessor {
         metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
         metricsRecalculateApi.setInternalData(internalData);
 
-        final ApiResponse<Void> postResponse =
-                companyMetricsApiService.postCompanyMetrics(
-                        contextId, companyNumber,
-                        metricsRecalculateApi
-                );
+        ApiResponse<Void> postResponse = null;
+        try {
+            postResponse =
+                    companyMetricsApiService.postCompanyMetrics(
+                            contextId, companyNumber.get(),
+                            metricsRecalculateApi
+                    );
 
-        logger.trace(String.format("Performing company metrics recalculate operation %s",
-                metricsRecalculateApi));
+            logger.trace(String.format("Performing company metrics recalculate operation %s",
+                    metricsRecalculateApi));
+        } catch (ResponseStatusException exception) {
+            handleResponse(exception.getStatus(), contextId, logMap);
+        }
 
         handleResponse(HttpStatus.valueOf(postResponse.getStatusCode()), contextId, logMap);
 
@@ -84,17 +95,18 @@ public class CompanyMetricsProcessor {
      * extract company number from
      * Resource URI.
      */
-    public String extractCompanyNumber(String resourceUri) {
+    public Optional<String> extractCompanyNumber(String resourceUri) {
 
         if (StringUtils.isNotBlank(resourceUri)) {
             //matches all characters between company/ and /
             Pattern companyNo = Pattern.compile("(?<=company/)(.*?)(?=/)");
             Matcher matcher = companyNo.matcher(resourceUri);
             if (matcher.find()) {
-                return matcher.group(0).length() > 1 ? matcher.group(0) : null;
+                return matcher.group(0).length() > 1 ? Optional.of(matcher.group(0))
+                        : Optional.empty();
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     private void handleResponse(
