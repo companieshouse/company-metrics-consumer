@@ -17,7 +17,7 @@ import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
-import uk.gov.companieshouse.company.metrics.model.TestData;
+import uk.gov.companieshouse.company.metrics.util.TestSupport;
 import uk.gov.companieshouse.company.metrics.service.CompanyMetricsApiService;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 import uk.gov.companieshouse.logging.Logger;
@@ -56,12 +56,12 @@ public class CompanyMetricsProcessorTest {
 
     @Mock
     private Logger logger;
-    private TestData testData;
+    private TestSupport testSupport;
 
     @BeforeEach
     void setUp() {
         companyMetricsProcessor = new CompanyMetricsProcessor(transformer, logger, companyMetricsApiService);
-        testData = new TestData();
+        testSupport = new TestSupport();
     }
 
     static Stream<Arguments> testExtractCompanyNumberFromResourceUri() {
@@ -89,10 +89,10 @@ public class CompanyMetricsProcessorTest {
     @DisplayName("Successfully processes a kafka message containing a ResourceChangedData payload and extract companyNumber")
     void When_ValidResourceChangedDataMessage_Expect_MessageProcessedAndExtractedCompanyNumber() throws IOException {
 
-        Message<ResourceChangedData> resourceChangedDataMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> resourceChangedDataMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
         when(companyMetricsApiService.postCompanyMetrics(CONTEXT_ID, MOCK_COMPANY_NUMBER,
-                testData.createMetricsRecalculateApiData())).thenReturn(response);
+                testSupport.createMetricsRecalculateApiData())).thenReturn(response);
 
         companyMetricsProcessor.process(resourceChangedDataMessage.getPayload(), TOPIC, PARTITION, OFFSET);
 
@@ -109,10 +109,10 @@ public class CompanyMetricsProcessorTest {
     @Test
     @DisplayName("POST company metrics recalculate returns Bad Request 400, non-retryable error")
     void postCompanyMetricsRecalculateReturnsBadRequest_then_nonRetryableError() throws IOException {
-        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
                 .thenReturn(response);
 
         assertThrows(NonRetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -121,10 +121,10 @@ public class CompanyMetricsProcessorTest {
     @Test
     @DisplayName("POST company metrics recalculate returns unauthorised 401, retryable error")
     void postCompanyMetricsRecalculateReturnsUnauthorized_then_nonRetryableError() throws IOException {
-        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.UNAUTHORIZED.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET));
@@ -133,10 +133,10 @@ public class CompanyMetricsProcessorTest {
     @Test
     @DisplayName("POST company metrics recalculate returns forbidden 403, retryable error")
     void postCompanyMetricsRecalculateReturnsForbidden_then_nonRetryableError() throws IOException {
-        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.FORBIDDEN.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET));
@@ -145,10 +145,10 @@ public class CompanyMetricsProcessorTest {
     @Test
     @DisplayName("POST company metrics recalculate returns internal server error 500, retryable error")
     void postCompanyMetricsRecalculateReturnsInternalServerError_then_nonRetryableError() throws IOException {
-        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -157,10 +157,10 @@ public class CompanyMetricsProcessorTest {
     @Test
     @DisplayName("POST company metrics recalculate returns service unavailable 503, retryable error")
     void postCompanyMetricsRecalcReturnsInternalServerError_then_nonRetryableError() throws IOException {
-        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -169,10 +169,10 @@ public class CompanyMetricsProcessorTest {
     @Test
     @DisplayName("POST company metrics recalculate returns bad gateway 502, retryable error")
     void postCompanyMetricsRecalcReturnsBadGatewayError_then_nonRetryableError() throws IOException {
-        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.BAD_GATEWAY.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -181,11 +181,11 @@ public class CompanyMetricsProcessorTest {
     @Test
     @DisplayName("POST company metrics recalculate returns gateway timeout 504, retryable error")
     void postCompanyMetricsRecalcReturnsGatewayTimeoutError_then_nonRetryableError() throws IOException {
-        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.GATEWAY_TIMEOUT.value(),
                 null, null);
 
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
                 .thenReturn(response);
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
     }
@@ -193,11 +193,11 @@ public class CompanyMetricsProcessorTest {
     @Test
     @DisplayName("POST company metrics recalculate returns temporary redirect 307, retryable error")
     void postCompanyMetricsRecalcReturnsTemporaryRedirect_then_nonRetryableError() throws IOException {
-        Message<ResourceChangedData> mockResourceChangedMessage = testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.TEMPORARY_REDIRECT.value(),
                 null, null);
 
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testData.createMetricsRecalculateApiData()))
+        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
                 .thenReturn(response);
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
     }
@@ -207,7 +207,7 @@ public class CompanyMetricsProcessorTest {
     void When_ValidMessage_With_InvalidResourceUri() throws IOException {
 
         Message<ResourceChangedData> resourceChangedDataMessage =
-                testData.createResourceChangedMessage(TestData.INVALID_COMPANY_LINKS_PATH);
+                testSupport.createResourceChangedMessage(TestSupport.INVALID_COMPANY_LINKS_PATH);
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
 
         assertThrows(NonRetryableErrorException.class, () ->
@@ -228,12 +228,12 @@ public class CompanyMetricsProcessorTest {
     void When_ValidMessage_but_backendApiService_throws_400_error() throws IOException {
 
         Message<ResourceChangedData> resourceChangedDataMessage =
-                testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
-        final ResponseStatusException responseStatusException = testData.getResponseStatusException(400);
+        final ResponseStatusException responseStatusException = testSupport.getResponseStatusException(400);
 
         when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER,
-                testData.createMetricsRecalculateApiData()))
+                testSupport.createMetricsRecalculateApiData()))
                 .thenThrow(responseStatusException);
 
         assertThrows(NonRetryableErrorException.class, () ->
@@ -254,12 +254,12 @@ public class CompanyMetricsProcessorTest {
     void When_ValidMessage_but_backendApiService_throws_503_error() throws IOException {
 
         Message<ResourceChangedData> resourceChangedDataMessage =
-                testData.createResourceChangedMessage(TestData.VALID_COMPANY_LINKS_PATH);
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
-        final ResponseStatusException responseStatusException = testData.getResponseStatusException(503);
+        final ResponseStatusException responseStatusException = testSupport.getResponseStatusException(503);
 
         when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER,
-                testData.createMetricsRecalculateApiData()))
+                testSupport.createMetricsRecalculateApiData()))
                 .thenThrow(responseStatusException);
 
         assertThrows(RetryableErrorException.class, () ->

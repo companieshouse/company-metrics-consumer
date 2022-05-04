@@ -1,15 +1,12 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpResponseException;
-import org.jetbrains.annotations.NotNull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.InternalApiClient;
@@ -20,8 +17,7 @@ import uk.gov.companieshouse.api.handler.metrics.request.PrivateCompanyMetricsUp
 import uk.gov.companieshouse.api.metrics.InternalData;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
-import uk.gov.companieshouse.company.metrics.model.TestData;
+import uk.gov.companieshouse.company.metrics.util.TestSupport;
 import uk.gov.companieshouse.logging.Logger;
 
 import java.time.OffsetDateTime;
@@ -58,7 +54,7 @@ public class CompanyMetricsApiServiceTest {
     @Mock
     private PrivateCompanyMetricsUpsert privateCompanyMetricsUpsert;
 
-    TestData testData = new TestData();
+    TestSupport testSupport = new TestSupport();
 
     @BeforeEach
     void setup() {
@@ -109,7 +105,7 @@ public class CompanyMetricsApiServiceTest {
         metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
         metricsRecalculateApi.setInternalData(internalData);
 
-        final ResponseStatusException responseStatusException = testData.getResponseStatusException(400);
+        final ResponseStatusException responseStatusException = testSupport.getResponseStatusException(400);
 
         when(privateCompanyMetricsUpsertHandler.postCompanyMetrics(
                 MOCK_COMPANY_METRICS_RECALCULATE_URI,
@@ -138,7 +134,7 @@ public class CompanyMetricsApiServiceTest {
         metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
         metricsRecalculateApi.setInternalData(internalData);
 
-        final ResponseStatusException responseStatusException = testData.getResponseStatusException(503);
+        final ResponseStatusException responseStatusException = testSupport.getResponseStatusException(503);
 
         when(privateCompanyMetricsUpsertHandler.postCompanyMetrics(
                 MOCK_COMPANY_METRICS_RECALCULATE_URI,

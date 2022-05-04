@@ -11,7 +11,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.util.ResourceUtils;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -52,10 +51,6 @@ public class TestSupport {
         return resourceChangedData;
     }
 
-    public ResourceChangedData createResourceChangedMessage(String companyNumber)
-            throws IOException {
-       return createResourceChangedMessage(TestSupport.VALID_COMPANY_CHARGES_LINK, companyNumber);
-    }
     public List<ServeEvent> getServeEvents() {
         return wireMockServer != null ? wireMockServer.getAllServeEvents() :
             new ArrayList<>();

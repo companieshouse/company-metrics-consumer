@@ -27,7 +27,7 @@ import java.util.stream.StreamSupport;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.header.Header;
-import org.apache.kafka.common.header.internals.RecordHeader;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
@@ -39,6 +39,9 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 
 public class CompanyMetricsConsumerSteps {
 
+    public static final String COMPANY_METRICS_RECALCULATE_POST = "/company/([a-zA-Z0-9]*)/metrics/recalculate";
+    public static final String RETRY_TOPIC_ATTEMPTS = "retry_topic-attempts";
+    public static final String COMPANY_METRICS_RECALCULATE_URI = "/company/%s/metrics/recalculate";
     @Autowired
     private TestSupport testSupport;
 
@@ -89,7 +92,7 @@ public class CompanyMetricsConsumerSteps {
         List<ServeEvent> serverEvents = testSupport.getServeEvents();
         assertThat(serverEvents.size()).isEqualTo(1);
         assertThat(serverEvents.isEmpty()).isFalse(); // assert that the wiremock did something
-        assertThat(serverEvents.get(0).getRequest().getUrl()).isEqualTo(String.format("/company/%s/metrics/recalculate", currentCompanyNumber));
+        assertThat(serverEvents.get(0).getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
         String body = new String(serverEvents.get(0).getRequest().getBody());
         MetricsRecalculateApi payload = null;
         ObjectMapper mapper = new ObjectMapper();
@@ -127,8 +130,9 @@ public class CompanyMetricsConsumerSteps {
     @And("Stubbed Company Metrics API should be called {string} times")
     public void stubbed_company_metrics_api_should_be_called_n_times(String times) {
         verify(Integer.parseInt(times), postRequestedFor(
-                        urlPathMatching("/company/([a-zA-Z0-9]*)/metrics/recalculate")
+                        urlPathMatching(COMPANY_METRICS_RECALCULATE_POST)
                 )
+
         );
     }
 
@@ -138,7 +142,7 @@ public class CompanyMetricsConsumerSteps {
 
         assertThat(singleRecord.value()).isNotNull();
         List<Header> retryList = StreamSupport.stream(singleRecord.headers().spliterator(), false)
-                .filter(header -> header.key().equalsIgnoreCase("retry_topic-attempts"))
+                .filter(header -> header.key().equalsIgnoreCase(RETRY_TOPIC_ATTEMPTS))
                 .collect(Collectors.toList());
 
         assertThat(retryList.size()).isEqualTo(Integer.parseInt(retryAttempts));
@@ -146,7 +150,7 @@ public class CompanyMetricsConsumerSteps {
 
     private void stubCompanyMetricsApi(String companyNumber, String testMethodIdentifier, int statusCode) {
          stubFor(
-            post(urlPathMatching("/company/([a-zA-Z0-9]*)/metrics/recalculate"))
+            post(urlPathMatching(COMPANY_METRICS_RECALCULATE_POST))
                 .willReturn(aResponse()
                     .withStatus(statusCode)
                     .withHeader("Content-Type", "application/json"))

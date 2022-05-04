@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.company.metrics.model;
+package uk.gov.companieshouse.company.metrics.util;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Objects;
 
-public class TestData {
+public class TestSupport {
 
     private static final String COMPANY_NUMBER = "02588581";
     public static final String VALID_COMPANY_LINKS_PATH = "/company/%s/charges";
