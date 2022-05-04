@@ -2,14 +2,17 @@ package uk.gov.companieshouse.company.metrics.steps;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.common.Metadata.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -119,6 +122,14 @@ public class CompanyMetricsConsumerSteps {
     public void the_message_should_be_moved_to_topic(String topic) {
         ConsumerRecord<String, Object> singleRecord = KafkaTestUtils.getSingleRecord(kafkaConsumer, topic);
         assertThat(singleRecord.value()).isNotNull();
+    }
+
+    @And("Stubbed Company Metrics API should be called {string} times")
+    public void stubbed_company_metrics_api_should_be_called_n_times(String times) {
+        verify(Integer.parseInt(times), postRequestedFor(
+                        urlPathMatching("/company/([a-zA-Z0-9]*)/metrics/recalculate")
+                )
+        );
     }
 
     @Then("The message should be moved to topic {string} after retry attempts of {string}")
