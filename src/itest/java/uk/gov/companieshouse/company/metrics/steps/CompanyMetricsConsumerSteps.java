@@ -140,6 +140,7 @@ public class CompanyMetricsConsumerSteps {
         List<Header> retryList = StreamSupport.stream(singleRecord.headers().spliterator(), false)
                 .filter(header -> header.key().equalsIgnoreCase("retry_topic-attempts"))
                 .collect(Collectors.toList());
+
         assertThat(retryList.size()).isEqualTo(Integer.parseInt(retryAttempts));
     }
 
