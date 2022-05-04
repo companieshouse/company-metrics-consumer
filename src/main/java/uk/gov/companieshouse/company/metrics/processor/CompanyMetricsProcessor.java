@@ -102,8 +102,7 @@ public class CompanyMetricsProcessor {
             Pattern companyNo = Pattern.compile("(?<=company/)(.*?)(?=/)");
             Matcher matcher = companyNo.matcher(resourceUri);
             if (matcher.find()) {
-                return matcher.group(0).length() > 1 ? Optional.of(matcher.group(0))
-                        : Optional.empty();
+                return Optional.ofNullable(matcher.group());
             }
         }
         return Optional.empty();
