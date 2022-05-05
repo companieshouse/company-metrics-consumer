@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.company.metrics.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -25,11 +26,13 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @TestConfiguration
 public class KafkaTestContainerConfig {
 
+    public static final String COMPANY_METRICS_CONSUMER = "company-metrics-consumer";
     @Value("${logger.namespace}")
     String loggerNamespace;
 
@@ -72,7 +75,7 @@ public class KafkaTestContainerConfig {
     public ConsumerFactory<String, ResourceChangedData> kafkaConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs(kafkaContainer()),
                 new StringDeserializer(),
-                resourceChangedDataDeserializer);
+                new ErrorHandlingDeserializer<>(resourceChangedDataDeserializer));
     }
 
     @Bean
@@ -106,6 +109,25 @@ public class KafkaTestContainerConfig {
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory(kafkaContainer()));
+    }
+
+    @Bean
+    public KafkaConsumer<String, Object> invalidTopicConsumer() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer().getBootstrapServers());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, COMPANY_METRICS_CONSUMER);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, StringDeserializer.class);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
+        KafkaConsumer<String, Object> consumer = new KafkaConsumer<>(props);
+        consumer.subscribe(List.of("stream-company-charges-company-metrics-consumer-invalid",
+                "stream-company-charges-company-metrics-consumer-error"));
+
+        return consumer;
     }
 
 }
