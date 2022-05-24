@@ -16,6 +16,8 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.company.metrics.exception.RetryableTopicErrorInterceptor;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataSerializer;
@@ -51,7 +53,7 @@ public class KafkaConfig {
     @Bean
     public ConsumerFactory<String, ResourceChangedData> consumerFactoryMessage() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(),
-                resourceChangedDataDeserializer);
+                new ErrorHandlingDeserializer<>(resourceChangedDataDeserializer));
     }
 
     /**
@@ -63,15 +65,19 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactoryMessage());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
         return factory;
     }
 
     private Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                ResourceChangedDataDeserializer.class);
+                ErrorHandlingDeserializer.class);
+        props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
+                 ResourceChangedDataDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
