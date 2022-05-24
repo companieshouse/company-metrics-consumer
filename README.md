@@ -43,3 +43,5 @@ kafka-topics.sh --list --zookeeper zookeeper:2181
 
 ### Produce kafka test messages locally
 kafka-console-producer.sh --topic delta-topic --broker-list localhost:9092
+
+#
