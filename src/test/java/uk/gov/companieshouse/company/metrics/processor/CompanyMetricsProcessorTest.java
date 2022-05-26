@@ -224,6 +224,27 @@ public class CompanyMetricsProcessorTest {
     }
 
     @Test
+    @DisplayName("Valid avro message with missing company number, throws Non retryable error")
+    void When_ValidMessage_With_MissingCompanyNumber() throws IOException {
+
+        Message<ResourceChangedData> resourceChangedDataMessage =
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, "");
+        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
+
+        assertThrows(NonRetryableErrorException.class, () ->
+                companyMetricsProcessor.process(resourceChangedDataMessage.getPayload(), TOPIC, PARTITION, OFFSET));
+
+        verify(logger, times(0)).trace((
+                String.format("Company number %s extracted from"
+                                + " ResourceURI %s the payload is %s ", "02588581",
+                        resourceChangedDataMessage.getPayload().getResourceUri(),
+                        resourceChangedDataMessage.getPayload())));
+
+        verify(companyMetricsApiService, times(0)).postCompanyMetrics(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
+                Mockito.any(MetricsRecalculateApi.class));
+    }
+
+    @Test
     @DisplayName("Valid avro message but backend api service, throws 400 bad request")
     void When_ValidMessage_but_backendApiService_throws_400_error() throws IOException {
 

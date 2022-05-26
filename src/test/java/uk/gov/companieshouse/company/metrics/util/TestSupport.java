@@ -26,6 +26,10 @@ public class TestSupport {
     public static final String INVALID_COMPANY_LINKS_PATH = "/companyabc/%s/charges";
 
     public Message<ResourceChangedData> createResourceChangedMessage(String companyLinksPath) throws IOException {
+        return this.createResourceChangedMessage(companyLinksPath, COMPANY_NUMBER);
+    }
+
+    public Message<ResourceChangedData> createResourceChangedMessage(String companyLinksPath, String companyNumber) throws IOException {
         InputStreamReader exampleChargesJsonPayload = new InputStreamReader(
                 Objects.requireNonNull(ClassLoader.getSystemClassLoader()
                         .getResourceAsStream("charges-record.json")));
@@ -37,9 +41,9 @@ public class TestSupport {
 
         ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
                 .setContextId("context_id")
-                .setResourceId(COMPANY_NUMBER)
+                .setResourceId(companyNumber)
                 .setResourceKind("company-charges")
-                .setResourceUri(String.format(companyLinksPath, COMPANY_NUMBER))
+                .setResourceUri(String.format(companyLinksPath, companyNumber))
                 .setEvent(eventRecord)
                 .setData(chargesRecord)
                 .build();
