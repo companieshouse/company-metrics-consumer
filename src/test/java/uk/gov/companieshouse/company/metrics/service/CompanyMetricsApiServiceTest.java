@@ -72,7 +72,6 @@ public class CompanyMetricsApiServiceTest {
         MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
         InternalData internalData = new InternalData();
         internalData.setUpdatedBy(updatedBy);
-        internalData.setUpdatedAt(OffsetDateTime.now());
         metricsRecalculateApi.setMortgage(Boolean.TRUE);
         metricsRecalculateApi.setAppointments(Boolean.FALSE);
         metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
@@ -99,7 +98,6 @@ public class CompanyMetricsApiServiceTest {
         MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
         InternalData internalData = new InternalData();
         internalData.setUpdatedBy(updatedBy);
-        internalData.setUpdatedAt(OffsetDateTime.now());
         metricsRecalculateApi.setMortgage(Boolean.TRUE);
         metricsRecalculateApi.setAppointments(Boolean.FALSE);
         metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
@@ -128,7 +126,6 @@ public class CompanyMetricsApiServiceTest {
         MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
         InternalData internalData = new InternalData();
         internalData.setUpdatedBy(updatedBy);
-        internalData.setUpdatedAt(OffsetDateTime.now());
         metricsRecalculateApi.setMortgage(Boolean.TRUE);
         metricsRecalculateApi.setAppointments(Boolean.FALSE);
         metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
