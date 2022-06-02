@@ -1,13 +1,25 @@
 package uk.gov.companieshouse.company.metrics.transformer;
 
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.metrics.InternalData;
+import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 
 @Component
 public class CompanyMetricsApiTransformer {
 
-    // FIXME - CompanyMetrics Model to be referred from private SDK when its ready
-    public String transform(Object companyMetrics) {
-        //TODO: Use mapStruct to transform json object to Open API generated object
-        return companyMetrics.toString();
+    /**
+     * Prepare MetricsRecalculateApi object.
+     */
+    public MetricsRecalculateApi transform(String updatedBy) {
+        MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
+
+        InternalData internalData = new InternalData();
+        internalData.setUpdatedBy(updatedBy);
+        metricsRecalculateApi.setMortgage(Boolean.TRUE);
+        metricsRecalculateApi.setAppointments(Boolean.FALSE);
+        metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
+        metricsRecalculateApi.setInternalData(internalData);
+
+        return metricsRecalculateApi;
     }
 }

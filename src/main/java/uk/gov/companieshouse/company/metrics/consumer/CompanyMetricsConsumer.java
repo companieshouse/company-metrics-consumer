@@ -32,30 +32,42 @@ public class CompanyMetricsConsumer {
      * Receives Main topic messages.
      */
     @RetryableTopic(attempts = "${charges.stream.retry-attempts}",
-                backoff = @Backoff(delayExpression = "${charges.stream.backoff-delay}"),
-                fixedDelayTopicStrategy = FixedDelayStrategy.SINGLE_TOPIC,
-                retryTopicSuffix = "-${charges.stream.group-id}-retry",
-                dltTopicSuffix = "-${charges.stream.group-id}-error",
-                dltStrategy = DltStrategy.FAIL_ON_ERROR,
-                autoCreateTopics = "false",
-                exclude = NonRetryableErrorException.class)
+            backoff = @Backoff(delayExpression = "${charges.stream.backoff-delay}"),
+            fixedDelayTopicStrategy = FixedDelayStrategy.SINGLE_TOPIC,
+            retryTopicSuffix = "-${charges.stream.group-id}-retry",
+            dltTopicSuffix = "-${charges.stream.group-id}-error",
+            dltStrategy = DltStrategy.FAIL_ON_ERROR,
+            autoCreateTopics = "false",
+            exclude = NonRetryableErrorException.class)
     @KafkaListener(topics = "${charges.stream.topic}",
-                   groupId = "${charges.stream.group-id}",
-                   autoStartup = "${charges.stream.enable}",
-                   containerFactory = "listenerContainerFactory")
+            groupId = "${charges.stream.group-id}",
+            autoStartup = "${charges.stream.enable}",
+            containerFactory = "listenerContainerFactory")
     public void receive(Message<ResourceChangedData> resourceChangedMessage,
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
                         @Header(KafkaHeaders.OFFSET) String offset) {
-        logger.trace(String.format("A new message from %s topic with payload:%s "
-                + "and headers:%s ", topic,
-                resourceChangedMessage.getPayload(), resourceChangedMessage.getHeaders()));
+        ResourceChangedData payload = resourceChangedMessage.getPayload();
+        String contextId = payload.getContextId();
+        logger.info(String.format("A new message successfully picked up "
+                + "from %s topic with contextId: %s", topic, contextId));
         try {
-            metricsProcessor.process(resourceChangedMessage.getPayload(), topic, partition, offset);
+            final boolean deleteEventType = "deleted"
+                    .equalsIgnoreCase(payload.getEvent().getType());
+
+            if (deleteEventType) {
+                logger.trace(String.format("DSND-860: ResourceChangedData with 'deleted' event "
+                        + "type extracted from a Kafka message: %s", payload));
+                metricsProcessor.process(payload, topic, partition, offset);
+            } else {
+                logger.trace(String.format("DSND-599: ResourceChangedData with 'changed' event "
+                        + "type extracted from a Kafka message: %s", payload));
+                metricsProcessor.process(payload, topic, partition, offset);
+            }
         } catch (Exception exception) {
             logger.error(String.format("Exception occurred while processing the topic %s "
-                    + "with message %s, exception thrown is %s", topic,
-                    resourceChangedMessage.getPayload(), exception));
+                            + "with contextId %s, exception thrown is %s",
+                    topic, contextId, exception));
             throw exception;
         }
     }

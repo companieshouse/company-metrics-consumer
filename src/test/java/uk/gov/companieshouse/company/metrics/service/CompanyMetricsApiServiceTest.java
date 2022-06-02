@@ -14,17 +14,17 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.metrics.PrivateCompanyMetricsUpsertHandler;
 import uk.gov.companieshouse.api.handler.metrics.request.PrivateCompanyMetricsUpsert;
+import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.metrics.InternalData;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.company.metrics.util.TestSupport;
 import uk.gov.companieshouse.logging.Logger;
 
-import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -46,7 +46,13 @@ public class CompanyMetricsApiServiceTest {
     private Logger logger;
 
     @Mock
-    private InternalApiClient apiClient;
+    private Supplier<InternalApiClient> internalApiClientSupplier;
+
+    @Mock
+    private InternalApiClient mockInternalApiClient;
+
+    @Mock
+    private HttpClient mockHttpClient;
 
     @Mock
     private PrivateCompanyMetricsUpsertHandler privateCompanyMetricsUpsertHandler;
@@ -58,9 +64,10 @@ public class CompanyMetricsApiServiceTest {
 
     @BeforeEach
     void setup() {
-        companyMetricsApiService = spy(new CompanyMetricsApiService(logger));
-        when(companyMetricsApiService.getApiClient(MOCK_CONTEXT_ID)).thenReturn(apiClient);
-        when(apiClient.privateCompanyMetricsUpsertHandler()).thenReturn(privateCompanyMetricsUpsertHandler);
+        companyMetricsApiService = spy(new CompanyMetricsApiService(logger, internalApiClientSupplier));
+        when(internalApiClientSupplier.get()).thenReturn(mockInternalApiClient);
+        when(mockInternalApiClient.getHttpClient()).thenReturn(mockHttpClient);
+        when(mockInternalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(privateCompanyMetricsUpsertHandler);
     }
 
     @Test
@@ -83,7 +90,7 @@ public class CompanyMetricsApiServiceTest {
         when(privateCompanyMetricsUpsertHandler.postCompanyMetrics(MOCK_COMPANY_METRICS_RECALCULATE_URI, metricsRecalculateApi)).thenReturn(privateCompanyMetricsUpsert);
         when(privateCompanyMetricsUpsert.execute()).thenReturn(expected);
 
-        final ApiResponse<Void> response = companyMetricsApiService.postCompanyMetrics(
+        final ApiResponse<Void> response = companyMetricsApiService.invokeMetricsPostApi(
                 MOCK_CONTEXT_ID, MOCK_COMPANY_NUMBER, metricsRecalculateApi);
 
         assertThat(response).isEqualTo(expected);
@@ -113,7 +120,7 @@ public class CompanyMetricsApiServiceTest {
         when(privateCompanyMetricsUpsert.execute()).thenThrow(responseStatusException);
 
         assertThrows(ResponseStatusException.class, () ->
-                companyMetricsApiService.postCompanyMetrics(
+                companyMetricsApiService.invokeMetricsPostApi(
                 MOCK_CONTEXT_ID, MOCK_COMPANY_NUMBER, metricsRecalculateApi));
     }
 
@@ -141,7 +148,7 @@ public class CompanyMetricsApiServiceTest {
         when(privateCompanyMetricsUpsert.execute()).thenThrow(responseStatusException);
 
         assertThrows(ResponseStatusException.class, () ->
-                companyMetricsApiService.postCompanyMetrics(
+                companyMetricsApiService.invokeMetricsPostApi(
                         MOCK_CONTEXT_ID, MOCK_COMPANY_NUMBER, metricsRecalculateApi));
     }
 }

@@ -37,17 +37,13 @@ public abstract class BaseClientApiService {
         logMap.put("path", uri);
 
         try {
-
             return executor.execute();
-
         } catch (URIValidationException ex) {
             logger.errorContext(logContext, "SDK exception", ex, logMap);
-
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
         } catch (ApiErrorResponseException ex) {
             logMap.put("status", ex.getStatusCode());
             logger.errorContext(logContext, "SDK exception", ex, logMap);
-
             throw new ResponseStatusException(HttpStatus.valueOf(ex.getStatusCode()),
                     ex.getStatusMessage(), ex);
         }
