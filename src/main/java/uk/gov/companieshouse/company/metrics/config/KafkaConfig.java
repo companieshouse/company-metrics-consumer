@@ -30,7 +30,6 @@ public class KafkaConfig {
 
     private String bootstrapServers;
 
-
     private final ResourceChangedDataDeserializer resourceChangedDataDeserializer;
     private final ResourceChangedDataSerializer resourceChangedDataSerializer;
 
@@ -97,10 +96,9 @@ public class KafkaConfig {
                 ResourceChangedDataSerializer.class);
         props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
                 RetryableTopicErrorInterceptor.class.getName());
-        DefaultKafkaProducerFactory<String, Object> factory = new DefaultKafkaProducerFactory<>(
-                props, new StringSerializer(), resourceChangedDataSerializer);
 
-        return factory;
+        return new DefaultKafkaProducerFactory<>(
+                props, new StringSerializer(), resourceChangedDataSerializer);
     }
 
     @Bean

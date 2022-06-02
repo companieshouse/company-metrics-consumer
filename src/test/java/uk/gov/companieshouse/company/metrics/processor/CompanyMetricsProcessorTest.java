@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.company.metrics.processor;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,8 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,11 +48,10 @@ public class CompanyMetricsProcessorTest {
     public static final String  PARTITION = "partition";
     public static final String  OFFSET = "offset";
 
-
     private CompanyMetricsProcessor companyMetricsProcessor;
 
     @Mock
-    private CompanyMetricsApiTransformer transformer;
+    private CompanyMetricsApiTransformer companyMetricsApiTransformer;
 
     @Mock
     private CompanyMetricsApiService companyMetricsApiService;
@@ -60,7 +62,7 @@ public class CompanyMetricsProcessorTest {
 
     @BeforeEach
     void setUp() {
-        companyMetricsProcessor = new CompanyMetricsProcessor(transformer, logger, companyMetricsApiService);
+        companyMetricsProcessor = new CompanyMetricsProcessor(companyMetricsApiTransformer, logger, companyMetricsApiService);
         testSupport = new TestSupport();
     }
 
@@ -78,10 +80,10 @@ public class CompanyMetricsProcessorTest {
     @MethodSource("testExtractCompanyNumberFromResourceUri")
     public void urlPatternTest(String input, String expected) {
         Optional<String> companyNumber = companyMetricsProcessor.extractCompanyNumber(input);
-        if(expected != null) {
+        if (expected != null) {
             assertEquals(expected, companyNumber.get());
         } else {
-            assertTrue(companyNumber.isEmpty());
+            Assertions.assertTrue(companyNumber.isEmpty());
         }
     }
 
@@ -91,18 +93,14 @@ public class CompanyMetricsProcessorTest {
 
         Message<ResourceChangedData> resourceChangedDataMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics(CONTEXT_ID, MOCK_COMPANY_NUMBER,
-                testSupport.createMetricsRecalculateApiData())).thenReturn(response);
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER,
+                recalculateApiData)).thenReturn(response);
 
         companyMetricsProcessor.process(resourceChangedDataMessage.getPayload(), TOPIC, PARTITION, OFFSET);
 
-        verify(logger, atLeastOnce()).trace((
-                String.format("Company number %s extracted from"
-                                + " ResourceURI %s the payload is %s ", "02588581",
-                        resourceChangedDataMessage.getPayload().getResourceUri(),
-                        resourceChangedDataMessage.getPayload())));
-
-        verify(companyMetricsApiService).postCompanyMetrics(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
+        verify(companyMetricsApiService).invokeMetricsPostApi(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
                 Mockito.any(MetricsRecalculateApi.class));
     }
 
@@ -112,7 +110,9 @@ public class CompanyMetricsProcessorTest {
         Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenReturn(response);
 
         assertThrows(NonRetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -124,7 +124,9 @@ public class CompanyMetricsProcessorTest {
         Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.UNAUTHORIZED.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET));
@@ -136,7 +138,9 @@ public class CompanyMetricsProcessorTest {
         Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.FORBIDDEN.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET));
@@ -148,7 +152,9 @@ public class CompanyMetricsProcessorTest {
         Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -160,7 +166,9 @@ public class CompanyMetricsProcessorTest {
         Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.SERVICE_UNAVAILABLE.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -172,7 +180,9 @@ public class CompanyMetricsProcessorTest {
         Message<ResourceChangedData> mockResourceChangedMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
 
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.BAD_GATEWAY.value(), null, null);
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenReturn(response);
 
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -185,7 +195,9 @@ public class CompanyMetricsProcessorTest {
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.GATEWAY_TIMEOUT.value(),
                 null, null);
 
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenReturn(response);
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
     }
@@ -197,7 +209,9 @@ public class CompanyMetricsProcessorTest {
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.TEMPORARY_REDIRECT.value(),
                 null, null);
 
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER, testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenReturn(response);
         assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor.process(mockResourceChangedMessage.getPayload(), TOPIC, PARTITION, OFFSET));
     }
@@ -219,7 +233,7 @@ public class CompanyMetricsProcessorTest {
                         resourceChangedDataMessage.getPayload().getResourceUri(),
                         resourceChangedDataMessage.getPayload())));
 
-        verify(companyMetricsApiService, times(0)).postCompanyMetrics(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
+        verify(companyMetricsApiService, times(0)).invokeMetricsPostApi(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
                 Mockito.any(MetricsRecalculateApi.class));
     }
 
@@ -240,7 +254,7 @@ public class CompanyMetricsProcessorTest {
                         resourceChangedDataMessage.getPayload().getResourceUri(),
                         resourceChangedDataMessage.getPayload())));
 
-        verify(companyMetricsApiService, times(0)).postCompanyMetrics(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
+        verify(companyMetricsApiService, times(0)).invokeMetricsPostApi(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
                 Mockito.any(MetricsRecalculateApi.class));
     }
 
@@ -253,20 +267,16 @@ public class CompanyMetricsProcessorTest {
 
         final ResponseStatusException responseStatusException = testSupport.getResponseStatusException(400);
 
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER,
-                testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER,
+                recalculateApiData))
                 .thenThrow(responseStatusException);
 
         assertThrows(NonRetryableErrorException.class, () ->
                 companyMetricsProcessor.process(resourceChangedDataMessage.getPayload(), TOPIC, PARTITION, OFFSET));
 
-        verify(logger, times(1)).trace((
-                String.format("Company number %s extracted from"
-                                + " ResourceURI %s the payload is %s ", "02588581",
-                        resourceChangedDataMessage.getPayload().getResourceUri(),
-                        resourceChangedDataMessage.getPayload())));
-
-        verify(companyMetricsApiService, times(1)).postCompanyMetrics(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
+        verify(companyMetricsApiService, times(1)).invokeMetricsPostApi(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
                 Mockito.any(MetricsRecalculateApi.class));
     }
 
@@ -279,20 +289,15 @@ public class CompanyMetricsProcessorTest {
 
         final ResponseStatusException responseStatusException = testSupport.getResponseStatusException(503);
 
-        when(companyMetricsApiService.postCompanyMetrics("context_id", MOCK_COMPANY_NUMBER,
-                testSupport.createMetricsRecalculateApiData()))
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(companyMetricsApiService.invokeMetricsPostApi("context_id", MOCK_COMPANY_NUMBER, recalculateApiData))
                 .thenThrow(responseStatusException);
 
         assertThrows(RetryableErrorException.class, () ->
                 companyMetricsProcessor.process(resourceChangedDataMessage.getPayload(), TOPIC, PARTITION, OFFSET));
 
-        verify(logger, times(1)).trace((
-                String.format("Company number %s extracted from"
-                                + " ResourceURI %s the payload is %s ", "02588581",
-                        resourceChangedDataMessage.getPayload().getResourceUri(),
-                        resourceChangedDataMessage.getPayload())));
-
-        verify(companyMetricsApiService, times(1)).postCompanyMetrics(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
+        verify(companyMetricsApiService, times(1)).invokeMetricsPostApi(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
                 Mockito.any(MetricsRecalculateApi.class));
     }
 
