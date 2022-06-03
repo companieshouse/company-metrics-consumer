@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.lessThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -13,11 +14,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.But;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.header.Header;
 
+import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
@@ -158,5 +160,88 @@ public class CompanyMetricsConsumerSteps {
                     .list("tags", testMethodIdentifier))
         );
     }
+
+    @Given("Company Metrics Consumer component is successfully running")
+    public void company_metrics_consumer_component_is_successfully_running() {
+      this.theCompanyMetricsIsRunning();
+    }
+
+    @Given("Stubbed Company Metrics API endpoint will return {int} http response code")
+    public void stubbed_company_metrics_api_endpoint_will_return_http_response_code(Integer responseCode) {
+        stubCompanyMetricsApi(currentCompanyNumber,
+                "an_avro_message_is_published_to_topic",
+                responseCode);
+    }
+
+    @Then("The message is successfully consumed and company number is successfully extracted to call company-metrics-api recalculate POST endpoint with expected payload")
+    public void the_message_is_successfully_consumed_and_company_number_is_successfully_extracted_to_call_company_metrics_api_recalculate_post_endpoint_with_expected_payload() {
+        List<ServeEvent> serverEvents = testSupport.getServeEvents();
+        assertThat(serverEvents.size()).isEqualTo(1);
+        assertThat(serverEvents.isEmpty()).isFalse(); // assert that the wiremock did something
+        assertThat(serverEvents.get(0).getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
+        String body = new String(serverEvents.get(0).getRequest().getBody());
+        MetricsRecalculateApi payload = null;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            payload = mapper.readValue(body, MetricsRecalculateApi.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        assertThat(payload).isNotNull();
+        assertThat(payload.getMortgage()).isTrue();
+        assertThat(payload.getAppointments()).isFalse();
+        assertThat(payload.getPersonsWithSignificantControl()).isFalse();
+    }
+
+    @When("A valid avro message {string} with deleted event for {string} and {string} is sent to the Kafka topic {string}")
+    public void a_valid_avro_message_with_deleted_event_for_and_is_sent_to_the_kafka_topic(String payload, String companyNumber, String resourceUri, String topicName)
+            throws InterruptedException {
+        ResourceChangedData avroMessageData = testSupport.createResourceDeletedMessage(resourceUri, companyNumber, payload);
+        this.currentCompanyNumber = companyNumber;
+        kafkaTemplate.send(topicName, avroMessageData);
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        countDownLatch.await(5, TimeUnit.SECONDS);
+    }
+
+    @Then("The message is successfully consumed only once from the {string} topic but failed to process")
+    public void the_message_is_successfully_consumed_only_once_from_the_topic_but_failed_to_process(String topicName) {
+        Assert.assertThrows(IllegalStateException.class, () -> KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName));
+    }
+
+    @But("Failed to process and immediately moved the message into {string} topic")
+    public void immediately_moved_the_message_into_topic(String topicName) {
+        Integer retryAttempts = 0;
+        moved_the_message_into_topic_after_attempts(topicName, retryAttempts);
+    }
+
+    @But("Failed to process and moved the message into {string} topic after {int} attempts")
+    public void moved_the_message_into_topic_after_attempts(String topicName, Integer retryAttempts) {
+        ConsumerRecord<String, Object> singleRecord = KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName);
+
+        assertThat(singleRecord.value()).isNotNull();
+        List<Header> retryList = StreamSupport.stream(singleRecord.headers().spliterator(), false)
+                .filter(header -> header.key().equalsIgnoreCase(RETRY_TOPIC_ATTEMPTS))
+                .collect(Collectors.toList());
+        assertThat(retryList.size()).isEqualTo(retryAttempts);
+    }
+
+    @Then("Metrics Data API endpoint is never invoked")
+    public void metrics_data_api_endpoint_is_never_invoked() {
+        verify(0, postRequestedFor(
+                        urlPathMatching(COMPANY_METRICS_RECALCULATE_POST)
+                )
+
+        );
+    }
+
+    @Then("Metrics Data API endpoint is not invoked again")
+    public void metrics_data_api_endpoint_is_not_invoked_again() {
+        verify(lessThanOrExactly(1), postRequestedFor(
+                        urlPathMatching(COMPANY_METRICS_RECALCULATE_POST)
+                )
+
+        );
+    }
+
 
 }

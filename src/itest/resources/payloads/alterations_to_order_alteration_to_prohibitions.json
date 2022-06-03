@@ -1,0 +1,50 @@
+{
+  "charges": [
+    {
+      "company_number": "SC109614",
+      "delta_at": "20211029142043360560",
+      "id": "2365312",
+      "persons_entitled": [
+        {
+          "person": "H I D B"
+        }
+      ],
+      "notice_type": "Registration of a charge",
+      "trans_desc": "",
+      "submission_type": "",
+      "delivered_on": "19890315",
+      "additional_notices": [
+        {
+          "notice_type": "419a(Scot)",
+          "trans_id": "0127126285",
+          "trans_desc": "DEC MORT/CHARGE            *****",
+          "submission_type": "9",
+          "delivered_on": "19980324"
+        }
+      ],
+      "charge_number": "2",
+      "migrated_from": "STEM",
+      "amount_secured": "ALL SUMS DUE OR TO BECOME DUE",
+      "type": "FLOATING CHARGE",
+      "short_particulars": "UNDERTAKING AND ALL PROPERTY AND ASSETS PRESENT AND FUTURE OF THE COMPANY INCLUDING UNCALLED CAPITAL",
+      "short_particular_flags": [
+        {
+          "fixed_charge": "no",
+          "contains_floating_charge": "no",
+          "floating_charge_all": "no",
+          "negative_pledge": "no",
+          "bare_trustee": "no"
+        }
+      ],
+      "status": "1",
+      "satisfied_on": "19980324",
+      "delivered_on": "19890315",
+      "floating_charge": "Y",
+      "restricting_provisions": "Y",
+      "alterations_to_order": "SEE PAGE 3 OF DOC\\n",
+      "alterations_to_prohibitions": "SEE PAGE 2 OF DOC\\n",
+      "created_on": "19890301"
+    }
+  ]
+}
+	
