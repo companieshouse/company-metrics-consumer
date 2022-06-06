@@ -1,0 +1,47 @@
+{
+  "charges": [
+    {
+      "company_number": "03674789",
+      "delta_at": "20211029142043360560",
+      "id": "667856",
+      "persons_entitled": [
+        {
+          "person": "GMAC COMMERCIAL FINANCE PLC AS SECURITY TRUSTEE FOR THE BENEFICIARIES"
+        }
+      ],
+      "notice_type": "395",
+      "trans_id": "0026819254",
+      "trans_desc": "PARTICULARS OF MORTGAGE/CHARGE",
+      "submission_type": "9",
+      "delivered_on": "20030811",
+      "additional_notices": [
+        {
+          "notice_type": "MR05",
+          "trans_id": "3118956563",
+          "trans_desc": "STATEMENT OF RELEASE / CEASE FROM CHARGE / WHOLE RELEASE / CHARGE NO 6",
+          "submission_type": "5",
+          "delivered_on": "20150302"
+        }
+      ],
+      "charge_number": "6",
+      "migrated_from": "STEM",
+      "amount_secured": "ALL MONIES DUE OR TO BECOME DUE FROM UMBRO INTERNATIONAL LIMITED TO THE TRUSTEE OR ANY OF THE OTHER BENEFICIARIES        UNDER THE TERMS OF THE AFOREMENTIONED INSTRUMENT CREATING OR EVIDENCING THE CHARGE",
+      "type": "MORTGAGE",
+      "short_particulars": "L/H PROPERTY AT LAKESIDE 5400, CHEADLE ROYAL BUSINESS PARK, WILMSLOW ROAD, CHEADLE, CHESHIRE T/N GM839134               ",
+      "short_particular_flags": [
+        {
+          "fixed_charge": "no",
+          "contains_floating_charge": "no",
+          "floating_charge_all": "no",
+          "negative_pledge": "no",
+          "bare_trustee": "no"
+        }
+      ],
+      "status": "0",
+      "assets_ceased_released": "8",
+      "delivered_on": "20030811",
+      "created_on": "20030804"
+    }
+  ]
+}
+	

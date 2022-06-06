@@ -1,0 +1,62 @@
+{
+  "charges": [
+    {
+      "company_number": "08124207",
+      "delta_at": "20211029142043360560",
+      "id": "3001283055",
+      "persons_entitled": [
+        {
+          "person": "LYELL TRADING LIMITED"
+        }
+      ],
+      "notice_type": "MR01",
+      "trans_id": "3247064063",
+      "trans_desc": "REGISTRATION OF A CHARGE / CHARGE CODE  081242070049",
+      "submission_type": "2",
+      "delivered_on": "20191017",
+      "more_than_4_persons": "N",
+      "additional_notices": [
+        {
+          "notice_type": "MR05",
+          "trans_id": "3247323133",
+          "trans_desc": "STATEMENT OF RELEASE / CEASE FROM CHARGE / PART BOTH / CHARGE CODE 081242070049",
+          "submission_type": "2",
+          "delivered_on": "20191022"
+        },
+        {
+          "notice_type": "MR04",
+          "trans_id": "3247979346",
+          "trans_desc": "STATEMENT OF SATISFACTION OF A CHARGE / PART / CHARGE CODE 081242070049",
+          "submission_type": "2",
+          "delivered_on": "20191029"
+        },
+        {
+          "notice_type": "MR05",
+          "trans_id": "3248292521",
+          "trans_desc": "STATEMENT OF RELEASE / CEASE FROM CHARGE / PART RELEASE / CHARGE CODE 081242070049",
+          "submission_type": "2",
+          "delivered_on": "20191101"
+        }
+      ],
+      "code": "081242070049",
+      "charge_number": "49",
+      "migrated_from": "CHIPS",
+      "type": "A REGISTERED CHARGE",
+      "brief_description": "THE FREEHOLD LAND KNOWN AS MILLENNIUM HOUSE, 60 VICTORIA STREET, LIVERPOOL AND REGISTERED WITH HM LAND REGISTRY UNDER TITLE NUMBER MS303172\\n",
+      "short_particular_flags": [
+        {
+          "fixed_charge": "yes",
+          "contains_floating_charge": "yes",
+          "floating_charge_all": "yes",
+          "negative_pledge": "yes",
+          "bare_trustee": "no"
+        }
+      ],
+      "status": "2",
+      "assets_ceased_released": "9",
+      "delivered_on": "20191017",
+      "floating_charge": "Y",
+      "created_on": "20191011"
+    }
+  ]
+}

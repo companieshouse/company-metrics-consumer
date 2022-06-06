@@ -1,0 +1,39 @@
+{
+  "charges": [
+    {
+      "company_number": "10286237",
+      "delta_at": "20211029142043360560",
+      "id": "3001193499",
+      "more_than_4_persons": "N",
+      "persons_entitled": [
+        {
+          "person": "WENDY KERR"
+        }
+      ],
+      "notice_type": "MR08",
+      "trans_id": "3229947422",
+      "trans_desc": "REGISTRATION OF A CHARGE WITHOUT DEED / CHARGE CODE  102862370001",
+      "submission_type": "5",
+      "delivered_on": "20190318",
+      "code": "102862370001",
+      "charge_number": "1",
+      "migrated_from": "CHIPS",
+      "obligations_secured": "£225,000 DUE OR TO BECOME DUE",
+      "nature_of_charge": "Floating Charge",
+      "description_of_property_undertaking": "OVER USED CAR STOCK",
+      "short_particular_flags": [
+        {
+          "fixed_charge": "no",
+          "contains_floating_charge": "no",
+          "floating_charge_all": "no",
+          "negative_pledge": "no",
+          "bare_trustee": "no"
+        }
+      ],
+      "status": "0",
+      "delivered_on": "20190318",
+      "created_on": "20190305"
+    }
+  ]
+}	
+	

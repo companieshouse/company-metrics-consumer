@@ -24,6 +24,7 @@ public class TestSupport {
     public static final String VALID_COMPANY_CHARGES_LINK = "/company/%s/charges";
     public static final String RESOURCE_ID = "11223344";
     public static final String TYPE = "charges";
+    public static final String DELETE_TYPE = "deleted";
 
     public TestSupport(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
@@ -38,6 +39,27 @@ public class TestSupport {
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
         eventRecord.setType(TYPE);
+
+        ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
+                .setContextId(CONTEXT_ID)
+                .setResourceId(RESOURCE_ID)
+                .setResourceKind(RESOURCE_KIND)
+                .setResourceUri(String.format(companyChargesLink, companyNumber))
+                .setEvent(eventRecord)
+                .setData(chargesRecord)
+                .build();
+
+        return resourceChangedData;
+    }
+
+    public ResourceChangedData createResourceDeletedMessage(String companyChargesLink, String companyNumber, String payload) {
+
+        String chargesRecord = loadFile("payloads", payload);
+
+        EventRecord eventRecord = new EventRecord();
+        eventRecord.setPublishedAt("2022010351");
+        eventRecord.setType(DELETE_TYPE);
+        eventRecord.setFieldsChanged(null);
 
         ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
                 .setContextId(CONTEXT_ID)
@@ -72,6 +94,9 @@ public class TestSupport {
             throw new RuntimeException("Wiremock not initialised");
         }
         wireMockServer.resetRequests();
+        wireMockServer.resetAll();
+        wireMockServer.stop();
+        wireMockServer.start();
     }
 
     public String loadFile(String dir, String fileName) {
