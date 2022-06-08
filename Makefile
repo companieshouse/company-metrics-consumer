@@ -19,7 +19,7 @@ all:
 .PHONY: clean
 clean:
 	@# Help: Reset repo to pre-build state (i.e. a clean checkout state)
-	mvn clean 
+	mvn clean
 	rm -f ./$(artifact_name).jar
 	rm -f ./$(artifact_name)-*.zip
 	rm -rf ./build-*
@@ -35,7 +35,7 @@ build:
 	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
 
 .PHONY: test
-test: test-integration test-unit 
+test: test-integration test-unit
 	@# Help: Run all test-* targets (convenience method for developers)
 
 .PHONY: test-unit
@@ -49,8 +49,8 @@ test-integration:
 	mvn integration-test -Dskip.unit.tests=true
 
 .PHONY: run-local
-run-local: 
-	@# Help: Run springboot app locally	
+run-local:
+	@# Help: Run springboot app locally
 	mvn spring-boot:run
 
 .PHONY: package
@@ -68,19 +68,19 @@ endif
 	cp ./$(artifact_name).jar $(tmpdir)/$(artifact_name).jar
 	cd $(tmpdir); zip -r ../$(artifact_name)-$(version).zip *
 	rm -rf $(tmpdir)
-	
+
 .PHONY: dist
 dist: clean build package
 
 .PHONY: sonar-pr-analysis
 sonar-pr-analysis:
 	@# Help: Run sonar scan on a PR
-	mvn sonar:sonar	-P sonar-pr-analysis
+	mvn verify sonar:sonar -P sonar-pr-analysis
 
 .PHONY: sonar
 sonar:
 	@# Help: Run sonar scan
-	mvn sonar:sonar
+	mvn verify sonar:sonar
 
 .PHONY: deps
 deps:

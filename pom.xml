@@ -44,11 +44,10 @@
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.projectKey>uk.gov.companieshouse:company-metrics-consumer</sonar.projectKey>
 		<sonar.sources>src/main</sonar.sources>
-		<sonar.tests>src/test</sonar.tests>
+		<sonar.tests>src/test,src/itest</sonar.tests>
 		<sonar.verbose>true</sonar.verbose>
 		<sonar.coverage.jacoco.xmlReportPaths>
-			${project.basedir}/target/site/jacoco/jacoco.xml,
-			${project.basedir}/target/site/jacoco-it/jacoco.xml
+			${project.basedir}/target/site/jacoco/jacoco.xml
 		</sonar.coverage.jacoco.xmlReportPaths>
 		<sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
 		<spring.boot.version>2.6.4</spring.boot.version>
@@ -249,6 +248,13 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco-maven-plugin.version}</version>
+				<configuration>
+					<append>true</append>
+					<destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>
+					<dataFile>${sonar.jacoco.reports}/jacoco.exec</dataFile>
+					<outputDirectory>${sonar.jacoco.reports}/jacoco</outputDirectory>
+				</configuration>
+
 				<executions>
 					<execution>
 						<id>pre-unit-test</id>
@@ -256,21 +262,15 @@
 							<goal>prepare-agent</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution model. -->
-							<destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>
 							<propertyName>surefireArgLine</propertyName>
 						</configuration>
 					</execution>
 					<execution>
 						<id>post-unit-test</id>
-						<phase>test</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
-						<configuration>
-							<dataFile>${sonar.jacoco.reports}/jacoco.exec</dataFile>
-							<outputDirectory>${sonar.jacoco.reports}/jacoco</outputDirectory>
-						</configuration>
 					</execution>
 					<execution>
 						<id>pre-integration-test</id>
@@ -279,23 +279,15 @@
 							<goal>prepare-agent</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution model. -->
-							<destFile>${sonar.jacoco.reports}/jacoco-it.exec</destFile>
 							<propertyName>failsafeArgLine</propertyName>
 						</configuration>
 					</execution>
 					<execution>
 						<id>post-integration-test</id>
-						<phase>post-integration-test</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
-						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
-							<dataFile>${sonar.jacoco.reports}/jacoco-it.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>${sonar.jacoco.reports}/jacoco-it</outputDirectory>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -340,6 +332,7 @@
 				<version>${maven-failsafe-plugin.version}</version>
 				<executions>
 					<execution>
+						<phase>integration-test</phase>
 						<goals>
 							<goal>integration-test</goal>
 							<goal>verify</goal>
@@ -347,6 +340,12 @@
 					</execution>
 				</executions>
 				<configuration>
+					<properties>
+						<property>
+							<name>listener</name>
+							<value>org.sonar.java.jacoco.JUnitListener</value>
+						</property>
+					</properties>
 					<argLine>-Dfile.encoding=UTF-8</argLine>
 					<argLine>${failsafeArgLine}</argLine>
 					<classesDirectory>${project.build.outputDirectory}</classesDirectory>
