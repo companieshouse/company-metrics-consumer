@@ -41,6 +41,8 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 
 public class CompanyMetricsConsumerSteps {
 
+    private static final String HEALTHCHECK_URI = "/company-metrics-consumer/healthcheck";
+    private static final String HEALTHCHECK_RESPONSE_BODY = "{\"status\":\"UP\"}";
     public static final String COMPANY_METRICS_RECALCULATE_POST = "/company/([a-zA-Z0-9]*)/metrics/recalculate";
     public static final String RETRY_TOPIC_ATTEMPTS = "retry_topic-attempts";
     public static final String COMPANY_METRICS_RECALCULATE_URI = "/company/%s/metrics/recalculate";
@@ -65,9 +67,9 @@ public class CompanyMetricsConsumerSteps {
 
     @Given("Company Metrics Consumer component is running and Company Metrics API is stubbed")
     public void theCompanyMetricsIsRunning() {
-        ResponseEntity<String> response = restTemplate.getForEntity("/healthcheck", String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(HEALTHCHECK_URI, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.valueOf(200));
-        assertThat(response.getBody()).isEqualTo("I am healthy");
+        assertThat(response.getBody()).isEqualTo(HEALTHCHECK_RESPONSE_BODY);
         wireMockServer = testSupport.setupWiremock();
         assertThat(wireMockServer.isRunning()).isTrue();
     }

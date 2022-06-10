@@ -6,5 +6,5 @@ Feature: Health check API endpoint
     Then the client receives status code of <code>
     And the client receives response body as <response>
     Examples:
-      | url            | code | response       |
-      | '/healthcheck' | 200  | 'I am healthy' |
+      | url                                     | code | response          |
+      | '/company-metrics-consumer/healthcheck' | 200  | '{"status":"UP"}' |
