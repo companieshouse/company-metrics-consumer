@@ -28,21 +28,22 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Profile("!test")
 public class KafkaConfig {
 
-    private String bootstrapServers;
-
     private final ResourceChangedDataDeserializer resourceChangedDataDeserializer;
     private final ResourceChangedDataSerializer resourceChangedDataSerializer;
+    private String bootstrapServers;
+    private final Integer listenerConcurrency;
 
     /**
      * Kafka Consumer Factory Message.
      */
     public KafkaConfig(ResourceChangedDataDeserializer resourceChangedDataDeserializer,
                        ResourceChangedDataSerializer resourceChangedDataSerializer,
-                       @Value("${spring.kafka"
-            + ".bootstrap-servers}") String bootstrapServers) {
+                       @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
+                       @Value("${spring.kafka.listener.concurrency}") Integer listenerConcurrency) {
         this.resourceChangedDataDeserializer = resourceChangedDataDeserializer;
         this.resourceChangedDataSerializer = resourceChangedDataSerializer;
         this.bootstrapServers = bootstrapServers;
+        this.listenerConcurrency = listenerConcurrency;
     }
 
 
@@ -64,6 +65,7 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactoryMessage());
+        factory.setConcurrency(listenerConcurrency);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
         return factory;
     }
@@ -72,8 +74,7 @@ public class KafkaConfig {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                ErrorHandlingDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         props.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
                  ResourceChangedDataDeserializer.class);

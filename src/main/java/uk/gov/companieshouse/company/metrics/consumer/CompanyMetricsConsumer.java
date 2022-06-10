@@ -49,8 +49,10 @@ public class CompanyMetricsConsumer {
                         @Header(KafkaHeaders.OFFSET) String offset) {
         ResourceChangedData payload = resourceChangedMessage.getPayload();
         String contextId = payload.getContextId();
-        logger.info(String.format("A new message successfully picked up "
-                + "from %s topic with contextId: %s", topic, contextId));
+        logger.info(String.format("A new message successfully picked up from topic: %s, "
+                        + "partition: %s and offset: %s with contextId: %s",
+                topic, partition, offset, contextId));
+
         try {
             final boolean deleteEventType = "deleted"
                     .equalsIgnoreCase(payload.getEvent().getType());
@@ -65,9 +67,8 @@ public class CompanyMetricsConsumer {
                 metricsProcessor.process(payload, topic, partition, offset);
             }
         } catch (Exception exception) {
-            logger.error(String.format("Exception occurred while processing the topic %s "
-                            + "with contextId %s, exception thrown is %s",
-                    topic, contextId, exception));
+            logger.error(String.format("Exception occurred while processing the topic: %s "
+                    + "with contextId: %s", topic, contextId), exception);
             throw exception;
         }
     }
