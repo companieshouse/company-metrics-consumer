@@ -8,16 +8,16 @@ springfox:
 spring:
   kafka:
     bootstrap-servers: ${STREAMING_KAFKA_BROKER_URL:localhost:9092}
-    producer-timeout: ${KAFKA_PRODUCER_TIMEOUT:3000}
-    producer-retries: ${KAFKA_PRODUCER_RETRIES:10}
+    listener:
+      concurrency: ${COMPANY_METRICS_LISTENER_CONCURRENCY:1}
 
 charges:
   stream:
-    group-id: company-metrics-consumer
-    topic: stream-company-charges
-    retry-attempts: 4
-    backoff-delay: 100
-    enable: true
+    enable: ${COMPANY_METRICS_CONSUMER_CHARGES_ENABLED:true}
+    group-id: ${COMPANY_METRICS_CONSUMER_CHARGES_GROUP_ID:company-metrics-consumer}
+    topic: ${COMPANY_METRICS_CONSUMER_CHARGES_TOPIC:stream-company-charges}
+    retry-attempts: ${COMPANY_METRICS_CONSUMER_CHARGES_ATTEMPTS:4}
+    backoff-delay: ${COMPANY_METRICS_CONSUMER_CHARGES_BACKOFF_DELAY:100}
 
 logger:
   namespace: company-metrics-consumer
