@@ -1,5 +1,10 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
+import static java.lang.String.format;
+
+import java.time.Duration;
+import java.time.Instant;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -47,6 +52,7 @@ public class CompanyMetricsConsumer {
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
                         @Header(KafkaHeaders.OFFSET) String offset) {
+        Instant startTime = Instant.now();
         ResourceChangedData payload = resourceChangedMessage.getPayload();
         String contextId = payload.getContextId();
         logger.info(String.format("A new message successfully picked up from topic: %s, "
@@ -58,13 +64,15 @@ public class CompanyMetricsConsumer {
                     .equalsIgnoreCase(payload.getEvent().getType());
 
             if (deleteEventType) {
-                logger.trace(String.format("DSND-860: ResourceChangedData with 'deleted' event "
-                        + "type extracted from a Kafka message: %s", payload));
                 metricsProcessor.process(payload, topic, partition, offset);
+                logger.info(format("Charges Metrics Delete message with contextId: %s is "
+                                + "successfully processed in %d milliseconds", contextId,
+                        Duration.between(startTime, Instant.now()).toMillis()));
             } else {
-                logger.trace(String.format("DSND-599: ResourceChangedData with 'changed' event "
-                        + "type extracted from a Kafka message: %s", payload));
                 metricsProcessor.process(payload, topic, partition, offset);
+                logger.info(format("Charges Metrics Delta message with contextId: %s is "
+                                + "successfully processed in %d milliseconds", contextId,
+                        Duration.between(startTime, Instant.now()).toMillis()));
             }
         } catch (Exception exception) {
             logger.error(String.format("Exception occurred while processing the topic: %s "
