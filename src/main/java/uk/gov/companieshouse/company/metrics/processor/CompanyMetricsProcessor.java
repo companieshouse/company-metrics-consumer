@@ -111,8 +111,9 @@ public class CompanyMetricsProcessor {
             logger.errorContext(logContext, message + ", retry", null, logMap);
             throw new RetryableErrorException(message);
         } else {
-            String message = "Got success response from POST endpoint of company-metrics-api";
-            logger.debugContext(logContext, message, logMap);
+            logger.info(String.format("Successfully invoked company-metrics-api "
+                            + "POST endpoint for message with contextId: %s",
+                    logContext));
         }
     }
 
