@@ -54,7 +54,7 @@ public class CompanyMetricsProcessor {
         companyNumberOptional
                 .filter(Predicate.not(String::isBlank))
                 .ifPresentOrElse(companyNumber -> {
-                    logger.trace(String.format("Company number %s extracted from"
+                    logger.info(String.format("Company number %s extracted from"
                             + " resourceURI %s", companyNumber, resourceUri));
 
                     prepareAndInvokeMetricsApi(companyNumber, contextId, updatedBy);
