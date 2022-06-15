@@ -75,8 +75,8 @@ public class CompanyMetricsConsumer {
                         Duration.between(startTime, Instant.now()).toMillis()));
             }
         } catch (Exception exception) {
-            logger.error(String.format("Exception occurred while processing the topic: %s "
-                    + "with contextId: %s", topic, contextId), exception);
+            logger.errorContext(contextId, format("Exception occurred while processing "
+                    + "message on the topic: %s", topic), exception, null);
             throw exception;
         }
     }

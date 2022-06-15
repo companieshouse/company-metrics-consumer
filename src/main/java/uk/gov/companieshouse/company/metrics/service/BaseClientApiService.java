@@ -8,6 +8,8 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.Executor;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.logging.Logger;
 
 public abstract class BaseClientApiService {
@@ -44,8 +46,10 @@ public abstract class BaseClientApiService {
         } catch (ApiErrorResponseException ex) {
             logMap.put("status", ex.getStatusCode());
             logger.errorContext(logContext, "SDK exception", ex, logMap);
-            throw new ResponseStatusException(HttpStatus.valueOf(ex.getStatusCode()),
-                    ex.getStatusMessage(), ex);
+            if (ex.getStatusCode() == HttpStatus.BAD_REQUEST.value()) {
+                throw new NonRetryableErrorException("SDK Exception", ex);
+            }
+            throw new RetryableErrorException("SDK Exception", ex);
         }
     }
 }
