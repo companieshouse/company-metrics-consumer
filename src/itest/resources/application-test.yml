@@ -1,29 +1,25 @@
 server:
-  port: 8081
-
-springfox:
-  documentation:
-    auto-startup: false
+  port: 8085
 
 spring:
   kafka:
-    bootstrap-servers: ${STREAMING_KAFKA_BROKER_URL:localhost:9092}
-    producer-timeout: ${KAFKA_PRODUCER_TIMEOUT:3000}
-    producer-retries: ${KAFKA_PRODUCER_RETRIES:10}
+    bootstrap-servers: localhost:9092
+    listener:
+      concurrency: 1
 
 charges:
   stream:
+    enable: true
     group-id: company-metrics-consumer
     topic: stream-company-charges
     retry-attempts: 3
-    backoff-delay: 100
-    enable: true
+    backoff-delay: 10
 
 logger:
   namespace: company-metrics-consumer
 
 api:
-  api-url: ${COMPANY_METRICS_API_URL:http://localhost:8888}
+  api-url: http://localhost:8888
   company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}
 
 wiremock:

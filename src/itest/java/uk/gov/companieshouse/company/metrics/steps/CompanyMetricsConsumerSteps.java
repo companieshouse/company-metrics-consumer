@@ -20,7 +20,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -46,6 +45,7 @@ public class CompanyMetricsConsumerSteps {
     public static final String COMPANY_METRICS_RECALCULATE_POST = "/company/([a-zA-Z0-9]*)/metrics/recalculate";
     public static final String RETRY_TOPIC_ATTEMPTS = "retry_topic-attempts";
     public static final String COMPANY_METRICS_RECALCULATE_URI = "/company/%s/metrics/recalculate";
+
     @Autowired
     private TestSupport testSupport;
 
@@ -86,9 +86,7 @@ public class CompanyMetricsConsumerSteps {
         stubCompanyMetricsApi(currentCompanyNumber,
                 "an_avro_message_is_published_to_topic",
                 Integer.parseInt(statusCode));
-        kafkaTemplate.send(topic, avroMessageData);
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        countDownLatch.await(5, TimeUnit.SECONDS);
+        sendKafkaMessage(topic, avroMessageData);
     }
 
     @Then("The message is successfully consumed and company number is susccessfully extracted to call company-metrics-api POST endpoint with expected payload")
@@ -119,15 +117,17 @@ public class CompanyMetricsConsumerSteps {
         String nonAvroMessageData = testSupport.loadAvroMessageFile(nonAvroMessageFileName);
         stubCompanyMetricsApi(currentCompanyNumber, "a_non_avro_message_is_published_and_failed_to_process",
                 Integer.parseInt(statusCode));
-        kafkaTemplate.send(topic, nonAvroMessageData);
 
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        countDownLatch.await(5, TimeUnit.SECONDS);
+        kafkaTemplate.send(topic, nonAvroMessageData);
+        kafkaTemplate.flush();
+
+        TimeUnit.SECONDS.sleep(1);
     }
 
     @Then("The message should be moved to topic {string}")
     public void the_message_should_be_moved_to_topic(String topic) {
-        ConsumerRecord<String, Object> singleRecord = KafkaTestUtils.getSingleRecord(kafkaConsumer, topic);
+        ConsumerRecord<String, Object> singleRecord =
+                KafkaTestUtils.getSingleRecord(kafkaConsumer, topic, 5000L);
         assertThat(singleRecord.value()).isNotNull();
     }
 
@@ -136,13 +136,13 @@ public class CompanyMetricsConsumerSteps {
         verify(Integer.parseInt(times), postRequestedFor(
                         urlPathMatching(COMPANY_METRICS_RECALCULATE_POST)
                 )
-
         );
     }
 
     @Then("The message should be moved to topic {string} after retry attempts of {string}")
     public void the_message_should_retried_and_moved_to_error_topic(String topic, String retryAttempts) {
-        ConsumerRecord<String, Object> singleRecord = KafkaTestUtils.getSingleRecord(kafkaConsumer, topic);
+        ConsumerRecord<String, Object> singleRecord =
+                KafkaTestUtils.getSingleRecord(kafkaConsumer, topic, 5000L);
 
         assertThat(singleRecord.value()).isNotNull();
         List<Header> retryList = StreamSupport.stream(singleRecord.headers().spliterator(), false)
@@ -200,14 +200,13 @@ public class CompanyMetricsConsumerSteps {
             throws InterruptedException {
         ResourceChangedData avroMessageData = testSupport.createResourceDeletedMessage(resourceUri, companyNumber, payload);
         this.currentCompanyNumber = companyNumber;
-        kafkaTemplate.send(topicName, avroMessageData);
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        countDownLatch.await(5, TimeUnit.SECONDS);
+        sendKafkaMessage(topicName, avroMessageData);
     }
 
     @Then("The message is successfully consumed only once from the {string} topic but failed to process")
     public void the_message_is_successfully_consumed_only_once_from_the_topic_but_failed_to_process(String topicName) {
-        Assert.assertThrows(IllegalStateException.class, () -> KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName));
+        Assert.assertThrows(IllegalStateException.class,
+                () -> KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName, 5000L));
     }
 
     @But("Failed to process and immediately moved the message into {string} topic")
@@ -218,7 +217,8 @@ public class CompanyMetricsConsumerSteps {
 
     @But("Failed to process and moved the message into {string} topic after {int} attempts")
     public void moved_the_message_into_topic_after_attempts(String topicName, Integer retryAttempts) {
-        ConsumerRecord<String, Object> singleRecord = KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName);
+        ConsumerRecord<String, Object> singleRecord =
+                KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName, 5000L);
 
         assertThat(singleRecord.value()).isNotNull();
         List<Header> retryList = StreamSupport.stream(singleRecord.headers().spliterator(), false)
@@ -232,7 +232,6 @@ public class CompanyMetricsConsumerSteps {
         verify(0, postRequestedFor(
                         urlPathMatching(COMPANY_METRICS_RECALCULATE_POST)
                 )
-
         );
     }
 
@@ -241,9 +240,13 @@ public class CompanyMetricsConsumerSteps {
         verify(lessThanOrExactly(1), postRequestedFor(
                         urlPathMatching(COMPANY_METRICS_RECALCULATE_POST)
                 )
-
         );
     }
 
+    private void sendKafkaMessage(String topic, ResourceChangedData avroMessageData) throws InterruptedException {
+        kafkaTemplate.send(topic, avroMessageData);
+        kafkaTemplate.flush();
+        TimeUnit.SECONDS.sleep(1);
+    }
 
 }
