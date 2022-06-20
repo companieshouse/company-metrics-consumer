@@ -41,4 +41,4 @@ Feature: Process company metrics charges-stream error and retry scenarios
     And Stubbed Company Metrics API should be called "<times>" times
     Examples:
       | companyNumber | resourceUriFormat   | KafkaTopic             | KafkaInvalidTopic                                     | statusCode | retryAttempts | times |
-      | 12345678      | /company/%s/charges | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 503        | 3             | 3     |
+      | 12345678      | /company/%s/charges | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 503        | 4             | 4     |
