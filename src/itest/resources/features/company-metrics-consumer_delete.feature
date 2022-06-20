@@ -47,7 +47,7 @@ Feature: Process Company Metrics Consumer delete events
     And Stubbed Company Metrics API endpoint will return <statusCode> http response code
     When A valid avro message "<payload>" with deleted event for "<companyNumber>" and "<resourceUriFormat>" is sent to the Kafka topic "<KafkaTopic>"
     Then The message is successfully consumed only once from the "<KafkaTopic>" topic but failed to process
-    But  Failed to process and moved the message into "stream-company-charges-company-metrics-consumer-error" topic after 3 attempts
+    But  Failed to process and moved the message into "stream-company-charges-company-metrics-consumer-error" topic after 4 attempts
 
     Examples:
       | companyNumber | KafkaTopic             | resourceUriFormat   | statusCode | payload                                               |
