@@ -21,15 +21,18 @@ import java.util.Objects;
 
 public class TestSupport {
 
-    private static final String COMPANY_NUMBER = "02588581";
-    public static final String VALID_COMPANY_LINKS_PATH = "/company/%s/charges";
-    public static final String INVALID_COMPANY_LINKS_PATH = "/companyabc/%s/charges";
+    public static final String COMPANY_NUMBER = "02588581";
+    public static final String MOCK_CHARGE_ID = "MYdKM_YnzAmJ8JtSgVXr61n1bgg";
+    public static final String VALID_COMPANY_LINKS_PATH = "/company/%s/charges/%s";
+    public static final String INVALID_COMPANY_LINKS_PATH = "/companyabc/%s/charges/%s";
 
     public Message<ResourceChangedData> createResourceChangedMessage(String companyLinksPath) throws IOException {
-        return this.createResourceChangedMessage(companyLinksPath, COMPANY_NUMBER);
+        return this.createResourceChangedMessage(companyLinksPath, COMPANY_NUMBER, MOCK_CHARGE_ID);
     }
 
-    public Message<ResourceChangedData> createResourceChangedMessage(String companyLinksPath, String companyNumber) throws IOException {
+    public Message<ResourceChangedData> createResourceChangedMessage(String companyLinksPath,
+                                                                     String companyNumber,
+                                                                     String chargeId) throws IOException {
         InputStreamReader exampleChargesJsonPayload = new InputStreamReader(
                 Objects.requireNonNull(ClassLoader.getSystemClassLoader()
                         .getResourceAsStream("charges-record.json")));
@@ -43,7 +46,7 @@ public class TestSupport {
                 .setContextId("context_id")
                 .setResourceId(companyNumber)
                 .setResourceKind("company-charges")
-                .setResourceUri(String.format(companyLinksPath, companyNumber))
+                .setResourceUri(String.format(companyLinksPath, companyNumber, chargeId))
                 .setEvent(eventRecord)
                 .setData(chargesRecord)
                 .build();
@@ -77,6 +80,28 @@ public class TestSupport {
                 new ResponseStatusException(httpStatus, httpStatus.getReasonPhrase(),
                         ApiErrorResponseException.fromHttpResponseException(httpResponseException));
         return responseStatusException;
+    }
+
+    public static ApiErrorResponseException buildApiErrorResponseCustomException(int nonHttpStatusCode) {
+
+        final HttpResponseException httpResponseException = new HttpResponseException.Builder(
+                nonHttpStatusCode,
+                "some error",
+                new HttpHeaders()
+        ).build();
+
+        return ApiErrorResponseException.fromHttpResponseException(httpResponseException);
+    }
+
+    public static ApiErrorResponseException buildApiErrorResponseException(HttpStatus httpStatus) {
+
+        final HttpResponseException httpResponseException = new HttpResponseException.Builder(
+                httpStatus.value(),
+                httpStatus.getReasonPhrase(),
+                new HttpHeaders()
+        ).build();
+
+        return ApiErrorResponseException.fromHttpResponseException(httpResponseException);
     }
 
 }

@@ -21,6 +21,10 @@ logger:
 api:
   api-url: http://localhost:8888
   company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}
+  charges:
+    data:
+      endpoint: ${CHARGES_DATA_API_URL:http://localhost:8888}
+      key: ${CHARGES_DATA_API_KEY:chargeApiKey}
 
 wiremock:
   server:

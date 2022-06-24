@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.config;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -26,13 +28,11 @@ public class ApplicationConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    Supplier<InternalApiClient> internalApiClientSupplier(
-            @Value("${api.company-metrics-api-key}") String apiKey,
-            @Value("${api.api-url}") String apiUrl) {
-        return () -> {
+    BiFunction<String, String, InternalApiClient> internalApiClientSupplier() {
+        return (key, url) -> {
             InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(
-                    apiKey));
-            internalApiClient.setBasePath(apiUrl);
+                    key));
+            internalApiClient.setBasePath(url);
             return internalApiClient;
         };
     }

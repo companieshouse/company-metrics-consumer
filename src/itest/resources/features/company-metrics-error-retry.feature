@@ -14,31 +14,34 @@ Feature: Process company metrics charges-stream error and retry scenarios
   Scenario Outline: Processing valid avro message with invalid resource uri
 
     Given Company Metrics Consumer component is running and Company Metrics API is stubbed
-    When A valid avro message for "<companyNumber>" and "<resourceUriFormat>" is generated and sent to the Kafka topic "<KafkaTopic>" and stubbed Company Metrics API returns "<statusCode>"
+    And Charges Data API endpoint is stubbed for "<companyNumber>" and "<chargeId>" and will return "<chargeApiStatusCode>" http response code
+    When A valid avro message for "<companyNumber>" and "<resourceUriFormat>" and "<chargeId>" is generated and sent to the Kafka topic "<KafkaTopic>" and stubbed Company Metrics API returns "<metricsApiStatusCode>"
     Then The message should be moved to topic "<KafkaInvalidTopic>" after retry attempts of "<retryAttempts>"
     And Stubbed Company Metrics API should be called "<times>" times
     Examples:
-      | companyNumber | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                       | statusCode | times | retryAttempts |
-      | 12345678      | /companyabc/%s/charges | stream-company-charges | stream-company-charges-company-metrics-consumer-invalid | 200        | 0     | 0             |
+      | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                       | metricsApiStatusCode | chargeApiStatusCode | times | retryAttempts |
+      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /companyabc/%s/charges | stream-company-charges | stream-company-charges-company-metrics-consumer-invalid | 200                  | 200                 | 0     | 0             |
 
 
   Scenario Outline: Processing valid avro message and backend api returning 400 bad request error
 
     Given Company Metrics Consumer component is running and Company Metrics API is stubbed
-    When A valid avro message for "<companyNumber>" and "<resourceUriFormat>" is generated and sent to the Kafka topic "<KafkaTopic>" and stubbed Company Metrics API returns "<statusCode>"
+    And Charges Data API endpoint is stubbed for "<companyNumber>" and "<chargeId>" and will return "<chargeApiStatusCode>" http response code
+    When A valid avro message for "<companyNumber>" and "<resourceUriFormat>" and "<chargeId>" is generated and sent to the Kafka topic "<KafkaTopic>" and stubbed Company Metrics API returns "<metricsApiStatusCode>"
     Then The message should be moved to topic "<KafkaInvalidTopic>" after retry attempts of "<retryAttempts>"
     And Stubbed Company Metrics API should be called "<times>" times
     Examples:
-      | companyNumber | resourceUriFormat   | KafkaTopic             | KafkaInvalidTopic                                       | statusCode | times | retryAttempts |
-      | 12345678      | /company/%s/charges | stream-company-charges | stream-company-charges-company-metrics-consumer-invalid | 400        | 1     | 0             |
+      | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                       | metricsApiStatusCode | chargeApiStatusCode | times | retryAttempts |
+      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-invalid | 400                  | 200                 | 1     | 0             |
 
 
   Scenario Outline: Processing valid avro message and backend api returning 503 bad request error
 
     Given Company Metrics Consumer component is running and Company Metrics API is stubbed
-    When A valid avro message for "<companyNumber>" and "<resourceUriFormat>" is generated and sent to the Kafka topic "<KafkaTopic>" and stubbed Company Metrics API returns "<statusCode>"
+    And Charges Data API endpoint is stubbed for "<companyNumber>" and "<chargeId>" and will return "<chargeApiStatusCode>" http response code
+    When A valid avro message for "<companyNumber>" and "<resourceUriFormat>" and "<chargeId>" is generated and sent to the Kafka topic "<KafkaTopic>" and stubbed Company Metrics API returns "<metricsApiStatusCode>"
     Then The message should be moved to topic "<KafkaInvalidTopic>" after retry attempts of "<retryAttempts>"
     And Stubbed Company Metrics API should be called "<times>" times
     Examples:
-      | companyNumber | resourceUriFormat   | KafkaTopic             | KafkaInvalidTopic                                     | statusCode | retryAttempts | times |
-      | 12345678      | /company/%s/charges | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 503        | 3             | 3     |
+      | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                     | metricsApiStatusCode | chargeApiStatusCode | retryAttempts | times |
+      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 503                  | 200                 | 3             | 3     |
