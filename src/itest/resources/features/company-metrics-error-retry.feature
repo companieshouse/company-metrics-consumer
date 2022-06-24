@@ -45,3 +45,14 @@ Feature: Process company metrics charges-stream error and retry scenarios
     Examples:
       | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                     | metricsApiStatusCode | chargeApiStatusCode | retryAttempts | times |
       | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 503                  | 200                 | 3             | 3     |
+
+  Scenario Outline: Processing valid avro message and charges data api returning 410 error
+
+    Given Company Metrics Consumer component is running and Company Metrics API is stubbed
+    And Charges Data API endpoint is stubbed for "<companyNumber>" and "<chargeId>" and will return "<chargeApiStatusCode>" http response code
+    When A valid avro message for "<companyNumber>" and "<resourceUriFormat>" and "<chargeId>" is generated and sent to the Kafka topic "<KafkaTopic>" and stubbed Company Metrics API returns "<metricsApiStatusCode>"
+    Then The message should be moved to topic "<KafkaInvalidTopic>" after retry attempts of "<retryAttempts>"
+    And Stubbed Company Metrics API should be called "<times>" times
+    Examples:
+      | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                     | metricsApiStatusCode | chargeApiStatusCode | retryAttempts | times |
+      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 200                  | 410                 | 3             | 0     |

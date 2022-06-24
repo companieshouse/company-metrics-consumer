@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.company.metrics.processor;
 
-import static uk.gov.companieshouse.company.metrics.consumer.CompanyMetricsConsumer.DELETE_EVENT_TYPE;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -77,11 +75,6 @@ public class CompanyMetricsProcessor {
         processMetrics(contextId, resourceUri, companyNumberOptional, updatedBy, deleteProcessor);
     }
 
-    private boolean isItDeleteEvent(ResourceChangedData payload) {
-        return DELETE_EVENT_TYPE
-                .equalsIgnoreCase(payload.getEvent().getType());
-    }
-
     private void processMetrics(String contextId, String resourceUri,
                                 Optional<String> companyNumberOptional,
                                 String updatedBy,
@@ -120,7 +113,14 @@ public class CompanyMetricsProcessor {
     private boolean isChargeAvailable(String resourceUri, String contextId) {
         ApiResponse<ChargeApi> apiResponseFromChargesDataApi =
                 prepareAndInvokeChargesDataApi(resourceUri, contextId);
-        return apiResponseFromChargesDataApi.getStatusCode() == 200 ? true : false;
+        if (apiResponseFromChargesDataApi == null) {
+            return false;
+        }
+        HttpStatus statusCode = HttpStatus.valueOf(apiResponseFromChargesDataApi.getStatusCode());
+        if (statusCode.is2xxSuccessful()) {
+            return true;
+        }
+        return false;
     }
 
     private boolean isChargeAlreadyDeleted(String resourceUri, String contextId) {

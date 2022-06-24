@@ -234,26 +234,6 @@ public class CompanyMetricsConsumerSteps {
                 responseCode);
     }
 
-    /*@Then("The message is successfully consumed and company number is successfully extracted to call company-metrics-api recalculate POST endpoint with expected payload")
-    public void the_message_is_successfully_consumed_and_company_number_is_successfully_extracted_to_call_company_metrics_api_recalculate_post_endpoint_with_expected_payload() {
-        List<ServeEvent> serverEvents = testSupport.getServeEvents();
-        assertThat(serverEvents.size()).isEqualTo(1);
-        assertThat(serverEvents.isEmpty()).isFalse(); // assert that the wiremock did something
-        assertThat(serverEvents.get(0).getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
-        String body = new String(serverEvents.get(0).getRequest().getBody());
-        MetricsRecalculateApi payload = null;
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            payload = mapper.readValue(body, MetricsRecalculateApi.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        assertThat(payload).isNotNull();
-        assertThat(payload.getMortgage()).isTrue();
-        assertThat(payload.getAppointments()).isFalse();
-        assertThat(payload.getPersonsWithSignificantControl()).isFalse();
-    }*/
-
     @When("A valid avro message {string} with deleted event for {string} and {string} and {string} is sent to the Kafka topic {string}")
     public void a_valid_avro_message_with_deleted_event_for_and_is_sent_to_the_kafka_topic(String payload, String companyNumber, String resourceUri,
                                                                                            String chargedId, String topicName)

@@ -101,7 +101,8 @@ public class CompanyMetricsProcessorTest {
     @DisplayName("Successfully processes a kafka message containing a ResourceChangedData payload and extract companyNumber")
     void When_ValidResourceChangedDataMessage_Expect_MessageProcessedAndExtractedCompanyNumber() throws IOException {
 
-        Message<ResourceChangedData> resourceChangedDataMessage = testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
+        Message<ResourceChangedData> resourceChangedDataMessage =
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, false);
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
         final ApiResponse<ChargeApi> chargeDataApiResponse =
                 new ApiResponse<>(HttpStatus.OK.value(), null, null);
@@ -143,7 +144,7 @@ public class CompanyMetricsProcessorTest {
             Class<Throwable> exception)
             throws IOException {
         Message<ResourceChangedData> mockResourceChangedMessage =
-                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, false);
 
         final ApiResponse<Void> response = new ApiResponse<>(httpStatus.value(), null, null);
         final ApiResponse<ChargeApi> chargeDataApiResponse =
@@ -169,7 +170,7 @@ public class CompanyMetricsProcessorTest {
     void When_ValidMessage_With_InvalidResourceUri() throws IOException {
 
         Message<ResourceChangedData> resourceChangedDataMessage =
-                testSupport.createResourceChangedMessage(TestSupport.INVALID_COMPANY_LINKS_PATH);
+                testSupport.createResourceChangedMessage(TestSupport.INVALID_COMPANY_LINKS_PATH, false);
 
         assertThrows(NonRetryableErrorException.class, () ->
                 companyMetricsProcessor.process(resourceChangedDataMessage.getPayload(), TOPIC, PARTITION, OFFSET));
@@ -190,7 +191,7 @@ public class CompanyMetricsProcessorTest {
 
         Message<ResourceChangedData> resourceChangedDataMessage =
                 testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH,
-                        "", TestSupport.MOCK_CHARGE_ID);
+                        "", TestSupport.MOCK_CHARGE_ID, false);
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
 
         assertThrows(NonRetryableErrorException.class, () ->
@@ -220,6 +221,8 @@ public class CompanyMetricsProcessorTest {
                 Arguments.of(HttpStatus.TEMPORARY_REDIRECT, RetryableErrorException.class)
         );
     }
+
+
     @ParameterizedTest
     @MethodSource("provideChargeDataApiExceptionParameters")
     @DisplayName("When calling get charge endpoint an error occurs then throw the appropriate exception based on the error type")
@@ -228,7 +231,7 @@ public class CompanyMetricsProcessorTest {
             Class<Throwable> exception)
             throws IOException {
         Message<ResourceChangedData> mockResourceChangedMessage =
-                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH);
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, false);
 
         final ApiResponse<ChargeApi> chargeDataApiResponse =
                 new ApiResponse<>(httpStatus.value(), null, null);
@@ -245,4 +248,96 @@ public class CompanyMetricsProcessorTest {
 
     }
 
+    @Test
+    @DisplayName("Successfully processes a kafka message containing a ResourceChangedData delete payload and extract companyNumber")
+    void When_ValidResourceChangedData_Delete_Message_Expect_MessageProcessedAndExtractedCompanyNumber() throws IOException {
+
+        Message<ResourceChangedData> resourceChangedDataMessage =
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, true);
+        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
+        final ApiResponse<ChargeApi> chargeDataApiResponse =
+                new ApiResponse<>(HttpStatus.GONE.value(), null, null);
+
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(chargesDataApiService.getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI))
+                .thenReturn(chargeDataApiResponse);
+        when(companyMetricsApiService.invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER,
+                recalculateApiData)).thenReturn(response);
+
+        companyMetricsProcessor.processDelete(resourceChangedDataMessage.getPayload(), TOPIC, PARTITION, OFFSET);
+
+        verify(companyMetricsApiTransformer, times(1)).transform(anyString());
+        verify(chargesDataApiService, times(1)).getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI);
+        verify(companyMetricsApiService, times(1))
+                .invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER, recalculateApiData);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideExceptionParameters")
+    @DisplayName("When calling metrics recalculate an error occurs then throw the appropriate exception based on the error type")
+    void postCompanyMetricsRecalculateReturns_for_delete_returns_Exception_Then_Throw_Appropriate_Exception(
+            HttpStatus httpStatus,
+            Class<Throwable> exception)
+            throws IOException {
+        Message<ResourceChangedData> mockResourceChangedMessage =
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, true);
+
+        final ApiResponse<Void> response = new ApiResponse<>(httpStatus.value(), null, null);
+        final ApiResponse<ChargeApi> chargeDataApiResponse =
+                new ApiResponse<>(HttpStatus.GONE.value(), null, null);
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
+        when(chargesDataApiService.getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI))
+                .thenReturn(chargeDataApiResponse);
+        when(companyMetricsApiService.invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER, recalculateApiData))
+                .thenReturn(response);
+        assertThrows(exception, () -> companyMetricsProcessor
+                .processDelete(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET));
+        verify(companyMetricsApiTransformer, times(1)).transform(anyString());
+        verify(chargesDataApiService, times(1)).getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI);
+        verify(companyMetricsApiService, times(1))
+                .invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER, recalculateApiData);
+
+    }
+
+    private static Stream<Arguments> provideChargeDataApiDeleteExceptionParameters() {
+        return Stream.of(
+                Arguments.of(HttpStatus.BAD_REQUEST, RetryableErrorException.class),
+                Arguments.of(HttpStatus.OK, RetryableErrorException.class),
+                Arguments.of(HttpStatus.NOT_FOUND, RetryableErrorException.class),
+                Arguments.of(HttpStatus.UNAUTHORIZED, RetryableErrorException.class),
+                Arguments.of(HttpStatus.INTERNAL_SERVER_ERROR, RetryableErrorException.class),
+                Arguments.of(HttpStatus.BAD_GATEWAY, RetryableErrorException.class),
+                Arguments.of(HttpStatus.FORBIDDEN, RetryableErrorException.class),
+                Arguments.of(HttpStatus.SERVICE_UNAVAILABLE, RetryableErrorException.class),
+                Arguments.of(HttpStatus.GATEWAY_TIMEOUT, RetryableErrorException.class),
+                Arguments.of(HttpStatus.TEMPORARY_REDIRECT, RetryableErrorException.class)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideChargeDataApiDeleteExceptionParameters")
+    @DisplayName("When calling get charge endpoint for delete message an error occurs then throw the appropriate exception based on the error type")
+    void getChargeApiReturns_For_delete_Exception_Then_Throw_Appropriate_Exception(
+            HttpStatus httpStatus,
+            Class<Throwable> exception)
+            throws IOException {
+        Message<ResourceChangedData> mockResourceChangedMessage =
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, false);
+
+        final ApiResponse<ChargeApi> chargeDataApiResponse =
+                new ApiResponse<>(httpStatus.value(), null, null);
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(chargesDataApiService.getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI))
+                .thenReturn(chargeDataApiResponse);
+        assertThrows(exception, () -> companyMetricsProcessor
+                .processDelete(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET));
+
+        verify(chargesDataApiService, times(1)).getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI);
+        verify(companyMetricsApiTransformer, times(0)).transform(anyString());
+        verify(companyMetricsApiService, times(0))
+                .invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER, recalculateApiData);
+
+    }
 }
