@@ -28,8 +28,8 @@ public class ChargesDataApiService extends BaseClientApiService {
     public ChargesDataApiService(Logger logger,
                                  BiFunction<String, String,
                                          InternalApiClient> internalApiClientSupplier,
-                                 @Value("${api.company-metrics-api-key}") String apiKey,
-                                 @Value("${api.api-url}") String apiUrl) {
+                                 @Value("${api.charges.data.key}") String apiKey,
+                                 @Value("${api.charges.data.endpoint}") String apiUrl) {
         super(logger);
         this.internalApiClientSupplier = internalApiClientSupplier;
         this.apiKey = apiKey;
