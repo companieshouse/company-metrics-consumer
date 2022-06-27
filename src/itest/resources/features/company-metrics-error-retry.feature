@@ -43,8 +43,9 @@ Feature: Process company metrics charges-stream error and retry scenarios
     Then The message should be moved to topic "<KafkaInvalidTopic>" after retry attempts of "<retryAttempts>"
     And Stubbed Company Metrics API should be called "<times>" times
     Examples:
+
       | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                     | metricsApiStatusCode | chargeApiStatusCode | retryAttempts | times |
-      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 503                  | 200                 | 3             | 3     |
+      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 503                  | 200                 | 4             | 4     |
 
   Scenario Outline: Processing valid avro message and charges data api returning 410 error
 
@@ -55,4 +56,4 @@ Feature: Process company metrics charges-stream error and retry scenarios
     And Stubbed Company Metrics API should be called "<times>" times
     Examples:
       | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                     | metricsApiStatusCode | chargeApiStatusCode | retryAttempts | times |
-      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 200                  | 410                 | 3             | 0     |
+      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 200                  | 410                 | 4             | 0     |

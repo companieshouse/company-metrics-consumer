@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.But;
 import io.cucumber.java.en.Given;
@@ -42,6 +43,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import uk.gov.companieshouse.api.charges.ChargeApi;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
+import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 public class CompanyMetricsConsumerSteps {
@@ -79,6 +81,14 @@ public class CompanyMetricsConsumerSteps {
 
     @Autowired
     public KafkaConsumer<String, Object> kafkaConsumer;
+
+    @Autowired
+    private ResettableCountDownLatch resettableCountDownLatch;
+
+    @Before
+    public void beforeEach() {
+        resettableCountDownLatch.resetLatch(4);
+    }
 
     @Given("Company Metrics Consumer component is running and Company Metrics API is stubbed")
     public void theCompanyMetricsIsRunning() {
@@ -186,7 +196,7 @@ public class CompanyMetricsConsumerSteps {
         kafkaTemplate.send(topic, nonAvroMessageData);
         kafkaTemplate.flush();
 
-        TimeUnit.SECONDS.sleep(1);
+        assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
     }
 
     @Then("The message should be moved to topic {string}")
@@ -294,7 +304,7 @@ public class CompanyMetricsConsumerSteps {
     private void sendKafkaMessage(String topic, ResourceChangedData avroMessageData) throws InterruptedException {
         kafkaTemplate.send(topic, avroMessageData);
         kafkaTemplate.flush();
-        TimeUnit.SECONDS.sleep(1);
+        assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
     }
 
     private ServeEvent getServeEvent(List<ServeEvent> serverEvents, String tag) {

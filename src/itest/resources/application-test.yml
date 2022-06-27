@@ -12,7 +12,7 @@ charges:
     enable: true
     group-id: company-metrics-consumer
     topic: stream-company-charges
-    retry-attempts: 3
+    retry-attempts: 4
     backoff-delay: 10
 
 logger:

@@ -53,16 +53,16 @@ Feature: Process Company Metrics Consumer delete events
     And  Charges Data API endpoint is stubbed for "<companyNumber>" and "<chargeId>" and will return "<chargeApiStatusCode>" http response code
     When A valid avro message "<payload>" with deleted event for "<companyNumber>" and "<resourceUriFormat>" and "<chargeId>" is sent to the Kafka topic "<KafkaTopic>"
     Then The message is successfully consumed only once from the "<KafkaTopic>" topic but failed to process
-    But  Failed to process and moved the message into "stream-company-charges-company-metrics-consumer-error" topic after 3 attempts
+    But  Failed to process and moved the message into "stream-company-charges-company-metrics-consumer-error" topic after 4 attempts
 
     Examples:
-      | companyNumber | chargeId                    | resourceUriFormat   | KafkaTopic             | metricsApiStatusCode | chargeApiStatusCode | payload                                              |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 503                  | 410                 | charges-record.json                                  |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 503                  | 410                 | Additional_notices_Happy_Path.json                   |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 503                  | 410                 | alterations_to_order_alteration_to_prohibitions.json |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 503                  | 410                 | assets_ceased_released_Happy_Path.json               |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 503                  | 410                 | obligations_secured_nature_of_charge_Happy_Path.json |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 503                  | 410                 | Scottish_Alterations.json                            |
+      | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | metricsApiStatusCode | chargeApiStatusCode | payload                                              |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | charges-record.json                                  |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | Additional_notices_Happy_Path.json                   |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | alterations_to_order_alteration_to_prohibitions.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | assets_ceased_released_Happy_Path.json               |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | obligations_secured_nature_of_charge_Happy_Path.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | Scottish_Alterations.json                            |
 
 
   Scenario Outline:  When charges data api returns 200 then a valid delete message should fail to process and message should forwarded to error topic
@@ -71,14 +71,14 @@ Feature: Process Company Metrics Consumer delete events
     And  Charges Data API endpoint is stubbed for "<companyNumber>" and "<chargeId>" and will return "<chargeApiStatusCode>" http response code
     When A valid avro message "<payload>" with deleted event for "<companyNumber>" and "<resourceUriFormat>" and "<chargeId>" is sent to the Kafka topic "<KafkaTopic>"
     Then The message is successfully consumed only once from the "<KafkaTopic>" topic but failed to process
-    But  Failed to process and moved the message into "stream-company-charges-company-metrics-consumer-error" topic after 3 attempts
+    But  Failed to process and moved the message into "stream-company-charges-company-metrics-consumer-error" topic after 4 attempts
     And  Metrics Data API endpoint is never invoked
 
     Examples:
-      | companyNumber | chargeId                    | resourceUriFormat   | KafkaTopic             | metricsApiStatusCode | chargeApiStatusCode | payload                                              |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 200                  | 200                 | charges-record.json                                  |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 200                  | 200                 | Additional_notices_Happy_Path.json                   |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 200                  | 200                 | alterations_to_order_alteration_to_prohibitions.json |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 200                  | 200                 | assets_ceased_released_Happy_Path.json               |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 200                  | 200                 | obligations_secured_nature_of_charge_Happy_Path.json |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges | stream-company-charges | 200                  | 200                 | Scottish_Alterations.json                            |
+      | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | metricsApiStatusCode | chargeApiStatusCode | payload                                              |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 200                  | 200                 | charges-record.json                                  |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 200                  | 200                 | Additional_notices_Happy_Path.json                   |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 200                  | 200                 | alterations_to_order_alteration_to_prohibitions.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 200                  | 200                 | assets_ceased_released_Happy_Path.json               |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 200                  | 200                 | obligations_secured_nature_of_charge_Happy_Path.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 200                  | 200                 | Scottish_Alterations.json                            |
