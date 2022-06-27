@@ -52,6 +52,12 @@ public class CompanyMetricsConsumerSteps {
     public static final String RETRY_TOPIC_ATTEMPTS = "retry_topic-attempts";
     public static final String COMPANY_METRICS_RECALCULATE_URI = "/company/%s/metrics/recalculate";
     public static final String VALID_COMPANY_CHARGES_PATH = "/company/%s/charges/%s";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String TAGS = "tags";
+    public static final String STUB_CHARGES_DATA_API_ENDPOINT_FOR_RESPONSE = "stubChargesDataApiEndpointForResponse";
+    public static final String AN_AVRO_MESSAGE_IS_PUBLISHED_TO_TOPIC = "an_avro_message_is_published_to_topic";
+    public static final String A_NON_AVRO_MESSAGE_IS_PUBLISHED_AND_FAILED_TO_PROCESS = "a_non_avro_message_is_published_and_failed_to_process";
 
     @Autowired
     private TestSupport testSupport;
@@ -91,7 +97,7 @@ public class CompanyMetricsConsumerSteps {
         this.currentCompanyNumber = companyNumber;
         this.currentChargeId = chargeId;
 
-        stubChargesDataApiGetEndpoint(requiredStatusValue, "stubChargesDataApiEndpointForResponse");
+        stubChargesDataApiGetEndpoint(requiredStatusValue, STUB_CHARGES_DATA_API_ENDPOINT_FOR_RESPONSE);
     }
 
     @When("A valid avro message for {string} and {string} and {string} is generated and sent to the Kafka topic {string} and stubbed Company Metrics API returns {string}")
@@ -106,7 +112,7 @@ public class CompanyMetricsConsumerSteps {
         currentCompanyNumber = companyNumber;
         currentChargeId = chargeId;
         stubCompanyMetricsApi(currentCompanyNumber,
-                "an_avro_message_is_published_to_topic",
+                AN_AVRO_MESSAGE_IS_PUBLISHED_TO_TOPIC,
                 Integer.parseInt(statusCode));
         sendKafkaMessage(topic, avroMessageData);
     }
@@ -132,7 +138,7 @@ public class CompanyMetricsConsumerSteps {
     }
 
     private void assertMetricsApiSuccessfullyInvoked(List<ServeEvent> serverEvents) {
-        ServeEvent serveEvent = getServeEvent(serverEvents, "an_avro_message_is_published_to_topic");
+        ServeEvent serveEvent = getServeEvent(serverEvents, AN_AVRO_MESSAGE_IS_PUBLISHED_TO_TOPIC);
         assertThat(serveEvent.getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
         String body = new String(serverEvents.get(0).getRequest().getBody());
         MetricsRecalculateApi payload = null;
@@ -149,7 +155,7 @@ public class CompanyMetricsConsumerSteps {
     }
 
     private void assertChargesApiSuccessfullyInvoked(List<ServeEvent> serverEvents) throws JsonProcessingException {
-        ServeEvent serveEvent = getServeEvent(serverEvents, "stubChargesDataApiEndpointForResponse");
+        ServeEvent serveEvent = getServeEvent(serverEvents, STUB_CHARGES_DATA_API_ENDPOINT_FOR_RESPONSE);
 
         assertThat(serveEvent.getRequest().getUrl()).isEqualTo(String.format(VALID_COMPANY_CHARGES_PATH, currentCompanyNumber, currentChargeId));
 
@@ -174,7 +180,7 @@ public class CompanyMetricsConsumerSteps {
                                                                       String statusCode)
             throws InterruptedException {
         String nonAvroMessageData = testSupport.loadAvroMessageFile(nonAvroMessageFileName);
-        stubCompanyMetricsApi(currentCompanyNumber, "a_non_avro_message_is_published_and_failed_to_process",
+        stubCompanyMetricsApi(currentCompanyNumber, A_NON_AVRO_MESSAGE_IS_PUBLISHED_AND_FAILED_TO_PROCESS,
                 Integer.parseInt(statusCode));
 
         kafkaTemplate.send(topic, nonAvroMessageData);
@@ -216,9 +222,9 @@ public class CompanyMetricsConsumerSteps {
             post(urlPathMatching(COMPANY_METRICS_RECALCULATE_POST))
                 .willReturn(aResponse()
                     .withStatus(statusCode)
-                    .withHeader("Content-Type", "application/json"))
+                    .withHeader(CONTENT_TYPE, APPLICATION_JSON))
                 .withMetadata(metadata()
-                    .list("tags", testMethodIdentifier))
+                    .list(TAGS, testMethodIdentifier))
         );
     }
 
@@ -230,7 +236,7 @@ public class CompanyMetricsConsumerSteps {
     @Given("Stubbed Company Metrics API endpoint will return {int} http response code")
     public void stubbed_company_metrics_api_endpoint_will_return_http_response_code(Integer responseCode) {
         stubCompanyMetricsApi(currentCompanyNumber,
-                "an_avro_message_is_published_to_topic",
+                AN_AVRO_MESSAGE_IS_PUBLISHED_TO_TOPIC,
                 responseCode);
     }
 
@@ -293,7 +299,7 @@ public class CompanyMetricsConsumerSteps {
 
     private ServeEvent getServeEvent(List<ServeEvent> serverEvents, String tag) {
         ServeEvent serveEvent = serverEvents.stream()
-                .filter(event -> event.getStubMapping().getMetadata().getList("tags").get(0)
+                .filter(event -> event.getStubMapping().getMetadata().getList(TAGS).get(0)
                         .toString().equalsIgnoreCase(tag))
                 .collect(Collectors.toList()).get(0);
         return serveEvent;
@@ -307,10 +313,10 @@ public class CompanyMetricsConsumerSteps {
                 get(urlEqualTo(String.format(VALID_COMPANY_CHARGES_PATH, currentCompanyNumber, currentChargeId)))
                         .willReturn(aResponse()
                                 .withStatus(requiredStatusValue)
-                                .withHeader("Content-Type", "application/json")
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                                 .withBody(chargesRecord))
                         .withMetadata(metadata()
-                                .list("tags", testIdentifier))
+                                .list(TAGS, testIdentifier))
         );
     }
 

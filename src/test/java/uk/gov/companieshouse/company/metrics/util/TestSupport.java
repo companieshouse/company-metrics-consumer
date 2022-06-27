@@ -26,7 +26,9 @@ public class TestSupport {
     public static final String MOCK_CHARGE_ID = "MYdKM_YnzAmJ8JtSgVXr61n1bgg";
     public static final String VALID_COMPANY_LINKS_PATH = "/company/%s/charges/%s";
     public static final String INVALID_COMPANY_LINKS_PATH = "/companyabc/%s/charges/%s";
-    public static final String CHARGES = "charges";
+    public static final String EVENT_TYPE_CHARGES = "charges";
+    public static final String RESOURCE_KIND = "company-charges";
+    public static final String CONTEXT_ID = "context_id";
 
     public Message<ResourceChangedData> createResourceChangedMessage(String companyLinksPath,
                                                                      boolean isDelete) throws IOException {
@@ -44,12 +46,12 @@ public class TestSupport {
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
-        eventRecord.setType(isDelete ? CompanyMetricsConsumer.DELETE_EVENT_TYPE : CHARGES);
+        eventRecord.setType(isDelete ? CompanyMetricsConsumer.DELETE_EVENT_TYPE : EVENT_TYPE_CHARGES);
 
         ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
-                .setContextId("context_id")
+                .setContextId(CONTEXT_ID)
                 .setResourceId(companyNumber)
-                .setResourceKind("company-charges")
+                .setResourceKind(RESOURCE_KIND)
                 .setResourceUri(String.format(companyLinksPath, companyNumber, chargeId))
                 .setEvent(eventRecord)
                 .setData(chargesRecord)

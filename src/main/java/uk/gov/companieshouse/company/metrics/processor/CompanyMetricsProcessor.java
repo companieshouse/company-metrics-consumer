@@ -26,6 +26,8 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class CompanyMetricsProcessor {
 
+    public static final int HTTP_STATUS_GONE = 410;
+    public static final String COMPANY_NUMBER_URI_PATTERN = "(?<=company/)(.*?)(?=/)";
     private final CompanyMetricsApiTransformer metricsApiTransformer;
     private final Logger logger;
     private final CompanyMetricsApiService companyMetricsApiService;
@@ -126,7 +128,7 @@ public class CompanyMetricsProcessor {
     private boolean isChargeAlreadyDeleted(String resourceUri, String contextId) {
         ApiResponse<ChargeApi> apiResponseFromChargesDataApi =
                 prepareAndInvokeChargesDataApi(resourceUri, contextId);
-        return apiResponseFromChargesDataApi.getStatusCode() == 410 ? true : false;
+        return apiResponseFromChargesDataApi.getStatusCode() == HTTP_STATUS_GONE ? true : false;
     }
 
 
@@ -153,7 +155,7 @@ public class CompanyMetricsProcessor {
 
         if (StringUtils.isNotBlank(resourceUri)) {
             //matches all characters between company/ and /
-            Pattern companyNo = Pattern.compile("(?<=company/)(.*?)(?=/)");
+            Pattern companyNo = Pattern.compile(COMPANY_NUMBER_URI_PATTERN);
             Matcher matcher = companyNo.matcher(resourceUri);
             if (matcher.find()) {
                 return Optional.ofNullable(matcher.group());
