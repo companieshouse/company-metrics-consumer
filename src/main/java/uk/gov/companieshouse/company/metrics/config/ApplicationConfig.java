@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.company.metrics.config;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Value;

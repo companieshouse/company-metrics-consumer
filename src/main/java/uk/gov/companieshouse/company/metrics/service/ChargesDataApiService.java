@@ -2,11 +2,9 @@ package uk.gov.companieshouse.company.metrics.service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.charges.ChargeApi;
@@ -18,8 +16,7 @@ import uk.gov.companieshouse.logging.Logger;
 public class ChargesDataApiService extends BaseClientApiService {
 
     private final Supplier<InternalApiClient> internalApiClientSupplier;
-    private String apiKey;
-    private String apiUrl;
+
 
     /**
      * Constructor that takes in a BiFunction to be able to construct and return internalApiClient
