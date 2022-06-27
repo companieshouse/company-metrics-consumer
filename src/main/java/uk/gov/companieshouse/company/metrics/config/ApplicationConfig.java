@@ -28,11 +28,13 @@ public class ApplicationConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    BiFunction<String, String, InternalApiClient> internalApiClientSupplier() {
-        return (key, url) -> {
+    Supplier<InternalApiClient> internalApiClientSupplier(
+            @Value("${api.company-metrics-api-key}") String apiKey,
+            @Value("${api.api-url}") String apiUrl) {
+        return () -> {
             InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(
-                    key));
-            internalApiClient.setBasePath(url);
+                    apiKey));
+            internalApiClient.setBasePath(apiUrl);
             return internalApiClient;
         };
     }

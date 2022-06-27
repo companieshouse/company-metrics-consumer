@@ -25,10 +25,7 @@ logger:
 api:
   api-url: ${COMPANY_METRICS_API_URL:https://localhost}
   company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}
-  charges:
-    data:
-      endpoint: ${CHARGES_DATA_API_URL:http://localhost}
-      key: ${CHARGES_DATA_API_KEY:apiKey}
+
 
 management:
   endpoints:

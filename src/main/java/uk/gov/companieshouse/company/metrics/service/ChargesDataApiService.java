@@ -3,6 +3,7 @@ package uk.gov.companieshouse.company.metrics.service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +17,7 @@ import uk.gov.companieshouse.logging.Logger;
 @Service
 public class ChargesDataApiService extends BaseClientApiService {
 
-    private final BiFunction<String, String, InternalApiClient> internalApiClientSupplier;
+    private final Supplier<InternalApiClient> internalApiClientSupplier;
     private String apiKey;
     private String apiUrl;
 
@@ -26,14 +27,10 @@ public class ChargesDataApiService extends BaseClientApiService {
      */
     @Autowired
     public ChargesDataApiService(Logger logger,
-                                 BiFunction<String, String,
-                                         InternalApiClient> internalApiClientSupplier,
-                                 @Value("${api.charges.data.key}") String apiKey,
-                                 @Value("${api.charges.data.endpoint}") String apiUrl) {
+                                 Supplier<InternalApiClient> internalApiClientSupplier) {
         super(logger);
         this.internalApiClientSupplier = internalApiClientSupplier;
-        this.apiKey = apiKey;
-        this.apiUrl = apiUrl;
+
     }
 
     /**
@@ -47,8 +44,7 @@ public class ChargesDataApiService extends BaseClientApiService {
         Map<String, Object> logMap = createLogMap("GET", uri);
         logger.infoContext(contextId, String.format("GET %s", uri), logMap);
 
-        InternalApiClient internalApiClient = internalApiClientSupplier
-                .apply(this.apiKey, this.apiUrl);
+        InternalApiClient internalApiClient = internalApiClientSupplier.get();
         internalApiClient.getHttpClient().setRequestId(contextId);
         PrivateChargesGet privateChargesGet =
                 internalApiClient.privateDeltaChargeResourceHandler()

@@ -17,24 +17,19 @@ import uk.gov.companieshouse.logging.Logger;
 @Service
 public class CompanyMetricsApiService extends BaseClientApiService {
 
-    private final BiFunction<String, String, InternalApiClient> internalApiClientSupplier;
+    private final Supplier<InternalApiClient> internalApiClientSupplier;
     private String apiKey;
     private String apiUrl;
 
     /**
-     * Constructor that takes in a BiFunction to be able to construct and return internalApiClient
+     * Constructor that takes in a Supplier to be able to construct and return internalApiClient
      * based on the provided key and url for the api call.
      */
     @Autowired
     public CompanyMetricsApiService(Logger logger,
-                                    BiFunction<String, String,
-                                            InternalApiClient> internalApiClientSupplier,
-                                    @Value("${api.company-metrics-api-key}") String apiKey,
-                                    @Value("${api.api-url}") String apiUrl) {
+                                    Supplier<InternalApiClient> internalApiClientSupplier) {
         super(logger);
         this.internalApiClientSupplier = internalApiClientSupplier;
-        this.apiKey = apiKey;
-        this.apiUrl = apiUrl;
     }
 
     /**
@@ -51,8 +46,7 @@ public class CompanyMetricsApiService extends BaseClientApiService {
         Map<String, Object> logMap = createLogMap(companyNumber, "POST", uri);
         logger.infoContext(contextId, String.format("POST %s", uri), logMap);
 
-        InternalApiClient internalApiClient = internalApiClientSupplier
-                .apply(this.apiKey, this.apiUrl);
+        InternalApiClient internalApiClient = internalApiClientSupplier.get();
         internalApiClient.getHttpClient().setRequestId(contextId);
         PrivateCompanyMetricsUpsert metricsUpsert =
                 internalApiClient.privateCompanyMetricsUpsertHandler()

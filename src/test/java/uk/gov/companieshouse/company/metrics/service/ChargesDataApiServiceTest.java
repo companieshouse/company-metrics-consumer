@@ -30,6 +30,7 @@ import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Collections;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -56,7 +57,7 @@ public class ChargesDataApiServiceTest {
     private Logger logger;
 
     @Mock
-    private BiFunction<String, String, InternalApiClient> internalApiClientSupplier;
+    private Supplier<InternalApiClient> internalApiClientSupplier;
 
     @Mock
     private InternalApiClient mockInternalApiClient;
@@ -74,9 +75,8 @@ public class ChargesDataApiServiceTest {
 
     @BeforeEach
     void setup() {
-        chargesDataApiService = spy(new ChargesDataApiService(logger, internalApiClientSupplier,
-                "chargesDataApiKey", "chargesDataApiUrl"));
-        when(internalApiClientSupplier.apply("chargesDataApiKey", "chargesDataApiUrl")).thenReturn(mockInternalApiClient);
+        chargesDataApiService = spy(new ChargesDataApiService(logger, internalApiClientSupplier));
+        when(internalApiClientSupplier.get()).thenReturn(mockInternalApiClient);
         when(mockInternalApiClient.getHttpClient()).thenReturn(mockHttpClient);
         when(mockInternalApiClient.privateDeltaChargeResourceHandler()).thenReturn(privateDeltaResourceHandler);
     }

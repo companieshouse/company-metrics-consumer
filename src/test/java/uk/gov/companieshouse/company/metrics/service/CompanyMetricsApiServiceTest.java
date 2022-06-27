@@ -28,6 +28,7 @@ import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Collections;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -54,7 +55,7 @@ public class CompanyMetricsApiServiceTest {
     private Logger logger;
 
     @Mock
-    private BiFunction<String, String, InternalApiClient> internalApiClientSupplier;
+    private Supplier<InternalApiClient> internalApiClientSupplier;
 
     @Mock
     private InternalApiClient mockInternalApiClient;
@@ -72,8 +73,8 @@ public class CompanyMetricsApiServiceTest {
 
     @BeforeEach
     void setup() {
-        companyMetricsApiService = spy(new CompanyMetricsApiService(logger, internalApiClientSupplier, "metricsApiKey", "metricsApiUrl"));
-        when(internalApiClientSupplier.apply("metricsApiKey", "metricsApiUrl")).thenReturn(mockInternalApiClient);
+        companyMetricsApiService = spy(new CompanyMetricsApiService(logger, internalApiClientSupplier));
+        when(internalApiClientSupplier.get()).thenReturn(mockInternalApiClient);
         when(mockInternalApiClient.getHttpClient()).thenReturn(mockHttpClient);
         when(mockInternalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(privateCompanyMetricsUpsertHandler);
     }
