@@ -23,6 +23,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class CompanyMetricsConsumer {
 
+    public static final String DELETE_EVENT_TYPE = "deleted";
     private final CompanyMetricsProcessor metricsProcessor;
     private final uk.gov.companieshouse.logging.Logger logger;
 
@@ -60,11 +61,11 @@ public class CompanyMetricsConsumer {
                 topic, partition, offset, contextId));
 
         try {
-            final boolean deleteEventType = "deleted"
+            final boolean deleteEventType = DELETE_EVENT_TYPE
                     .equalsIgnoreCase(payload.getEvent().getType());
 
             if (deleteEventType) {
-                metricsProcessor.process(payload, topic, partition, offset);
+                metricsProcessor.processDelete(payload, topic, partition, offset);
                 logger.info(format("Charges Metrics Delete message with contextId: %s is "
                                 + "successfully processed in %d milliseconds", contextId,
                         Duration.between(startTime, Instant.now()).toMillis()));

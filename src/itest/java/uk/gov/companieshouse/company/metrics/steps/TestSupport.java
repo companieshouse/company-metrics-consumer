@@ -21,7 +21,6 @@ public class TestSupport {
     private static WireMockServer wireMockServer = null;
     public static final String RESOURCE_KIND = "company-charges";
     public static final String CONTEXT_ID = "context_id";
-    public static final String VALID_COMPANY_CHARGES_LINK = "/company/%s/charges";
     public static final String RESOURCE_ID = "11223344";
     public static final String TYPE = "charges";
     public static final String DELETE_TYPE = "deleted";
@@ -31,7 +30,8 @@ public class TestSupport {
     }
 
     public ResourceChangedData createResourceChangedMessage(String companyChargesLink,
-                                                            String companyNumber)
+                                                            String companyNumber,
+                                                            String chargeId)
             throws IOException {
 
         String chargesRecord = loadFile("payloads", "charges-record.json");
@@ -44,7 +44,7 @@ public class TestSupport {
                 .setContextId(CONTEXT_ID)
                 .setResourceId(RESOURCE_ID)
                 .setResourceKind(RESOURCE_KIND)
-                .setResourceUri(String.format(companyChargesLink, companyNumber))
+                .setResourceUri(String.format(companyChargesLink, companyNumber, chargeId))
                 .setEvent(eventRecord)
                 .setData(chargesRecord)
                 .build();
@@ -52,7 +52,7 @@ public class TestSupport {
         return resourceChangedData;
     }
 
-    public ResourceChangedData createResourceDeletedMessage(String companyChargesLink, String companyNumber, String payload) {
+    public ResourceChangedData createResourceDeletedMessage(String companyChargesLink, String companyNumber, String chargedId, String payload) {
 
         String chargesRecord = loadFile("payloads", payload);
 
@@ -65,7 +65,7 @@ public class TestSupport {
                 .setContextId(CONTEXT_ID)
                 .setResourceId(RESOURCE_ID)
                 .setResourceKind(RESOURCE_KIND)
-                .setResourceUri(String.format(companyChargesLink, companyNumber))
+                .setResourceUri(String.format(companyChargesLink, companyNumber, chargedId))
                 .setEvent(eventRecord)
                 .setData(chargesRecord)
                 .build();

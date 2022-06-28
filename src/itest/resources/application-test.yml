@@ -22,6 +22,7 @@ api:
   api-url: http://localhost:8888
   company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}
 
+
 wiremock:
   server:
     port: 8888

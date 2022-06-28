@@ -17,6 +17,11 @@ public class CompanyMetricsApiService extends BaseClientApiService {
 
     private final Supplier<InternalApiClient> internalApiClientSupplier;
 
+
+    /**
+     * Constructor that takes in a Supplier to be able to construct and return internalApiClient
+     * based on the provided key and url for the api call.
+     */
     @Autowired
     public CompanyMetricsApiService(Logger logger,
                                     Supplier<InternalApiClient> internalApiClientSupplier) {

@@ -1,16 +1,19 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.lessThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.common.Metadata.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import io.cucumber.java.Before;
@@ -29,6 +32,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.header.Header;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -36,6 +41,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import uk.gov.companieshouse.api.charges.ChargeApi;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -47,6 +53,13 @@ public class CompanyMetricsConsumerSteps {
     public static final String COMPANY_METRICS_RECALCULATE_POST = "/company/([a-zA-Z0-9]*)/metrics/recalculate";
     public static final String RETRY_TOPIC_ATTEMPTS = "retry_topic-attempts";
     public static final String COMPANY_METRICS_RECALCULATE_URI = "/company/%s/metrics/recalculate";
+    public static final String VALID_COMPANY_CHARGES_PATH = "/company/%s/charges/%s";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String TAGS = "tags";
+    public static final String STUB_CHARGES_DATA_API_ENDPOINT_FOR_RESPONSE = "stubChargesDataApiEndpointForResponse";
+    public static final String AN_AVRO_MESSAGE_IS_PUBLISHED_TO_TOPIC = "an_avro_message_is_published_to_topic";
+    public static final String A_NON_AVRO_MESSAGE_IS_PUBLISHED_AND_FAILED_TO_PROCESS = "a_non_avro_message_is_published_and_failed_to_process";
 
     @Autowired
     private TestSupport testSupport;
@@ -63,6 +76,8 @@ public class CompanyMetricsConsumerSteps {
      * The company number extracted from the current avro file
      */
     private String currentCompanyNumber;
+
+    private String currentChargeId;
 
     @Autowired
     public KafkaConsumer<String, Object> kafkaConsumer;
@@ -84,27 +99,57 @@ public class CompanyMetricsConsumerSteps {
         assertThat(wireMockServer.isRunning()).isTrue();
     }
 
-    @When("A valid avro message for {string} and {string} is generated and sent to the Kafka topic {string} and stubbed Company Metrics API returns {string}")
+    @And("Charges Data API endpoint is stubbed for {string} and {string} and will return {string} http response code")
+    public void stubChargesDataApiEndpointForResponse(String companyNumber,
+                                                      String chargeId,
+                                                      String statusValue){
+        int requiredStatusValue = Integer.parseInt(statusValue);
+        this.currentCompanyNumber = companyNumber;
+        this.currentChargeId = chargeId;
+
+        stubChargesDataApiGetEndpoint(requiredStatusValue, STUB_CHARGES_DATA_API_ENDPOINT_FOR_RESPONSE);
+    }
+
+    @When("A valid avro message for {string} and {string} and {string} is generated and sent to the Kafka topic {string} and stubbed Company Metrics API returns {string}")
     public void generateAvroMessageSendToTheKafkaTopic(String companyNumber,
                                                        String companyLinksFormat,
+                                                       String chargeId,
                                                        String topic,
                                                        String statusCode)
             throws InterruptedException, IOException {
         ResourceChangedData avroMessageData = testSupport.createResourceChangedMessage(
-                companyLinksFormat, companyNumber);
+                companyLinksFormat, companyNumber, chargeId);
         currentCompanyNumber = companyNumber;
+        currentChargeId = chargeId;
         stubCompanyMetricsApi(currentCompanyNumber,
-                "an_avro_message_is_published_to_topic",
+                AN_AVRO_MESSAGE_IS_PUBLISHED_TO_TOPIC,
                 Integer.parseInt(statusCode));
         sendKafkaMessage(topic, avroMessageData);
     }
 
-    @Then("The message is successfully consumed and company number is susccessfully extracted to call company-metrics-api POST endpoint with expected payload")
+    @Then("The message is successfully consumed and company number is successfully extracted to call company-metrics-api POST endpoint with expected payload")
     public void checkMessageComsumedAndCompanyMetricsApiCalledWithCorrectValues(){
+        List<ServeEvent> serverEvents = checkServeEvents();
+        assertMetricsApiSuccessfullyInvoked(serverEvents);
+    }
+
+    @NotNull
+    private List<ServeEvent> checkServeEvents() {
         List<ServeEvent> serverEvents = testSupport.getServeEvents();
-        assertThat(serverEvents.size()).isEqualTo(1);
+        assertThat(serverEvents.size()).isEqualTo(2);
         assertThat(serverEvents.isEmpty()).isFalse(); // assert that the wiremock did something
-        assertThat(serverEvents.get(0).getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
+        return serverEvents;
+    }
+
+    @Then("The message is successfully consumed and company number is successfully extracted to call charges-data-api GET endpoint")
+    public void checkMessageComsumedAndChargesDataApiCalledWithCorrectValues() throws JsonProcessingException {
+        List<ServeEvent> serverEvents = checkServeEvents();
+        assertChargesApiSuccessfullyInvoked(serverEvents);
+    }
+
+    private void assertMetricsApiSuccessfullyInvoked(List<ServeEvent> serverEvents) {
+        ServeEvent serveEvent = getServeEvent(serverEvents, AN_AVRO_MESSAGE_IS_PUBLISHED_TO_TOPIC);
+        assertThat(serveEvent.getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
         String body = new String(serverEvents.get(0).getRequest().getBody());
         MetricsRecalculateApi payload = null;
         ObjectMapper mapper = new ObjectMapper();
@@ -119,13 +164,33 @@ public class CompanyMetricsConsumerSteps {
         assertThat(payload.getPersonsWithSignificantControl()).isFalse();
     }
 
+    private void assertChargesApiSuccessfullyInvoked(List<ServeEvent> serverEvents) throws JsonProcessingException {
+        ServeEvent serveEvent = getServeEvent(serverEvents, STUB_CHARGES_DATA_API_ENDPOINT_FOR_RESPONSE);
+
+        assertThat(serveEvent.getRequest().getUrl()).isEqualTo(String.format(VALID_COMPANY_CHARGES_PATH, currentCompanyNumber, currentChargeId));
+
+        ChargeApi payload = getPayloadFromWireMock(serveEvent, ChargeApi.class);
+        assertThat(payload).isNotNull();
+        assertThat(payload.getId()).isEqualTo("3001283055");
+        assertThat(payload.getChargeNumber()).isEqualTo(50);
+        assertThat(payload.getChargeCode()).isEqualTo("081242070049");
+    }
+
+    @Nullable
+    private <T> T getPayloadFromWireMock(ServeEvent serveEvent, Class<T> T) throws JsonProcessingException {
+        String body = new String(serveEvent.getResponse().getBody());
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.readValue(body, T);
+    }
+
     @When("A non-avro message {string} is sent to the Kafka topic {string} and stubbed Company Metrics API returns {string}")
     public void a_non_avro_message_is_published_and_failed_to_process(String nonAvroMessageFileName,
                                                                       String topic,
                                                                       String statusCode)
             throws InterruptedException {
         String nonAvroMessageData = testSupport.loadAvroMessageFile(nonAvroMessageFileName);
-        stubCompanyMetricsApi(currentCompanyNumber, "a_non_avro_message_is_published_and_failed_to_process",
+        stubCompanyMetricsApi(currentCompanyNumber, A_NON_AVRO_MESSAGE_IS_PUBLISHED_AND_FAILED_TO_PROCESS,
                 Integer.parseInt(statusCode));
 
         kafkaTemplate.send(topic, nonAvroMessageData);
@@ -167,9 +232,9 @@ public class CompanyMetricsConsumerSteps {
             post(urlPathMatching(COMPANY_METRICS_RECALCULATE_POST))
                 .willReturn(aResponse()
                     .withStatus(statusCode)
-                    .withHeader("Content-Type", "application/json"))
+                    .withHeader(CONTENT_TYPE, APPLICATION_JSON))
                 .withMetadata(metadata()
-                    .list("tags", testMethodIdentifier))
+                    .list(TAGS, testMethodIdentifier))
         );
     }
 
@@ -181,35 +246,18 @@ public class CompanyMetricsConsumerSteps {
     @Given("Stubbed Company Metrics API endpoint will return {int} http response code")
     public void stubbed_company_metrics_api_endpoint_will_return_http_response_code(Integer responseCode) {
         stubCompanyMetricsApi(currentCompanyNumber,
-                "an_avro_message_is_published_to_topic",
+                AN_AVRO_MESSAGE_IS_PUBLISHED_TO_TOPIC,
                 responseCode);
     }
 
-    @Then("The message is successfully consumed and company number is successfully extracted to call company-metrics-api recalculate POST endpoint with expected payload")
-    public void the_message_is_successfully_consumed_and_company_number_is_successfully_extracted_to_call_company_metrics_api_recalculate_post_endpoint_with_expected_payload() {
-        List<ServeEvent> serverEvents = testSupport.getServeEvents();
-        assertThat(serverEvents.size()).isEqualTo(1);
-        assertThat(serverEvents.isEmpty()).isFalse(); // assert that the wiremock did something
-        assertThat(serverEvents.get(0).getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
-        String body = new String(serverEvents.get(0).getRequest().getBody());
-        MetricsRecalculateApi payload = null;
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            payload = mapper.readValue(body, MetricsRecalculateApi.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        assertThat(payload).isNotNull();
-        assertThat(payload.getMortgage()).isTrue();
-        assertThat(payload.getAppointments()).isFalse();
-        assertThat(payload.getPersonsWithSignificantControl()).isFalse();
-    }
-
-    @When("A valid avro message {string} with deleted event for {string} and {string} is sent to the Kafka topic {string}")
-    public void a_valid_avro_message_with_deleted_event_for_and_is_sent_to_the_kafka_topic(String payload, String companyNumber, String resourceUri, String topicName)
+    @When("A valid avro message {string} with deleted event for {string} and {string} and {string} is sent to the Kafka topic {string}")
+    public void a_valid_avro_message_with_deleted_event_for_and_is_sent_to_the_kafka_topic(String payload, String companyNumber, String resourceUri,
+                                                                                           String chargedId, String topicName)
             throws InterruptedException {
-        ResourceChangedData avroMessageData = testSupport.createResourceDeletedMessage(resourceUri, companyNumber, payload);
+        ResourceChangedData avroMessageData = testSupport.createResourceDeletedMessage(resourceUri, companyNumber,
+                chargedId, payload);
         this.currentCompanyNumber = companyNumber;
+        this.currentChargeId = chargedId;
         sendKafkaMessage(topicName, avroMessageData);
     }
 
@@ -257,6 +305,29 @@ public class CompanyMetricsConsumerSteps {
         kafkaTemplate.send(topic, avroMessageData);
         kafkaTemplate.flush();
         assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
+    }
+
+    private ServeEvent getServeEvent(List<ServeEvent> serverEvents, String tag) {
+        ServeEvent serveEvent = serverEvents.stream()
+                .filter(event -> event.getStubMapping().getMetadata().getList(TAGS).get(0)
+                        .toString().equalsIgnoreCase(tag))
+                .collect(Collectors.toList()).get(0);
+        return serveEvent;
+    }
+
+    private void stubChargesDataApiGetEndpoint(int requiredStatusValue, String testIdentifier) {
+
+        String chargesRecord = testSupport.loadFile("payloads", "get_charge_response.json");
+
+        stubFor(
+                get(urlEqualTo(String.format(VALID_COMPANY_CHARGES_PATH, currentCompanyNumber, currentChargeId)))
+                        .willReturn(aResponse()
+                                .withStatus(requiredStatusValue)
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                .withBody(chargesRecord))
+                        .withMetadata(metadata()
+                                .list(TAGS, testIdentifier))
+        );
     }
 
 }

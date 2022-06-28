@@ -1,0 +1,69 @@
+{
+  "id": "3001283055",
+  "charge_code": "081242070049",
+  "classification": {
+    "type": "charge-description",
+    "description": "A REGISTERED CHARGE"
+  },
+  "charge_number": 50,
+  "status": "part-satisfied",
+  "assets_ceased_released": "multiple-filings",
+  "delivered_on": "2019-10-17",
+  "created_on": "2019-10-11",
+  "particulars": {
+    "type": "brief-description",
+    "description": "THE FREEHOLD LAND KNOWN AS MILLENNIUM HOUSE, 60 VICTORIA STREET, LIVERPOOL AND REGISTERED WITH HM LAND REGISTRY UNDER TITLE NUMBER MS303172\\n",
+    "contains_floating_charge": true,
+    "contains_fixed_charge": true,
+    "floating_charge_covers_all": true,
+    "contains_negative_pledge": true,
+    "chargor_acting_as_bare_trustee": false
+  },
+  "secured_details": {
+    "type": "obligations-secured",
+    "description": "A REGISTERED CHARGE"
+  },
+  "scottish_alterations": {
+    "has_alterations_to_order": false,
+    "has_alterations_to_prohibitions": false,
+    "has_restricting_provisions": false
+  },
+  "more_than_four_persons_entitled": false,
+  "persons_entitled": [
+    {
+      "name": "LYELL TRADING LIMITED"
+    }
+  ],
+  "transactions": [
+    {
+      "filing_type": " MR05",
+      "delivered_on": "2019-10-22",
+      "links": {
+        "filing": "/company/08124207/filing-history/MzI0NzMyMzEzM2FkaXF6a2N4"
+      }
+    },
+    {
+      "filing_type": " MR04",
+      "delivered_on": "2019-10-29",
+      "links": {
+        "filing": "/company/08124207/filing-history/MzI0Nzk3OTM0NmFkaXF6a2N4"
+      }
+    },
+    {
+      "filing_type": " MR05",
+      "delivered_on": "2019-11-01",
+      "links": {
+        "filing": "/company/08124207/filing-history/MzI0ODI5MjUyMWFkaXF6a2N4"
+      }
+    },
+    {
+      "filing_type": "MR01",
+      "links": {
+        "filing": "/company/08124207/filing-history/MzI0NzA2NDA2M2FkaXF6a2N4"
+      }
+    }
+  ],
+  "links": {
+    "self": "/company/08124207/charges/ZDE1Yzc0ODkzOWZmYTA5MDUxYjA4NGQ0ZDYzNmVkNGRhMTE5MTI1OQ=="
+  }
+}

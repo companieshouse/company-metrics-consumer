@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.company.metrics.service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -42,14 +43,19 @@ public abstract class BaseClientApiService {
             return executor.execute();
         } catch (URIValidationException ex) {
             logger.errorContext(logContext, "SDK exception", ex, logMap);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
-        } catch (ApiErrorResponseException ex) {
-            logMap.put("status", ex.getStatusCode());
-            logger.errorContext(logContext, "SDK exception", ex, logMap);
-            if (ex.getStatusCode() == HttpStatus.BAD_REQUEST.value()) {
-                throw new NonRetryableErrorException("SDK Exception", ex);
-            }
             throw new RetryableErrorException("SDK Exception", ex);
+        } catch (ApiErrorResponseException ex) {
+            String message = "Private API Error Response exception";
+            logMap.put("status", ex.getStatusCode());
+            logger.errorContext(logContext, message, ex, logMap);
+            if (ex.getStatusCode() != 0) {
+                return new ApiResponse<>(ex.getStatusCode(), Collections.emptyMap());
+            }
+            throw new RetryableErrorException(message, ex);
+        } catch (Exception ex) {
+            String message = "Private API Generic exception";
+            logger.errorContext(logContext, message, ex, logMap);
+            throw new RetryableErrorException(message, ex);
         }
     }
 }
