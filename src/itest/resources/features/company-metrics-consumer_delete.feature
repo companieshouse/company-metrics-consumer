@@ -11,7 +11,7 @@ Feature: Process Company Metrics Consumer delete events
 
     Examples:
       | companyNumber | chargeId                    | KafkaTopic             | resourceUriFormat      | metricsApiStatusCode | chargeApiStatusCode | payload             |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 200                  | 410                 | charges-record.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 200                  | 404                 | charges-record.json |
 
 
   Scenario Outline: A valid delete message with invalid resource uri should fail to process and message should forwarded to invalid topic
@@ -25,7 +25,7 @@ Feature: Process Company Metrics Consumer delete events
 
     Examples:
       | companyNumber | chargeId                    | KafkaTopic             | resourceUriFormat | metricsApiStatusCode | chargeApiStatusCode | payload             |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company//charges | 200                  | 410                 | charges-record.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company//charges | 200                  | 404                 | charges-record.json |
 
 
   Scenario Outline: When company metrics returns 400 then a valid delete message should fail to process and message should forwarded to invalid topic
@@ -39,12 +39,12 @@ Feature: Process Company Metrics Consumer delete events
 
     Examples:
       | companyNumber | chargeId                    | KafkaTopic             | resourceUriFormat      | metricsApiStatusCode | chargeApiStatusCode | payload                                              |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 410                 | charges-record.json                                  |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 410                 | Additional_notices_Happy_Path.json                   |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 410                 | alterations_to_order_alteration_to_prohibitions.json |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 410                 | assets_ceased_released_Happy_Path.json               |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 410                 | obligations_secured_nature_of_charge_Happy_Path.json |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 410                 | Scottish_Alterations.json                            |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 404                 | charges-record.json                                  |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 404                 | Additional_notices_Happy_Path.json                   |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 404                 | alterations_to_order_alteration_to_prohibitions.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 404                 | assets_ceased_released_Happy_Path.json               |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 404                 | obligations_secured_nature_of_charge_Happy_Path.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | stream-company-charges | /company/%s/charges/%s | 400                  | 404                 | Scottish_Alterations.json                            |
 
 
   Scenario Outline:  When company metrics returns 503 then a valid delete message should fail to process and message should forwarded to error topic
@@ -57,12 +57,12 @@ Feature: Process Company Metrics Consumer delete events
 
     Examples:
       | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | metricsApiStatusCode | chargeApiStatusCode | payload                                              |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | charges-record.json                                  |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | Additional_notices_Happy_Path.json                   |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | alterations_to_order_alteration_to_prohibitions.json |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | assets_ceased_released_Happy_Path.json               |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | obligations_secured_nature_of_charge_Happy_Path.json |
-      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 410                 | Scottish_Alterations.json                            |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 404                 | charges-record.json                                  |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 404                 | Additional_notices_Happy_Path.json                   |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 404                 | alterations_to_order_alteration_to_prohibitions.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 404                 | assets_ceased_released_Happy_Path.json               |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 404                 | obligations_secured_nature_of_charge_Happy_Path.json |
+      | 01203396      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | 503                  | 404                 | Scottish_Alterations.json                            |
 
 
   Scenario Outline:  When charges data api returns 200 then a valid delete message should fail to process and message should forwarded to error topic

@@ -256,7 +256,7 @@ public class CompanyMetricsProcessorTest {
                 testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, true);
         final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.OK.value(), null, null);
         final ApiResponse<ChargeApi> chargeDataApiResponse =
-                new ApiResponse<>(HttpStatus.GONE.value(), null, null);
+                new ApiResponse<>(HttpStatus.NOT_FOUND.value(), null, null);
 
         MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
         when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
@@ -285,7 +285,7 @@ public class CompanyMetricsProcessorTest {
 
         final ApiResponse<Void> response = new ApiResponse<>(httpStatus.value(), null, null);
         final ApiResponse<ChargeApi> chargeDataApiResponse =
-                new ApiResponse<>(HttpStatus.GONE.value(), null, null);
+                new ApiResponse<>(HttpStatus.NOT_FOUND.value(), null, null);
         MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
         when(companyMetricsApiTransformer.transform(anyString())).thenReturn(recalculateApiData);
         when(chargesDataApiService.getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI))
