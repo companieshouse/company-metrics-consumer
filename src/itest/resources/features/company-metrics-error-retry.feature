@@ -47,7 +47,7 @@ Feature: Process company metrics charges-stream error and retry scenarios
       | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                     | metricsApiStatusCode | chargeApiStatusCode | retryAttempts | times |
       | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 503                  | 200                 | 4             | 4     |
 
-  Scenario Outline: Processing valid avro message and charges data api returning 410 error
+  Scenario Outline: Processing valid avro message and charges data api returning 404 error
 
     Given Company Metrics Consumer component is running and Company Metrics API is stubbed
     And Charges Data API endpoint is stubbed for "<companyNumber>" and "<chargeId>" and will return "<chargeApiStatusCode>" http response code
@@ -56,4 +56,4 @@ Feature: Process company metrics charges-stream error and retry scenarios
     And Stubbed Company Metrics API should be called "<times>" times
     Examples:
       | companyNumber | chargeId                    | resourceUriFormat      | KafkaTopic             | KafkaInvalidTopic                                     | metricsApiStatusCode | chargeApiStatusCode | retryAttempts | times |
-      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 200                  | 410                 | 4             | 0     |
+      | 12345678      | MYdKM_YnzAmJ8JtSgVXr61n1bgg | /company/%s/charges/%s | stream-company-charges | stream-company-charges-company-metrics-consumer-error | 200                  | 404                 | 4             | 0     |
