@@ -9,21 +9,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
-
 import uk.gov.companieshouse.api.charges.ChargeApi;
-
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.company.metrics.service.ChargesDataApiService;
-import uk.gov.companieshouse.company.metrics.util.TestSupport;
 import uk.gov.companieshouse.company.metrics.service.CompanyMetricsApiService;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
+import uk.gov.companieshouse.company.metrics.util.TestSupport;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -32,18 +29,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertThrows;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static org.mockito.Mockito.eq;
-
 @ExtendWith(MockitoExtension.class)
-public class CompanyMetricsProcessorTest {
+class CompanyMetricsProcessorTest {
 
     public static final String CONTEXT_ID = "context_id";
     public static final String MOCK_COMPANY_NUMBER = "02588581";
@@ -88,7 +83,7 @@ public class CompanyMetricsProcessorTest {
 
     @ParameterizedTest(name = "{index} ==> {2}: is {0} valid? {1}")
     @MethodSource("testExtractCompanyNumberFromResourceUri")
-    public void urlPatternTest(String input, String expected) {
+    void urlPatternTest(String input, String expected) {
         Optional<String> companyNumber = companyMetricsProcessor.extractCompanyNumber(input);
         if (expected != null) {
             assertEquals(expected, companyNumber.get());
@@ -182,7 +177,7 @@ public class CompanyMetricsProcessorTest {
                         resourceChangedDataMessage.getPayload())));
         verify(chargesDataApiService, times(0)).getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI);
         verify(companyMetricsApiService, times(0)).invokeMetricsPostApi(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
-                Mockito.any(MetricsRecalculateApi.class));
+                any(MetricsRecalculateApi.class));
     }
 
     @Test
@@ -204,7 +199,7 @@ public class CompanyMetricsProcessorTest {
                         resourceChangedDataMessage.getPayload())));
         verify(chargesDataApiService, times(0)).getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI);
         verify(companyMetricsApiService, times(0)).invokeMetricsPostApi(eq(CONTEXT_ID), eq(MOCK_COMPANY_NUMBER),
-                Mockito.any(MetricsRecalculateApi.class));
+                any(MetricsRecalculateApi.class));
     }
 
 
@@ -305,7 +300,6 @@ public class CompanyMetricsProcessorTest {
         return Stream.of(
                 Arguments.of(HttpStatus.BAD_REQUEST, RetryableErrorException.class),
                 Arguments.of(HttpStatus.OK, RetryableErrorException.class),
-                Arguments.of(HttpStatus.NOT_FOUND, RetryableErrorException.class),
                 Arguments.of(HttpStatus.UNAUTHORIZED, RetryableErrorException.class),
                 Arguments.of(HttpStatus.INTERNAL_SERVER_ERROR, RetryableErrorException.class),
                 Arguments.of(HttpStatus.BAD_GATEWAY, RetryableErrorException.class),
@@ -323,6 +317,7 @@ public class CompanyMetricsProcessorTest {
             HttpStatus httpStatus,
             Class<Throwable> exception)
             throws IOException {
+
         Message<ResourceChangedData> mockResourceChangedMessage =
                 testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, false);
 
@@ -331,11 +326,37 @@ public class CompanyMetricsProcessorTest {
         MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
         when(chargesDataApiService.getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI))
                 .thenReturn(chargeDataApiResponse);
-        assertThrows(exception, () -> companyMetricsProcessor
-                .processDelete(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET));
+        final String exceptionMessage = assertThrows(exception, () -> companyMetricsProcessor
+                .processDelete(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET)).getMessage();
+        assertEquals("Charge details found!", exceptionMessage);
 
         verify(chargesDataApiService, times(1)).getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI);
         verify(companyMetricsApiTransformer, times(0)).transform(anyString());
+        verify(companyMetricsApiService, times(0))
+                .invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER, recalculateApiData);
+
+    }
+
+    @Test
+    @DisplayName("When calling get charge endpoint for delete message then a RetryableErrorException is thrown if a 404 response is received")
+    void getChargeApiReturns_404_for_delete_then_RetryableErrorException_is_thrown() throws IOException {
+
+        Message<ResourceChangedData> mockResourceChangedMessage =
+                testSupport.createResourceChangedMessage(TestSupport.VALID_COMPANY_LINKS_PATH, false);
+
+        final ApiResponse<Void> response = new ApiResponse<>(HttpStatus.NOT_FOUND.value(), null, null);
+        final ApiResponse<ChargeApi> chargeDataApiResponse =
+                new ApiResponse<>(HttpStatus.NOT_FOUND.value(), null, null);
+        MetricsRecalculateApi recalculateApiData = testSupport.createMetricsRecalculateApiData();
+        when(chargesDataApiService.getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI))
+                .thenReturn(chargeDataApiResponse);
+        when(companyMetricsApiService.invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER,null)).thenReturn(response);
+        final String exceptionMessage = assertThrows(RetryableErrorException.class, () -> companyMetricsProcessor
+                .processDelete(mockResourceChangedMessage.getPayload(),TOPIC, PARTITION, OFFSET)).getMessage();
+        assertEquals("Non-Successful response received from company-metrics-api", exceptionMessage);
+
+        verify(chargesDataApiService, times(1)).getACharge(CONTEXT_ID, MOCK_GET_CHARGE_URI);
+        verify(companyMetricsApiTransformer, times(1)).transform(anyString());
         verify(companyMetricsApiService, times(0))
                 .invokeMetricsPostApi(CONTEXT_ID, MOCK_COMPANY_NUMBER, recalculateApiData);
 
