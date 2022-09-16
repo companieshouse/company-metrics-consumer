@@ -128,7 +128,7 @@ public class CompanyMetricsProcessor {
     private boolean isChargeAlreadyDeleted(String resourceUri, String contextId) {
         ApiResponse<ChargeApi> apiResponseFromChargesDataApi =
                 prepareAndInvokeChargesDataApi(resourceUri, contextId);
-        return apiResponseFromChargesDataApi.getStatusCode() == HTTP_STATUS_NOT_FOUND ? true : false;
+        return apiResponseFromChargesDataApi.getStatusCode() == HTTP_STATUS_NOT_FOUND;
     }
 
 
