@@ -26,7 +26,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class CompanyMetricsProcessor {
 
-    public static final int HTTP_STATUS_GONE = 410;
+    public static final int HTTP_STATUS_NOT_FOUND = 404;
     public static final String COMPANY_NUMBER_URI_PATTERN = "(?<=company/)(.*?)(?=/)";
     private final CompanyMetricsApiTransformer metricsApiTransformer;
     private final Logger logger;
@@ -128,7 +128,7 @@ public class CompanyMetricsProcessor {
     private boolean isChargeAlreadyDeleted(String resourceUri, String contextId) {
         ApiResponse<ChargeApi> apiResponseFromChargesDataApi =
                 prepareAndInvokeChargesDataApi(resourceUri, contextId);
-        return apiResponseFromChargesDataApi.getStatusCode() == HTTP_STATUS_GONE ? true : false;
+        return apiResponseFromChargesDataApi.getStatusCode() == HTTP_STATUS_NOT_FOUND;
     }
 
 
