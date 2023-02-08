@@ -13,7 +13,7 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.logging.Logger;
 
 @Service
-public class ChargesDataApiService extends BaseClientApiService {
+public class ChargesDataApiService extends BaseApiClientService {
 
     private final Supplier<InternalApiClient> internalApiClientSupplier;
 
