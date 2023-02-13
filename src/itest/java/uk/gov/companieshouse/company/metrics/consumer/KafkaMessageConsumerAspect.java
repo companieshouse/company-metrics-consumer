@@ -12,13 +12,13 @@ public class KafkaMessageConsumerAspect {
     @Autowired
     private ResettableCountDownLatch resettableCountDownLatch;
 
-    @AfterReturning("execution(* uk.gov.companieshouse.company.metrics.consumer.CompanyMetricsConsumer" +
+    @AfterReturning("execution(* uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer" +
             ".receive(..))")
     void onSuccessfulProcessing() {
         resettableCountDownLatch.countDownAll();
     }
 
-    @AfterThrowing(value = "execution(* uk.gov.companieshouse.company.metrics.consumer.CompanyMetricsConsumer" +
+    @AfterThrowing(value = "execution(* uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer" +
             ".receive(..))", throwing = "ex")
     void onConsumerException(Exception ex) {
         if (ex instanceof NonRetryableErrorException) {

@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.metrics.InternalData;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
-import uk.gov.companieshouse.company.metrics.consumer.CompanyMetricsConsumer;
+import uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -46,7 +46,7 @@ public class TestSupport {
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
-        eventRecord.setType(isDelete ? CompanyMetricsConsumer.DELETE_EVENT_TYPE : EVENT_TYPE_CHARGES);
+        eventRecord.setType(isDelete ? ChargesStreamConsumer.DELETE_EVENT_TYPE : EVENT_TYPE_CHARGES);
 
         ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
                 .setContextId(CONTEXT_ID)

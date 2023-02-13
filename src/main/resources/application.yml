@@ -11,13 +11,15 @@ spring:
     listener:
       concurrency: ${COMPANY_METRICS_LISTENER_CONCURRENCY:1}
 
-charges:
-  stream:
-    enable: ${COMPANY_METRICS_CONSUMER_CHARGES_ENABLED:true}
-    group-id: ${COMPANY_METRICS_CONSUMER_CHARGES_GROUP_ID:company-metrics-consumer}
-    topic: ${COMPANY_METRICS_CONSUMER_CHARGES_TOPIC:stream-company-charges}
-    retry-attempts: ${COMPANY_METRICS_CONSUMER_CHARGES_ATTEMPTS:4}
-    backoff-delay: ${COMPANY_METRICS_CONSUMER_CHARGES_BACKOFF_DELAY:100}
+company-metrics:
+  consumer:
+    charges:
+      stream:
+        enable: ${COMPANY_METRICS_CONSUMER_CHARGES_ENABLED:true}
+        group-id: ${COMPANY_METRICS_CONSUMER_CHARGES_GROUP_ID:company-metrics-consumer}
+        topic: ${COMPANY_METRICS_CONSUMER_CHARGES_TOPIC:stream-company-charges}
+        retry-attempts: ${COMPANY_METRICS_CONSUMER_CHARGES_ATTEMPTS:4}
+        backoff-delay: ${COMPANY_METRICS_CONSUMER_CHARGES_BACKOFF_DELAY:100}
 
 logger:
   namespace: company-metrics-consumer
