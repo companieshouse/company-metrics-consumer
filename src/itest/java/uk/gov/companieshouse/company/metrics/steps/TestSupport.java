@@ -22,7 +22,7 @@ public class TestSupport {
     public static final String RESOURCE_KIND = "company-charges";
     public static final String CONTEXT_ID = "context_id";
     public static final String RESOURCE_ID = "11223344";
-    public static final String TYPE = "charges";
+    public static final String TYPE = "changed";
     public static final String DELETE_TYPE = "deleted";
 
     public TestSupport(KafkaTemplate<String, Object> kafkaTemplate) {

@@ -19,7 +19,10 @@ public class MetricsRouter implements MetricsRoutable {
     @Override
     public void route(ResourceChange message, String deltaType, String updatedBy) {
         String eventType = message.getData().getEvent().getType();
+        String resourceUri = message.getData().getResourceUri();
+        String contextId = message.getData().getContextId();
         String companyNumber = extractor.extractCompanyNumber(message.getData().getResourceUri());
-        factory.getMetricsClient(deltaType, eventType).postMetrics(companyNumber, updatedBy);
+        factory.getMetricsClient(deltaType, eventType)
+                .postMetrics(companyNumber, updatedBy, resourceUri, contextId);
     }
 }

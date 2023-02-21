@@ -14,7 +14,10 @@ public class NullMetricsClient implements MetricsClient {
     }
 
     @Override
-    public void postMetrics(String companyNumber, String updatedBy) {
+    public void postMetrics(String companyNumber,
+                            String updatedBy,
+                            String resourceUri,
+                            String contextId) {
         logger.error(String.format(
                 "Invalid delta type and/or event type for company number %s", companyNumber));
         throw new NonRetryableErrorException("Invalid delta type and/or event type");

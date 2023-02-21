@@ -1,9 +1,10 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
 
 @Component
 public class MetricsClientFactory {

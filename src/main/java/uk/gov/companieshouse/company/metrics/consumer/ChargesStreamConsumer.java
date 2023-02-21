@@ -16,7 +16,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
-import uk.gov.companieshouse.company.metrics.processor.CompanyMetricsProcessor;
 import uk.gov.companieshouse.company.metrics.processor.MetricsRouter;
 import uk.gov.companieshouse.company.metrics.type.ResourceChange;
 import uk.gov.companieshouse.logging.Logger;
@@ -27,15 +26,12 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 public class ChargesStreamConsumer {
 
     public static final String DELETE_EVENT_TYPE = "deleted";
-    private final CompanyMetricsProcessor metricsProcessor;
 
     private final MetricsRouter chargesRouter;
     private final uk.gov.companieshouse.logging.Logger logger;
 
     @Autowired
-    public ChargesStreamConsumer(CompanyMetricsProcessor metricsProcessor,
-                                 MetricsRouter chargesRouter, Logger logger) {
-        this.metricsProcessor = metricsProcessor;
+    public ChargesStreamConsumer(MetricsRouter chargesRouter, Logger logger) {
         this.chargesRouter = chargesRouter;
         this.logger = logger;
     }
@@ -44,7 +40,8 @@ public class ChargesStreamConsumer {
      * Receives Main topic messages.
      */
     @RetryableTopic(attempts = "${company-metrics.consumer.charges.stream.retry-attempts}",
-            backoff = @Backoff(delayExpression = "${company-metrics.consumer.charges.stream.backoff-delay}"),
+            backoff = @Backoff(delayExpression =
+                    "${company-metrics.consumer.charges.stream.backoff-delay}"),
             fixedDelayTopicStrategy = FixedDelayStrategy.SINGLE_TOPIC,
             retryTopicSuffix = "-${company-metrics.consumer.charges.stream.group-id}-retry",
             dltTopicSuffix = "-${company-metrics.consumer.charges.stream.group-id}-error",
@@ -67,26 +64,12 @@ public class ChargesStreamConsumer {
                 topic, partition, offset, contextId));
 
         try {
-            final boolean deleteEventType = DELETE_EVENT_TYPE
-                    .equalsIgnoreCase(payload.getEvent().getType());
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
 
             chargesRouter.route(new ResourceChange(payload), "charges", updatedBy);
-            logger.info(format("Charges Metrics Delete message with contextId: %s is "
+            logger.info(format("Charges Metrics message with contextId: %s is "
                             + "successfully processed in %d milliseconds", contextId,
                     Duration.between(startTime, Instant.now()).toMillis()));
-
-            if (deleteEventType) {
-                metricsProcessor.processDelete(payload, topic, partition, offset);
-                logger.info(format("Charges Metrics Delete message with contextId: %s is "
-                                + "successfully processed in %d milliseconds", contextId,
-                        Duration.between(startTime, Instant.now()).toMillis()));
-            } else {
-                metricsProcessor.process(payload, topic, partition, offset);
-                logger.info(format("Charges Metrics Delta message with contextId: %s is "
-                                + "successfully processed in %d milliseconds", contextId,
-                        Duration.between(startTime, Instant.now()).toMillis()));
-            }
         } catch (Exception exception) {
             logger.errorContext(contextId, format("Exception occurred while processing "
                     + "message on the topic: %s", topic), exception, null);
