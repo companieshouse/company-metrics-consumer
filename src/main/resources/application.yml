@@ -21,6 +21,14 @@ company-metrics:
         retry-attempts: ${COMPANY_METRICS_CONSUMER_CHARGES_ATTEMPTS:4}
         backoff-delay: ${COMPANY_METRICS_CONSUMER_CHARGES_BACKOFF_DELAY:100}
 
+    appointments:
+      stream:
+        enable: ${COMPANY_METRICS_CONSUMER_OFFICERS_ENABLED:true}
+        group-id: ${COMPANY_METRICS_CONSUMER_OFFICERS_GROUP_ID:company-metrics-consumer}
+        topic: ${COMPANY_METRICS_CONSUMER_OFFICERS_TOPIC:stream-company-officers}
+        retry-attempts: ${COMPANY_METRICS_CONSUMER_OFFICERS_ATTEMPTS:4}
+        backoff-delay: ${COMPANY_METRICS_CONSUMER_OFFICERS_BACKOFF_DELAY:100}
+
 logger:
   namespace: company-metrics-consumer
 
