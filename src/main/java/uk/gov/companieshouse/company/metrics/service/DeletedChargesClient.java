@@ -94,7 +94,6 @@ public class DeletedChargesClient implements MetricsClient {
     }
 
     private boolean isChargeAlreadyDeleted(String resourceUri, String contextId) {
-        //include in tech debt ticket.
         ApiResponse<ChargeApi> apiResponseFromChargesDataApi = chargesDataApiService
                 .getACharge(contextId, resourceUri);
         return apiResponseFromChargesDataApi.getStatusCode() == HttpStatus.NOT_FOUND.value();

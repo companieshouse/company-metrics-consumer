@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import io.swagger.models.HttpMethod;
+import org.springframework.http.HttpMethod;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;

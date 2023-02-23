@@ -92,7 +92,6 @@ public class ChangedChargesClient implements MetricsClient {
     }
 
     private boolean isChargeAvailable(String resourceUri, String contextId) {
-        //create tech debt ticket for this business requirement
         ApiResponse<ChargeApi> apiResponseFromChargesDataApi = chargesDataApiService
                 .getACharge(contextId, resourceUri);
         if (apiResponseFromChargesDataApi == null) {
