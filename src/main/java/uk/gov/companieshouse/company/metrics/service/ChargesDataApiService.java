@@ -1,11 +1,11 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import org.springframework.http.HttpMethod;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.charges.ChargeApi;
