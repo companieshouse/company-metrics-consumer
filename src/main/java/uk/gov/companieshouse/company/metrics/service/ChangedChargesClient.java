@@ -18,12 +18,11 @@ import uk.gov.companieshouse.logging.Logger;
 @Component
 public class ChangedChargesClient implements MetricsClient {
 
+    public static final String FAILED_MSG = "Failed recalculating charges for company [%s]";
+    public static final String ERROR_MSG = "Error [%s] recalculating charges for company [%s]";
     private final Logger logger;
-
     private final Supplier<InternalApiClient> internalApiClientFactory;
-
     private final CompanyMetricsApiTransformer metricsApiTransformer;
-
     private final ChargesDataApiService chargesDataApiService;
 
     /**
@@ -55,35 +54,45 @@ public class ChangedChargesClient implements MetricsClient {
                                 metricsRecalculateApi)
                         .execute();
             } catch (ApiErrorResponseException ex) {
-                if (HttpStatus.valueOf(ex.getStatusCode()).is5xxServerError()) {
-                    logger.error(String.format("Server error returned with status code: [%s] "
-                            + "processing charges recalculate request", ex.getStatusCode()));
-                    throw new RetryableErrorException("Server error returned when processing "
-                            + "charges recalculate request", ex);
-                } else if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                    logger.info("HTTP 404 Not Found returned; "
-                            + "company does not exist");
-                } else {
-                    logger.error(String.format("Changed charges client error returned with "
-                                    + "status code: [%s] when processing recalculate request",
-                            ex.getStatusCode()));
-                    throw new NonRetryableErrorException("UpsertClient error returned when "
-                            + "processing charges recalculate request", ex);
-                }
+                handleApiError(companyNumber, ex);
             } catch (IllegalArgumentException ex) {
-                logger.error("Illegal argument exception caught when handling API response");
-                throw new RetryableErrorException("Server error returned when processing "
-                        + "charges recalculate request", ex);
+                hanleIllegalArgumentError(companyNumber, ex);
             } catch (URIValidationException ex) {
-                logger.error("Invalid companyNumber specified when handling API request");
-                throw new NonRetryableErrorException("Invalid companyNumber specified", ex);
+                handleURIValidationError(companyNumber, ex);
             }
         } else {
-            throw new RetryableErrorException("Charge details could not be found!");
+            throw new RetryableErrorException("Charge details not found for company "
+                    + companyNumber);
+        }
+    }
+
+    private void handleURIValidationError(String companyNumber, URIValidationException ex) {
+        String message = String.format(FAILED_MSG, companyNumber);
+        logger.error(message);
+        throw new NonRetryableErrorException(message, ex);
+    }
+
+    private void hanleIllegalArgumentError(String companyNumber, IllegalArgumentException ex) {
+        String message = String.format(FAILED_MSG, companyNumber);
+        logger.info(message);
+        throw new RetryableErrorException(message, ex);
+    }
+
+    private void handleApiError(String companyNumber, ApiErrorResponseException ex) {
+        String message = String.format(ERROR_MSG, ex.getStatusCode(), companyNumber);
+        if (HttpStatus.valueOf(ex.getStatusCode()).is5xxServerError()) {
+            logger.info(message);
+            throw new RetryableErrorException(message, ex);
+        } else if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+            logger.info(message);
+        } else {
+            logger.error(message);
+            throw new NonRetryableErrorException(message, ex);
         }
     }
 
     private boolean isChargeAvailable(String resourceUri, String contextId) {
+        //create tech debt ticket for this business requirement
         ApiResponse<ChargeApi> apiResponseFromChargesDataApi = chargesDataApiService
                 .getACharge(contextId, resourceUri);
         if (apiResponseFromChargesDataApi == null) {

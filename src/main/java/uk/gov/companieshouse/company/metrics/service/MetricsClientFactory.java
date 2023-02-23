@@ -5,10 +5,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class MetricsClientFactory {
-
 
     private final Map<String, Map<String, MetricsClient>> metricsClientMap;
     private final NullMetricsClient nullMetricsClient;
@@ -23,5 +21,4 @@ public class MetricsClientFactory {
         return metricsClientMap.getOrDefault(deltaType, Collections.emptyMap())
                 .getOrDefault(eventType, nullMetricsClient);
     }
-    
 }
