@@ -99,7 +99,7 @@ class DeletedChargesClientTest {
         // then
         verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATEDBY));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(logger).info("HTTP 404 Not Found returned; company does not exist");
+        verify(logger).info("Error [404] recalculating charges for company [01203396]");
     }
 
     @Test

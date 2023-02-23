@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.company.metrics.service;
 
+import io.swagger.models.HttpMethod;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import io.swagger.models.HttpMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;

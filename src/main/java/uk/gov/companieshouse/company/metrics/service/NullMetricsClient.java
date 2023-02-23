@@ -8,7 +8,8 @@ import uk.gov.companieshouse.logging.Logger;
 public class NullMetricsClient implements MetricsClient {
 
     private final Logger logger;
-    private static final String INVALID_DELTA_EVENT_TYPE = "Invalid delta type and/or event type for company number: ";
+    private static final String INVALID_DELTA_EVENT_TYPE =
+            "Invalid delta type and/or event type for company number: ";
 
     public NullMetricsClient(Logger logger) {
         this.logger = logger;
@@ -19,8 +20,9 @@ public class NullMetricsClient implements MetricsClient {
                             String updatedBy,
                             String resourceUri,
                             String contextId) {
-        logger.error(String.format(INVALID_DELTA_EVENT_TYPE +
-                "%s", companyNumber));
-        throw new NonRetryableErrorException(String.format( INVALID_DELTA_EVENT_TYPE + "%s", companyNumber));
+        logger.error(String.format(INVALID_DELTA_EVENT_TYPE
+                + "%s", companyNumber));
+        throw new NonRetryableErrorException(String.format(INVALID_DELTA_EVENT_TYPE
+                + "%s", companyNumber));
     }
 }

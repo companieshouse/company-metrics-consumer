@@ -60,15 +60,15 @@ public class DeletedChargesClient implements MetricsClient {
             } catch (IllegalArgumentException ex) {
                 handleIllegalArguementError(companyNumber, ex);
             } catch (URIValidationException ex) {
-                handleURIValidationError(companyNumber, ex);
+                handleUriValidationError(companyNumber, ex);
             }
         } else {
-            throw new RetryableErrorException("Charge details found for [%s] when " +
-                    "should have been deleted " + companyNumber);
+            throw new RetryableErrorException("Charge details found for [%s] when " 
+                    + "should have been deleted " + companyNumber);
         }
     }
 
-    private void handleURIValidationError(String companyNumber, URIValidationException ex) {
+    private void handleUriValidationError(String companyNumber, URIValidationException ex) {
         String message = String.format(FAILED_MSG, companyNumber);
         logger.error(message);
         throw new NonRetryableErrorException(message, ex);

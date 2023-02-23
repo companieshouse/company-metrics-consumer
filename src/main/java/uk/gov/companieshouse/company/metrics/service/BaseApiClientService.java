@@ -14,6 +14,7 @@ import uk.gov.companieshouse.logging.Logger;
 
 public abstract class BaseApiClientService {
     protected final Logger logger;
+
     protected BaseApiClientService(Logger logger) {
         this.logger = logger;
     }

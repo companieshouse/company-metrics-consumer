@@ -11,12 +11,11 @@ import uk.gov.companieshouse.logging.Logger;
 @Component
 public class CompanyNumberExtractor implements CompanyNumberExtractable {
     private static final Pattern EXTRACT_COMPANY_NUMBER_PATTERN =
-           Pattern.compile("(?<=company/)([a-zA-Z0-9]{6,10})(?=/.*)");
-
-    private static final String NULL_EMPTY_URI = "Could not extract company number from empty or null resource uri";
-
-    private static final String EXTRACTION_ERROR = "Could not extract company number from resource URI: ";
-
+            Pattern.compile("(?<=company/)([a-zA-Z0-9]{6,10})(?=/.*)");
+    private static final String NULL_EMPTY_URI =
+            "Could not extract company number from empty or null resource uri";
+    private static final String EXTRACTION_ERROR =
+            "Could not extract company number from resource URI: ";
     private final Logger logger;
 
     public CompanyNumberExtractor(Logger logger) {
