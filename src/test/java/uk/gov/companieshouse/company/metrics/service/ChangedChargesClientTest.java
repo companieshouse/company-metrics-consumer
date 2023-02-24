@@ -22,10 +22,13 @@ import uk.gov.companieshouse.logging.Logger;
 import java.util.Collections;
 import java.util.function.Supplier;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -120,6 +123,24 @@ class ChangedChargesClientTest {
     }
 
     @Test
+    void testThrowNonRetryableExceptionIfBadRequestReturned() throws ApiErrorResponseException, URIValidationException {
+        // given
+        when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
+        when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(chargesMetricsPostHandler);
+        when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
+        when(privateCompanyMetricsUpsert.execute()).thenThrow(new ApiErrorResponseException(new HttpResponseException.Builder(400, "Internal server error", new HttpHeaders())));
+        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(200, Collections.emptyMap()));
+
+        // when
+        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+
+        // then
+        assertThrows(NonRetryableErrorException.class, actual);
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATEDBY));
+        verify(privateCompanyMetricsUpsert).execute();
+    }
+
+    @Test
     void testThrowRetryableExceptionIfIllegalArgumentExceptionIsCaught() throws ApiErrorResponseException, URIValidationException {
         // given
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
@@ -154,5 +175,38 @@ class ChangedChargesClientTest {
         assertThrows(NonRetryableErrorException.class, actual);
         verify(chargesMetricsPostHandler).postCompanyMetrics("/company/invalid/path/metrics/recalculate", metricsApiTransformer.transform(UPDATEDBY));
         verify(privateCompanyMetricsUpsert).execute();
+    }
+
+    @Test
+    void testThrowRetryableExceptionIfChargesDetailsCannotBeFound() throws ApiErrorResponseException, URIValidationException{
+        //given
+        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
+
+
+        // when
+        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+
+        //then
+        Exception exception = assertThrows(RetryableErrorException.class, actual);
+        String expectedMessage = "Charge details could not be found!";
+        assertEquals(expectedMessage, exception.getMessage());
+        verifyNoInteractions(chargesMetricsPostHandler);
+        verifyNoInteractions(privateCompanyMetricsUpsert);
+    }
+
+    @Test
+    void testThrowsRetryableExceptionIfChargeDataApiReturnsNullResponse() throws ApiErrorResponseException, URIValidationException {
+        //given
+        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(null));
+
+        // when
+        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+
+        //then
+        Exception exception = assertThrows(RetryableErrorException.class, actual);
+        String expectedMessage = "Charge details could not be found!";
+        assertEquals(expectedMessage, exception.getMessage());
+        verifyNoInteractions(chargesMetricsPostHandler);
+        verifyNoInteractions(privateCompanyMetricsUpsert);
     }
 }

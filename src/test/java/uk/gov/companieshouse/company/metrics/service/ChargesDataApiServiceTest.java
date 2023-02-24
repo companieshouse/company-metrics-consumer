@@ -43,7 +43,7 @@ import static uk.gov.companieshouse.company.metrics.util.TestSupport.buildApiErr
 import static uk.gov.companieshouse.company.metrics.util.TestSupport.buildApiErrorResponseException;
 
 @ExtendWith(MockitoExtension.class)
-public class ChargesDataApiServiceTest {
+class ChargesDataApiServiceTest {
 
     private static final String MOCK_CONTEXT_ID = "context_id";
     private static final String MOCK_COMPANY_NUMBER = "6146287";
