@@ -56,7 +56,7 @@ public class ChangedChargesClient implements MetricsClient {
             } catch (ApiErrorResponseException ex) {
                 handleApiError(companyNumber, ex);
             } catch (IllegalArgumentException ex) {
-                hanleIllegalArgumentError(companyNumber, ex);
+                handleIllegalArgumentError(companyNumber, ex);
             } catch (URIValidationException ex) {
                 handleUriValidationError(companyNumber, ex);
             }
@@ -72,7 +72,7 @@ public class ChangedChargesClient implements MetricsClient {
         throw new NonRetryableErrorException(message, ex);
     }
 
-    private void hanleIllegalArgumentError(String companyNumber, IllegalArgumentException ex) {
+    private void handleIllegalArgumentError(String companyNumber, IllegalArgumentException ex) {
         String message = String.format(FAILED_MSG, companyNumber);
         logger.info(message);
         throw new RetryableErrorException(message, ex);
