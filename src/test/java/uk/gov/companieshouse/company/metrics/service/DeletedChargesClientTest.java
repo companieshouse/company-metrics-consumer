@@ -188,7 +188,7 @@ class DeletedChargesClientTest {
 
         //then
         Exception exception = assertThrows(RetryableErrorException.class, actual);
-        String expectedMessage = "Charge details found when should have been deleted";
+        String expectedMessage = "Charge details found for [01203396] when should have been deleted";
         assertEquals(expectedMessage, exception.getMessage());
         verifyNoInteractions(chargesMetricsPostHandler);
         verifyNoInteractions(privateCompanyMetricsUpsert);

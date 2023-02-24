@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -188,7 +187,7 @@ class ChangedChargesClientTest {
 
         //then
         Exception exception = assertThrows(RetryableErrorException.class, actual);
-        String expectedMessage = "Charge details could not be found!";
+        String expectedMessage = "Charge details not found for company [01203396]";
         assertEquals(expectedMessage, exception.getMessage());
         verifyNoInteractions(chargesMetricsPostHandler);
         verifyNoInteractions(privateCompanyMetricsUpsert);
@@ -204,7 +203,7 @@ class ChangedChargesClientTest {
 
         //then
         Exception exception = assertThrows(RetryableErrorException.class, actual);
-        String expectedMessage = "Charge details could not be found!";
+        String expectedMessage = "Charge details not found for company [01203396]";
         assertEquals(expectedMessage, exception.getMessage());
         verifyNoInteractions(chargesMetricsPostHandler);
         verifyNoInteractions(privateCompanyMetricsUpsert);

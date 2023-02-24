@@ -39,9 +39,9 @@ class NullMetricsClientTest {
 
         //then
         Exception exception = assertThrows(NonRetryableErrorException.class, actual);
-        String expectedMessage = "Invalid delta type and/or event type";
+        String expectedMessage = "Invalid delta type and/or event type for company number: 01203396";
         assertEquals(expectedMessage, exception.getMessage());
-        verify(logger).error("Invalid delta type and/or event type for company number 01203396");
+        verify(logger).error("Invalid delta type and/or event type for company number: 01203396");
 
     }
 }
