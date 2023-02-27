@@ -57,7 +57,6 @@ public class OfficersStreamConsumer {
                 topic, partition, offset, contextId));
         try {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
-            ResourceChange resourceChange = new ResourceChange(payload);
             router.route(new ResourceChange(payload), "officers", updatedBy);
             logger.debug(String.format("Company appointments message processed. ContextId: %s",
                     contextId));
