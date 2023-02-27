@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static java.lang.String.format;
-
-import java.time.Duration;
 import java.time.Instant;
 
 import org.springframework.kafka.annotation.KafkaListener;
@@ -55,19 +52,18 @@ public class OfficersStreamConsumer {
         Instant startTime = Instant.now();
         ResourceChangedData payload = resourceChangedDataMessage.getPayload();
         String contextId = payload.getContextId();
-        logger.info(String.format("A new message successfully picked up from topic: %s, "
-                        + "partition: %s and offset: %s with contextId: %s",
+        logger.debug(String.format(
+                "New message picked up. Topic: %s; Partition: %s; Offset: %s; ContextId: %s",
                 topic, partition, offset, contextId));
-
         try {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
+            ResourceChange resourceChange = new ResourceChange(payload);
             router.route(new ResourceChange(payload), "officers", updatedBy);
-            logger.info(format("Company appointments message with contextId: %s is "
-                            + "successfully processed in %d milliseconds", contextId,
-                    Duration.between(startTime, Instant.now()).toMillis()));
+            logger.debug(String.format("Company appointments message processed. ContextId: %s",
+                    contextId));
         } catch (Exception exception) {
-            logger.errorContext(contextId, format("Exception occurred while processing "
-                    + "message on the topic: %s", topic), exception, null);
+            logger.error(String.format("Exception processing message. Topic: %s; Offset: %s",
+                    topic, offset));
             throw exception;
         }
     }
