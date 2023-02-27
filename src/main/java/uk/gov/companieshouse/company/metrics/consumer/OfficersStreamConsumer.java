@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import java.time.Instant;
-
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.FixedDelayStrategy;
@@ -49,7 +47,6 @@ public class OfficersStreamConsumer {
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
                         @Header(KafkaHeaders.OFFSET) String offset) {
-        Instant startTime = Instant.now();
         ResourceChangedData payload = resourceChangedDataMessage.getPayload();
         String contextId = payload.getContextId();
         logger.debug(String.format(
