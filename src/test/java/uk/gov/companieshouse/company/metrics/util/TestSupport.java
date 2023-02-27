@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.metrics.InternalData;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
-import uk.gov.companieshouse.company.metrics.consumer.CompanyMetricsConsumer;
+import uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -26,7 +26,7 @@ public class TestSupport {
     public static final String MOCK_CHARGE_ID = "MYdKM_YnzAmJ8JtSgVXr61n1bgg";
     public static final String VALID_COMPANY_LINKS_PATH = "/company/%s/charges/%s";
     public static final String INVALID_COMPANY_LINKS_PATH = "/companyabc/%s/charges/%s";
-    public static final String EVENT_TYPE_CHARGES = "charges";
+    public static final String EVENT_TYPE_CHARGES = "changed";
     public static final String RESOURCE_KIND = "company-charges";
     public static final String CONTEXT_ID = "context_id";
 
@@ -46,7 +46,7 @@ public class TestSupport {
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
-        eventRecord.setType(isDelete ? CompanyMetricsConsumer.DELETE_EVENT_TYPE : EVENT_TYPE_CHARGES);
+        eventRecord.setType(isDelete ? ChargesStreamConsumer.DELETE_EVENT_TYPE : EVENT_TYPE_CHARGES);
 
         ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
                 .setContextId(CONTEXT_ID)

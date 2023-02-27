@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.util.ResourceUtils;
@@ -22,8 +23,8 @@ public class TestSupport {
     public static final String RESOURCE_KIND = "company-charges";
     public static final String CONTEXT_ID = "context_id";
     public static final String RESOURCE_ID = "11223344";
-    public static final String TYPE = "charges";
-    public static final String DELETE_TYPE = "deleted";
+    public static final String CHANGED_EVENT_TYPE = "changed";
+    public static final String DELETED_EVENT_TYPE = "deleted";
 
     public TestSupport(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
@@ -32,15 +33,15 @@ public class TestSupport {
     public ResourceChangedData createResourceChangedMessage(String companyChargesLink,
                                                             String companyNumber,
                                                             String chargeId)
-            throws IOException {
+            {
 
         String chargesRecord = loadFile("payloads", "charges-record.json");
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
-        eventRecord.setType(TYPE);
+        eventRecord.setType(CHANGED_EVENT_TYPE);
 
-        ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
+        return ResourceChangedData.newBuilder()
                 .setContextId(CONTEXT_ID)
                 .setResourceId(RESOURCE_ID)
                 .setResourceKind(RESOURCE_KIND)
@@ -49,7 +50,6 @@ public class TestSupport {
                 .setData(chargesRecord)
                 .build();
 
-        return resourceChangedData;
     }
 
     public ResourceChangedData createResourceDeletedMessage(String companyChargesLink, String companyNumber, String chargedId, String payload) {
@@ -58,10 +58,10 @@ public class TestSupport {
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
-        eventRecord.setType(DELETE_TYPE);
+        eventRecord.setType(DELETED_EVENT_TYPE);
         eventRecord.setFieldsChanged(null);
 
-        ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder()
+        return ResourceChangedData.newBuilder()
                 .setContextId(CONTEXT_ID)
                 .setResourceId(RESOURCE_ID)
                 .setResourceKind(RESOURCE_KIND)
@@ -69,8 +69,6 @@ public class TestSupport {
                 .setEvent(eventRecord)
                 .setData(chargesRecord)
                 .build();
-
-        return resourceChangedData;
     }
 
     public List<ServeEvent> getServeEvents() {

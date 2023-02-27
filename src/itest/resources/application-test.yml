@@ -7,13 +7,15 @@ spring:
     listener:
       concurrency: 1
 
-charges:
-  stream:
-    enable: true
-    group-id: company-metrics-consumer
-    topic: stream-company-charges
-    retry-attempts: 4
-    backoff-delay: 10
+company-metrics:
+  consumer:
+    charges:
+      stream:
+        enable: true
+        group-id: company-metrics-consumer
+        topic: stream-company-charges
+        retry-attempts: 4
+        backoff-delay: 10
 
 logger:
   namespace: company-metrics-consumer
