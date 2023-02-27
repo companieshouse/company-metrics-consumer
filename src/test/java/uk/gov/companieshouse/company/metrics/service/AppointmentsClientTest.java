@@ -36,6 +36,8 @@ class AppointmentsClientTest {
     private static final String UPDATED_BY = "updated_by";
     private static final String RESOURCE_URI = "resource_uri";
     private static final String CONTEXT_ID = "context_id";
+    public static final String FAILED_MSG = "Failed recalculating appointments for company [%s]";
+    public static final String ERROR_MSG = "Error [%s] recalculating appointments for company [%s]";
 
     @Mock
     private Supplier<InternalApiClient> internalApiClientSupplier;
@@ -89,7 +91,7 @@ class AppointmentsClientTest {
         assertThrows(RetryableErrorException.class, actual);
         verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(logger).error("Server error returned with status code: [500] processing appointments metrics request");
+        verify(logger).info(String.format(ERROR_MSG, "500", COMPANY_NUMBER));
     }
 
     @Test
@@ -106,7 +108,7 @@ class AppointmentsClientTest {
         // then
         verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(logger).info("HTTP 404 Not Found returned; company does not exist");
+        verify(logger).info(String.format(ERROR_MSG, "404", COMPANY_NUMBER));
     }
 
     @Test
@@ -121,10 +123,10 @@ class AppointmentsClientTest {
         Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        assertThrows(NonRetryableErrorException.class, actual);
+        assertThrows(RetryableErrorException.class, actual);
         verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(logger).error("Illegal argument exception caught when handling API response");
+        verify(logger).info(String.format(FAILED_MSG, COMPANY_NUMBER));
     }
 
     @Test
@@ -142,6 +144,6 @@ class AppointmentsClientTest {
         assertThrows(NonRetryableErrorException.class, actual);
         verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(logger).error("Invalid companyNumber specified when handling request");
+        verify(logger).error(String.format(FAILED_MSG, COMPANY_NUMBER));
     }
 }
