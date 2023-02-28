@@ -21,11 +21,8 @@ public class ChangedChargesClient implements MetricsClient {
     public static final String FAILED_MSG = "Failed recalculating charges for company [%s]";
     public static final String ERROR_MSG = "Error [%s] recalculating charges for company [%s]";
     private final Logger logger;
-
     private final Supplier<InternalApiClient> internalApiClientFactory;
-
     private final CompanyMetricsApiTransformer metricsApiTransformer;
-
     private final ChargesDataApiService chargesDataApiService;
 
     /**

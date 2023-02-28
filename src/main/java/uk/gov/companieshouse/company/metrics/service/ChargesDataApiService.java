@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.charges.ChargeApi;
@@ -14,7 +15,6 @@ import uk.gov.companieshouse.logging.Logger;
 
 @Service
 public class ChargesDataApiService extends BaseApiClientService {
-
     private final Supplier<InternalApiClient> internalApiClientSupplier;
 
 
@@ -38,7 +38,7 @@ public class ChargesDataApiService extends BaseApiClientService {
      */
     public ApiResponse<ChargeApi> getACharge(String contextId,
                                             String uri) {
-        Map<String, Object> logMap = createLogMap("GET", uri);
+        Map<String, Object> logMap = createLogMap(uri);
         logger.infoContext(contextId, String.format("GET %s", uri), logMap);
 
         InternalApiClient internalApiClient = internalApiClientSupplier.get();
@@ -53,9 +53,9 @@ public class ChargesDataApiService extends BaseApiClientService {
     /**
      * Create Log context map.
      */
-    private Map<String, Object> createLogMap(String method, String path) {
+    private Map<String, Object> createLogMap(String path) {
         final Map<String, Object> logMap = new HashMap<>();
-        logMap.put("method", method);
+        logMap.put("method", HttpMethod.GET.name());
         logMap.put("path", path);
         return logMap;
     }
