@@ -17,6 +17,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class OfficersStreamConsumer {
 
+    private static final String OFFICER_DELTA_TYPE = "officers";
     private final MetricsRouter router;
     private final Logger logger;
 
@@ -54,7 +55,7 @@ public class OfficersStreamConsumer {
                 topic, partition, offset, contextId));
         try {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
-            router.route(new ResourceChange(payload), "officers", updatedBy);
+            router.route(new ResourceChange(payload), OFFICER_DELTA_TYPE, updatedBy);
             logger.debug(String.format("Company appointments message processed. ContextId: %s",
                     contextId));
         } catch (Exception exception) {

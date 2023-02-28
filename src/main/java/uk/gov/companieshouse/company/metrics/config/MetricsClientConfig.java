@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.company.metrics.config;
 
-import avro.shaded.com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
@@ -13,11 +12,11 @@ public class MetricsClientConfig {
     Map<String, Map<String, MetricsClient>> metricsClientMap(MetricsClient changedChargesClient,
                                                              MetricsClient deletedChargesClient,
                                                              MetricsClient appointmentsClient) {
-        return ImmutableMap.of(
-                "charges", ImmutableMap.of(
+        return Map.of(
+                "charges", Map.of(
                         "changed", changedChargesClient,
                         "deleted", deletedChargesClient),
-                "officers", ImmutableMap.of(
+                "officers", Map.of(
                         "changed", appointmentsClient,
                         "deleted", appointmentsClient));
     }
