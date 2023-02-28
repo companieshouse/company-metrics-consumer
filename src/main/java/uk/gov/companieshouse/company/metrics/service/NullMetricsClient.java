@@ -20,6 +20,7 @@ public class NullMetricsClient implements MetricsClient {
                             String contextId) {
         logger.error(String.format(
                 "Invalid delta type and/or event type for company number %s", companyNumber));
-        throw new NonRetryableErrorException("Invalid delta type and/or event type");
+        throw new NonRetryableErrorException(String.format(
+                "Invalid delta type and/or event type for company number %s", companyNumber));
     }
 }

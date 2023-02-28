@@ -89,7 +89,8 @@ public class ChangedChargesClient implements MetricsClient {
         } else if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
             logger.info(message);
         } else {
-            throw new RetryableErrorException("Charge details could not be found!");
+            logger.error(message);
+            throw new NonRetryableErrorException(message, ex);
         }
     }
 
