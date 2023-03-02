@@ -11,9 +11,9 @@ public class CompanyMetricsApiTransformer {
      * Prepare MetricsRecalculateApi object.
      */
     public MetricsRecalculateApi transform(String updatedBy,
-                                           Boolean isMortgage,
-                                           Boolean isAppointment,
-                                           Boolean isPsc) {
+                                           boolean isMortgage,
+                                           boolean isAppointment,
+                                           boolean isPsc) {
         MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
 
         InternalData internalData = new InternalData();

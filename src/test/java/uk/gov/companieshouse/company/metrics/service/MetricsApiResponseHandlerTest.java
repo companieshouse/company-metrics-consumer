@@ -8,6 +8,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
@@ -90,9 +91,9 @@ class MetricsApiResponseHandlerTest {
     @Test
     void testHandleApiErrorResponseExceptionWhenStatusCode500() {
         // given
-        int statusCode = 500;
-        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
-        HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCode, "", new HttpHeaders());
+        final int statusCodeInternalServerError = 500;
+        String message = String.format(ERROR_MSG, statusCodeInternalServerError, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCodeInternalServerError, "", new HttpHeaders());
 
         // when
         Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
@@ -106,9 +107,9 @@ class MetricsApiResponseHandlerTest {
     @Test
     void testHandleApiErrorResponseExceptionWhenStatusCode404() {
         // given
-        int statusCode = 404;
-        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
-        HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCode, "", new HttpHeaders());
+        final int statusCodeNotFound = 404;
+        String message = String.format(ERROR_MSG, statusCodeNotFound, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCodeNotFound, "", new HttpHeaders());
 
         // when
         Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
@@ -121,9 +122,9 @@ class MetricsApiResponseHandlerTest {
     @Test
     void testHandleApiErrorResponseExceptionWhenStatusCodeIsNot404Or5xx() {
         // given
-        int statusCode = 403;
-        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
-        HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCode, "", new HttpHeaders());
+        final int statusCodeForbidden = 403;
+        String message = String.format(ERROR_MSG, statusCodeForbidden, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCodeForbidden, "", new HttpHeaders());
 
         // when
         Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);

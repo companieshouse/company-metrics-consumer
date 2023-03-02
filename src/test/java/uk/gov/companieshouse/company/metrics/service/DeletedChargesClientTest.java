@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,6 +14,8 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.metrics.PrivateCompanyMetricsUpsertHandler;
 import uk.gov.companieshouse.api.handler.metrics.request.PrivateCompanyMetricsUpsert;
 import uk.gov.companieshouse.api.model.ApiResponse;
+import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
 import java.util.Collections;
@@ -37,6 +40,9 @@ class DeletedChargesClientTest {
     private static final String CONTEXT_ID = "context_id";
     private static final String CHARGES_DELTA_TYPE = "charges";
     private static final String INVALID_PATH = "invalid/path";
+    private static final boolean IS_MORTGAGE = true;
+    private static final boolean IS_APPOINTMENTS = false;
+    private static final boolean IS_PSC = false;
 
     @Mock
     private Supplier<InternalApiClient> internalApiClientSupplier;
@@ -77,7 +83,7 @@ class DeletedChargesClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, true, false, false));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
     }
 
@@ -95,7 +101,7 @@ class DeletedChargesClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, true, false, false));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
         verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
@@ -114,7 +120,7 @@ class DeletedChargesClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, true, false, false));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
         verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
@@ -122,19 +128,20 @@ class DeletedChargesClientTest {
     @Test
     void testThrowNonRetryableExceptionIfBadRequestReturned() throws ApiErrorResponseException, URIValidationException {
         // given
+        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(new HttpResponseException.Builder(400, "Internal server error", new HttpHeaders()));
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(chargesMetricsPostHandler);
         when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
-        when(privateCompanyMetricsUpsert.execute()).thenThrow(new ApiErrorResponseException(new HttpResponseException.Builder(400, "Internal server error", new HttpHeaders())));
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
+        when(privateCompanyMetricsUpsert.execute()).thenThrow(apiErrorResponseException);
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
 
         // when
-        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+        client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        assertThrows(NonRetryableErrorException.class, actual);
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATEDBY));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
+        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -151,7 +158,7 @@ class DeletedChargesClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, true, false, false));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
         verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
     }
@@ -170,7 +177,7 @@ class DeletedChargesClientTest {
         client.postMetrics(INVALID_PATH, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(chargesMetricsPostHandler).postCompanyMetrics("/company/invalid/path/metrics/recalculate", metricsApiTransformer.transform(UPDATED_BY, true, false, false));
+        verify(chargesMetricsPostHandler).postCompanyMetrics("/company/invalid/path/metrics/recalculate", metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
         verify(responseHandler).handle(INVALID_PATH, CHARGES_DELTA_TYPE, uriValidationException, CONTEXT_ID);
     }
@@ -178,11 +185,11 @@ class DeletedChargesClientTest {
     @Test
     void testThrowRetryableExceptionIfChargesDetailsCannotBeFound() throws ApiErrorResponseException, URIValidationException{
         //given
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(200, Collections.emptyMap()));
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(200, Collections.emptyMap()));
 
 
         // when
-        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         //then
         Exception exception = assertThrows(RetryableErrorException.class, actual);

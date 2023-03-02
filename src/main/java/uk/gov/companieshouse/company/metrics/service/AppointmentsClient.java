@@ -13,9 +13,9 @@ import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransf
 public class AppointmentsClient implements MetricsClient {
 
     private static final String APPOINTMENTS_DELTA_TYPE = "appointments";
-    private static final Boolean IS_MORTGAGE = false;
-    private static final Boolean IS_APPOINTMENT = true;
-    private static final Boolean IS_PSC = false;
+    private static final boolean IS_MORTGAGE = false;
+    private static final boolean IS_APPOINTMENT = true;
+    private static final boolean IS_PSC = false;
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;

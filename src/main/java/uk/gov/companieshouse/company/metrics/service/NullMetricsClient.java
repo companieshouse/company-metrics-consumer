@@ -10,7 +10,7 @@ public class NullMetricsClient implements MetricsClient {
     private final Logger logger;
 
     private static final String INVALID_DELTA_EVENT_TYPE =
-            "Invalid delta type and/or event type for company number: %s";
+            "Invalid delta type and/or event type for company number %s";
 
     public NullMetricsClient(Logger logger) {
         this.logger = logger;

@@ -17,9 +17,9 @@ import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransf
 public class ChangedChargesClient implements MetricsClient {
 
     private static final String CHARGES_DELTA_TYPE = "charges";
-    private static final Boolean IS_MORTGAGE = true;
-    private static final Boolean IS_APPOINTMENT = false;
-    private static final Boolean IS_PSC = false;
+    private static final boolean IS_MORTGAGE = true;
+    private static final boolean IS_APPOINTMENT = false;
+    private static final boolean IS_PSC = false;
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;
