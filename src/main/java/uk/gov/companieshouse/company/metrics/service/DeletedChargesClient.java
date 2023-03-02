@@ -63,8 +63,8 @@ public class DeletedChargesClient implements MetricsClient {
                 handleUriValidationError(companyNumber, ex);
             }
         } else {
-            throw new RetryableErrorException("Charge details found for [%s] when " 
-                    + "should have been deleted " + companyNumber);
+            throw new RetryableErrorException(String.format("Charge details found for [%s] when "
+                    + "should have been deleted", companyNumber));
         }
     }
 

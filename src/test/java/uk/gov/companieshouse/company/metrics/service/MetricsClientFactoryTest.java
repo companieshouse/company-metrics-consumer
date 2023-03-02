@@ -4,10 +4,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import uk.gov.companieshouse.company.metrics.util.TestConfig;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@TestPropertySource(locations = "classpath:application-test_main.yml")
+@Import(TestConfig.class)
+@ActiveProfiles("test_main")
 class MetricsClientFactoryTest {
 
     @Autowired
@@ -34,8 +41,6 @@ class MetricsClientFactoryTest {
         // then
         assertTrue(metricsClient instanceof DeletedChargesClient);
     }
-
-
 
     @Test
     @DisplayName("Metrics factory correctly returns a null metrics client when deltaType mismatch")

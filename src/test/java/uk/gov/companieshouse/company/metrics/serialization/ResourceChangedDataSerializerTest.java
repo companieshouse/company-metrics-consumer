@@ -5,18 +5,28 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
+import javax.management.ObjectName;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceChangedDataSerializerTest {
 
     @Mock
     private Logger logger;
+
     private ResourceChangedDataSerializer serializer;
 
     @BeforeEach
@@ -47,6 +57,13 @@ public class ResourceChangedDataSerializerTest {
         byte[] byteExample = "Sample bytes".getBytes();
         byte[] serialize = serializer.serialize("", byteExample);
         assertThat(serialize).isEqualTo(byteExample);
+    }
+
+    @Test
+    void When_serializeFails_throwsNonRetryableError() {
+        int[] newIntArray = new int[1];
+        when(serializer.serialize("", newIntArray)).thenThrow(NonRetryableErrorException.class);
+        assertThrows(NonRetryableErrorException.class, () -> serializer.serialize("", newIntArray));
     }
 
     private ResourceChangedData decodedData(byte[] resourceChangedData) {

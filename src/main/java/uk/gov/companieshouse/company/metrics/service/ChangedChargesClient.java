@@ -61,8 +61,8 @@ public class ChangedChargesClient implements MetricsClient {
                 handleUriValidationError(companyNumber, ex);
             }
         } else {
-            throw new RetryableErrorException("Charge details not found for company "
-                    + companyNumber);
+            throw new RetryableErrorException(String.format("Charge details not found for "
+                    + "company [%s]", companyNumber));
         }
     }
 

@@ -55,11 +55,11 @@ class CompanyNumberExtractorTest {
     private static Stream<Arguments> extractorFixtures() {
         return Stream.of(
                 arguments("The extractor should throw a non retryable exception when it cannot extract a company number",
-                        "company-exemptions",
-                        "Could not extract company number from resource URI: company-exemptions"),
+                        "company-appointments",
+                        "Could not extract company number from resource URI: company-appointments"),
                 arguments("The extractor should throw a non retryable exception when it cannot extract an empty company number",
-                        "company//exemptions",
-                        "Could not extract company number from resource URI: company//exemptions"),
+                        "company//charges",
+                        "Could not extract company number from resource URI: company//charges"),
                 arguments("The extractor should throw a non retryable exception when it cannot extract a company number from an empty uri",
                         "",
                         "Could not extract company number from empty or null resource uri"),
