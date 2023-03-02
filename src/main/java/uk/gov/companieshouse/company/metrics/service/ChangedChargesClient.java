@@ -15,7 +15,11 @@ import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransf
 
 @Component
 public class ChangedChargesClient implements MetricsClient {
-    public static final String CHARGES_DELTA_TYPE = "charges";
+
+    private static final String CHARGES_DELTA_TYPE = "charges";
+    private static final Boolean IS_MORTGAGE = true;
+    private static final Boolean IS_APPOINTMENT = false;
+    private static final Boolean IS_PSC = false;
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;
@@ -44,18 +48,21 @@ public class ChangedChargesClient implements MetricsClient {
             InternalApiClient client = internalApiClientFactory.get();
             try {
                 MetricsRecalculateApi metricsRecalculateApi = metricsApiTransformer
-                        .transform(updatedBy);
+                        .transform(updatedBy, IS_MORTGAGE, IS_APPOINTMENT, IS_PSC);
                 client.privateCompanyMetricsUpsertHandler()
                         .postCompanyMetrics(
                                 String.format("/company/%s/metrics/recalculate", companyNumber),
                                 metricsRecalculateApi)
                         .execute();
             } catch (ApiErrorResponseException ex) {
-                metricsApiResponseHandlerImpl.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
+                metricsApiResponseHandlerImpl
+                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             } catch (IllegalArgumentException ex) {
-                metricsApiResponseHandlerImpl.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
+                metricsApiResponseHandlerImpl
+                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             } catch (URIValidationException ex) {
-                metricsApiResponseHandlerImpl.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
+                metricsApiResponseHandlerImpl
+                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             }
         } else {
             throw new RetryableErrorException(String.format("Charge details not found for "

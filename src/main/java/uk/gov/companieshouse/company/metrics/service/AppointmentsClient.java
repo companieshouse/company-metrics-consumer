@@ -12,7 +12,10 @@ import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransf
 @Component
 public class AppointmentsClient implements MetricsClient {
 
-    public static final String APPOINTMENTS_DELTA_TYPE = "appointments";
+    private static final String APPOINTMENTS_DELTA_TYPE = "appointments";
+    private static final Boolean IS_MORTGAGE = false;
+    private static final Boolean IS_APPOINTMENT = true;
+    private static final Boolean IS_PSC = false;
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;
@@ -42,18 +45,21 @@ public class AppointmentsClient implements MetricsClient {
         InternalApiClient client = internalApiClientFactory.get();
         try {
             MetricsRecalculateApi metricsRecalculateApi = metricsApiTransformer
-                    .transform(updatedBy);
+                    .transform(updatedBy, IS_MORTGAGE, IS_APPOINTMENT, IS_PSC);
             client.privateCompanyMetricsUpsertHandler()
                     .postCompanyMetrics(
                             String.format("/company/%s/metrics/recalculate", companyNumber),
                             metricsRecalculateApi)
                     .execute();
         } catch (ApiErrorResponseException ex) {
-            metricsApiResponseHandlerImpl.handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex);
+            metricsApiResponseHandlerImpl
+                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         } catch (IllegalArgumentException ex) {
-            metricsApiResponseHandlerImpl.handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex);
+            metricsApiResponseHandlerImpl
+                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         } catch (URIValidationException ex) {
-            metricsApiResponseHandlerImpl.handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex);
+            metricsApiResponseHandlerImpl
+                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         }
     }
 }

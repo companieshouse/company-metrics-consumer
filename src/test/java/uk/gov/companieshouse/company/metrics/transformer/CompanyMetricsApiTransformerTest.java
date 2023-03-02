@@ -15,7 +15,7 @@ class CompanyMetricsApiTransformerTest {
     private final CompanyMetricsApiTransformer transformer = new CompanyMetricsApiTransformer();
 
     @Test
-    void testTransformSuccessfully() {
+    void testSuccessfulTransformForMortgageIsTrue() {
         final String updatedBy = String.format("%s-%s-%s", MOCK_TOPIC, MOCK_PARTITION, MOCK_OFFSET);
         MetricsRecalculateApi expectedApi = new MetricsRecalculateApi();
         InternalData internalData = new InternalData();
@@ -26,7 +26,22 @@ class CompanyMetricsApiTransformerTest {
         expectedApi.setPersonsWithSignificantControl(Boolean.FALSE);
         expectedApi.setInternalData(internalData);
 
-        assertThat(transformer.transform(updatedBy)).isEqualTo(expectedApi);
+        assertThat(transformer.transform(updatedBy, true, false, false)).isEqualTo(expectedApi);
+    }
+
+    @Test
+    void testSuccessfulTransformForAppointmentsIsTrue() {
+        final String updatedBy = String.format("%s-%s-%s", MOCK_TOPIC, MOCK_PARTITION, MOCK_OFFSET);
+        MetricsRecalculateApi expectedApi = new MetricsRecalculateApi();
+        InternalData internalData = new InternalData();
+        internalData.setUpdatedBy(updatedBy);
+
+        expectedApi.setMortgage(Boolean.FALSE);
+        expectedApi.setAppointments(Boolean.TRUE);
+        expectedApi.setPersonsWithSignificantControl(Boolean.FALSE);
+        expectedApi.setInternalData(internalData);
+
+        assertThat(transformer.transform(updatedBy, false, true, false)).isEqualTo(expectedApi);
     }
 
 }

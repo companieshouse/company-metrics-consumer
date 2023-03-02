@@ -10,14 +10,17 @@ public class CompanyMetricsApiTransformer {
     /**
      * Prepare MetricsRecalculateApi object.
      */
-    public MetricsRecalculateApi transform(String updatedBy) {
+    public MetricsRecalculateApi transform(String updatedBy,
+                                           Boolean isMortgage,
+                                           Boolean isAppointment,
+                                           Boolean isPsc) {
         MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
 
         InternalData internalData = new InternalData();
         internalData.setUpdatedBy(updatedBy);
-        metricsRecalculateApi.setMortgage(Boolean.TRUE);
-        metricsRecalculateApi.setAppointments(Boolean.FALSE);
-        metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
+        metricsRecalculateApi.setMortgage(isMortgage);
+        metricsRecalculateApi.setAppointments(isAppointment);
+        metricsRecalculateApi.setPersonsWithSignificantControl(isPsc);
         metricsRecalculateApi.setInternalData(internalData);
 
         return metricsRecalculateApi;

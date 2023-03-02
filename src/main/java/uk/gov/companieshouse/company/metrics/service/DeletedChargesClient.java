@@ -10,34 +10,35 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
-import uk.gov.companieshouse.logging.Logger;
-
 
 @Component
 public class DeletedChargesClient implements MetricsClient {
-    public static final String FAILED_MSG = "Failed recalculating charges for company [%s]";
-    public static final String ERROR_MSG = "Error [%s] recalculating charges for company [%s]";
-    private final Logger logger;
+
+    private static final String CHARGES_DELTA_TYPE = "charges";
+    private static final Boolean IS_MORTGAGE = true;
+    private static final Boolean IS_APPOINTMENT = false;
+    private static final Boolean IS_PSC = false;
+
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;
     private final ChargesDataApiService chargesDataApiService;
+    private final MetricsApiResponseHandler metricsApiResponseHandlerImpl;
 
     /**
      * Constructor to construct and return instance of
      * deleteChargesClient - used to post a recalculation of company charges metrics.
      *
      */
-    public DeletedChargesClient(Logger logger,
-                                Supplier<InternalApiClient> internalApiClientFactory,
+    public DeletedChargesClient(Supplier<InternalApiClient> internalApiClientFactory,
                                 CompanyMetricsApiTransformer metricsApiTransformer,
-                                ChargesDataApiService chargesDataApiService) {
-        this.logger = logger;
+                                ChargesDataApiService chargesDataApiService,
+                                MetricsApiResponseHandler metricsApiResponseHandlerImpl) {
         this.internalApiClientFactory = internalApiClientFactory;
         this.metricsApiTransformer = metricsApiTransformer;
         this.chargesDataApiService = chargesDataApiService;
+        this.metricsApiResponseHandlerImpl = metricsApiResponseHandlerImpl;
     }
 
     @Override
@@ -49,47 +50,25 @@ public class DeletedChargesClient implements MetricsClient {
             InternalApiClient client = internalApiClientFactory.get();
             try {
                 MetricsRecalculateApi metricsRecalculateApi = metricsApiTransformer
-                        .transform(updatedBy);
+                        .transform(updatedBy, IS_MORTGAGE, IS_APPOINTMENT, IS_PSC);
                 client.privateCompanyMetricsUpsertHandler()
                         .postCompanyMetrics(
                                 String.format("/company/%s/metrics/recalculate", companyNumber),
                                 metricsRecalculateApi)
                         .execute();
             } catch (ApiErrorResponseException ex) {
-                handleApiError(companyNumber, ex);
+                metricsApiResponseHandlerImpl
+                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             } catch (IllegalArgumentException ex) {
-                handleIllegalArguementError(companyNumber, ex);
+                metricsApiResponseHandlerImpl
+                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             } catch (URIValidationException ex) {
-                handleUriValidationError(companyNumber, ex);
+                metricsApiResponseHandlerImpl
+                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             }
         } else {
             throw new RetryableErrorException(String.format("Charge details found for [%s] when "
                     + "should have been deleted", companyNumber));
-        }
-    }
-
-    private void handleUriValidationError(String companyNumber, URIValidationException ex) {
-        String message = String.format(FAILED_MSG, companyNumber);
-        logger.error(message);
-        throw new NonRetryableErrorException(message, ex);
-    }
-
-    private void handleIllegalArguementError(String companyNumber, IllegalArgumentException ex) {
-        String message = String.format(FAILED_MSG, companyNumber);
-        logger.error(message);
-        throw new RetryableErrorException(message, ex);
-    }
-
-    private void handleApiError(String companyNumber, ApiErrorResponseException ex) {
-        String message = String.format(ERROR_MSG, ex.getStatusCode(), companyNumber);
-        if (HttpStatus.valueOf(ex.getStatusCode()).is5xxServerError()) {
-            logger.info(message);
-            throw new RetryableErrorException(message, ex);
-        } else if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-            logger.info(message);
-        } else {
-            logger.error(message);
-            throw new NonRetryableErrorException(message, ex);
         }
     }
 

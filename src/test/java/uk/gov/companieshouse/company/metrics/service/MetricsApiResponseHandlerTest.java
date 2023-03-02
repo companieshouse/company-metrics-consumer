@@ -24,10 +24,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MetricsApiResponseHandlerTest {
 
-    private static final String FAILED_MSG = "Failed recalculating %s for company %s";
-    private static final String ERROR_MSG = "Error %s recalculating %s for company %s";
+    private static final String FAILED_MSG = "Failed recalculating %s for company %s with context id %s";
+    private static final String ERROR_MSG = "Error %s recalculating %s for company %s with context id %s";
     private static final String COMPANY_NUMBER = "12345678";
     private static final String APPOINTMENTS_DELTA_TYPE = "appointments";
+    private static final String CONTEXT_ID = "1234";
 
     @Mock
     private Logger logger;
@@ -44,10 +45,10 @@ class MetricsApiResponseHandlerTest {
     @Test
     void testHandleUriValidationException() {
         // given
-        String message = String.format(FAILED_MSG, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER);
+        String message = String.format(FAILED_MSG, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new URIValidationException(any()));
+        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new URIValidationException(any()), CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(NonRetryableErrorException.class, actual);
@@ -58,13 +59,13 @@ class MetricsApiResponseHandlerTest {
     @Test
     void testHandleIllegalArgumentException() {
         // given
-        String message = String.format(FAILED_MSG, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER);
+        String message = String.format(FAILED_MSG, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
         String causeMessage = "cause message";
         when(illegalArgumentException.getCause()).thenReturn(throwable);
         when(throwable.getMessage()).thenReturn(causeMessage);
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException);
+        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(RetryableErrorException.class, actual);
@@ -75,10 +76,10 @@ class MetricsApiResponseHandlerTest {
     @Test
     void testHandleIllegalArgumentExceptionWhenCauseIsNull() {
         // given
-        String message = String.format(FAILED_MSG, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER);
+        String message = String.format(FAILED_MSG, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException);
+        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(RetryableErrorException.class, actual);
@@ -90,11 +91,11 @@ class MetricsApiResponseHandlerTest {
     void testHandleApiErrorResponseExceptionWhenStatusCode500() {
         // given
         int statusCode = 500;
-        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER);
+        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
         HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCode, "", new HttpHeaders());
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder));
+        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(RetryableErrorException.class, actual);
@@ -106,11 +107,11 @@ class MetricsApiResponseHandlerTest {
     void testHandleApiErrorResponseExceptionWhenStatusCode404() {
         // given
         int statusCode = 404;
-        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER);
+        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
         HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCode, "", new HttpHeaders());
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder));
+        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
 
         // then
         assertDoesNotThrow(actual);
@@ -121,11 +122,11 @@ class MetricsApiResponseHandlerTest {
     void testHandleApiErrorResponseExceptionWhenStatusCodeIsNot404Or5xx() {
         // given
         int statusCode = 403;
-        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER);
+        String message = String.format(ERROR_MSG, statusCode, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
         HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCode, "", new HttpHeaders());
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder));
+        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(NonRetryableErrorException.class, actual);

@@ -31,7 +31,7 @@ class AppointmentsClientTest {
     private static final String UPDATED_BY = "updated_by";
     private static final String RESOURCE_URI = "resource_uri";
     private static final String CONTEXT_ID = "context_id";
-    public static final String APPOINTMENTS_DELTA_TYPE = "appointments";
+    private static final String APPOINTMENTS_DELTA_TYPE = "appointments";
 
     @Mock
     private Supplier<InternalApiClient> internalApiClientSupplier;
@@ -66,7 +66,7 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, false, true, false));
         verify(privateCompanyMetricsUpsert).execute();
     }
 
@@ -83,9 +83,9 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, false, true, false));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException);
+        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -101,9 +101,9 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, false, true, false));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException);
+        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -119,9 +119,9 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, false, true, false));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException);
+        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
     }
 
     @Test
@@ -137,8 +137,8 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, false, true, false));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, uriValidationException);
+        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, uriValidationException, CONTEXT_ID);
     }
 }
