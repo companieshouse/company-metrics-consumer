@@ -14,15 +14,11 @@ public class CompanyMetricsApiTransformer {
                                            boolean isMortgage,
                                            boolean isAppointment,
                                            boolean isPsc) {
-        MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
-
-        InternalData internalData = new InternalData();
-        internalData.setUpdatedBy(updatedBy);
-        metricsRecalculateApi.setMortgage(isMortgage);
-        metricsRecalculateApi.setAppointments(isAppointment);
-        metricsRecalculateApi.setPersonsWithSignificantControl(isPsc);
-        metricsRecalculateApi.setInternalData(internalData);
-
-        return metricsRecalculateApi;
+        return new MetricsRecalculateApi()
+                .mortgage(isMortgage)
+                .appointments(isAppointment)
+                .personsWithSignificantControl(isPsc)
+                .internalData(new InternalData()
+                        .updatedBy(updatedBy));
     }
 }

@@ -6,8 +6,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.error.ApiErrorResponseException;
-import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.logging.Logger;
 
@@ -19,11 +17,9 @@ import static org.mockito.Mockito.verify;
 class NullMetricsClientTest {
 
     private static final String COMPANY_NUMBER = "01203396";
-    private static final String UPDATEDBY = "updatedBy";
-
-    private static final String RESOURCEURI = String.format("/company/%s/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg", COMPANY_NUMBER);
-
-    private static final String CONTEXTID = "context_id";
+    private static final String UPDATED_BY = "updatedBy";
+    private static final String RESOURCE_URI = String.format("/company/%s/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg", COMPANY_NUMBER);
+    private static final String CONTEXT_ID = "context_id";
 
     @Mock
     private Logger logger;
@@ -32,10 +28,10 @@ class NullMetricsClientTest {
     private NullMetricsClient client;
 
     @Test
-    void testThrowNonRetryableExceptionIfPostMetricsInvoked() throws ApiErrorResponseException, URIValidationException {
-
+    void testThrowNonRetryableExceptionIfPostMetricsInvoked() {
+        // given
         //when
-        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         //then
         Exception exception = assertThrows(NonRetryableErrorException.class, actual);

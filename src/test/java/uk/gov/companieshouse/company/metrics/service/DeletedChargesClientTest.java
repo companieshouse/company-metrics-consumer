@@ -14,7 +14,6 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.metrics.PrivateCompanyMetricsUpsertHandler;
 import uk.gov.companieshouse.api.handler.metrics.request.PrivateCompanyMetricsUpsert;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
@@ -31,7 +30,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DeletedChargesClientTest {
-
 
     private static final String COMPANY_NUMBER = "01203396";
     private static final String PATH = String.format("/company/%s/metrics/recalculate", COMPANY_NUMBER);
@@ -68,7 +66,6 @@ class DeletedChargesClientTest {
     @InjectMocks
     private DeletedChargesClient client;
 
-
     @Test
     void testDelete() throws ApiErrorResponseException, URIValidationException {
         // given
@@ -77,7 +74,6 @@ class DeletedChargesClientTest {
         when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
         when(privateCompanyMetricsUpsert.execute()).thenReturn(new ApiResponse<>(200, Collections.emptyMap()));
         when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
-
 
         // when
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
@@ -183,10 +179,9 @@ class DeletedChargesClientTest {
     }
 
     @Test
-    void testThrowRetryableExceptionIfChargesDetailsCannotBeFound() throws ApiErrorResponseException, URIValidationException{
+    void testThrowRetryableExceptionIfChargesDetailsCannotBeFound() {
         //given
         when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(200, Collections.emptyMap()));
-
 
         // when
         Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
@@ -198,5 +193,4 @@ class DeletedChargesClientTest {
         verifyNoInteractions(chargesMetricsPostHandler);
         verifyNoInteractions(privateCompanyMetricsUpsert);
     }
-
 }
