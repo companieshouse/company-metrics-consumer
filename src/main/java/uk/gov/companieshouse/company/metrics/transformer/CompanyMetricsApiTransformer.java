@@ -10,16 +10,15 @@ public class CompanyMetricsApiTransformer {
     /**
      * Prepare MetricsRecalculateApi object.
      */
-    public MetricsRecalculateApi transform(String updatedBy) {
-        MetricsRecalculateApi metricsRecalculateApi = new MetricsRecalculateApi();
-
-        InternalData internalData = new InternalData();
-        internalData.setUpdatedBy(updatedBy);
-        metricsRecalculateApi.setMortgage(Boolean.TRUE);
-        metricsRecalculateApi.setAppointments(Boolean.FALSE);
-        metricsRecalculateApi.setPersonsWithSignificantControl(Boolean.FALSE);
-        metricsRecalculateApi.setInternalData(internalData);
-
-        return metricsRecalculateApi;
+    public MetricsRecalculateApi transform(String updatedBy,
+                                           boolean isMortgage,
+                                           boolean isAppointment,
+                                           boolean isPsc) {
+        return new MetricsRecalculateApi()
+                .mortgage(isMortgage)
+                .appointments(isAppointment)
+                .personsWithSignificantControl(isPsc)
+                .internalData(new InternalData()
+                        .updatedBy(updatedBy));
     }
 }

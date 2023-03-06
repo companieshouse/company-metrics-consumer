@@ -22,7 +22,7 @@ public class NullMetricsClient implements MetricsClient {
                             String resourceUri,
                             String contextId) {
         logger.error(String.format(INVALID_DELTA_EVENT_TYPE, companyNumber));
-        throw new NonRetryableErrorException(String.format(
-                INVALID_DELTA_EVENT_TYPE, companyNumber));
+        throw new NonRetryableErrorException(
+                String.format(INVALID_DELTA_EVENT_TYPE, companyNumber));
     }
 }

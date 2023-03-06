@@ -21,20 +21,19 @@ public class ResourceChangedDataDeserializer implements Deserializer<ResourceCha
         this.logger = logger;
     }
 
-
     /**
      * deserialize.
      */
     @Override
     public ResourceChangedData deserialize(String topic, byte[] data) {
         try {
-            logger.trace(String.format("DSND-599: Message picked up from topic with data: %s",
+            logger.trace(String.format("Message picked up from topic with data: %s",
                     new String(data)));
             Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
             DatumReader<ResourceChangedData> reader =
                     new ReflectDatumReader<>(ResourceChangedData.class);
             ResourceChangedData resourceChangedData = reader.read(null, decoder);
-            logger.trace(String.format("DSND-599: Message successfully de-serialised into "
+            logger.trace(String.format("Message successfully de-serialised into "
                     + "Avro ResourceChangedData object: %s", resourceChangedData));
             return resourceChangedData;
         } catch (Exception ex) {

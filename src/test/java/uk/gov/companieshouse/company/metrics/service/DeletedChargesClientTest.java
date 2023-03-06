@@ -14,10 +14,8 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.metrics.PrivateCompanyMetricsUpsertHandler;
 import uk.gov.companieshouse.api.handler.metrics.request.PrivateCompanyMetricsUpsert;
 import uk.gov.companieshouse.api.model.ApiResponse;
-import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
-import uk.gov.companieshouse.logging.Logger;
 
 import java.util.Collections;
 import java.util.function.Supplier;
@@ -33,15 +31,16 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DeletedChargesClientTest {
 
-
     private static final String COMPANY_NUMBER = "01203396";
     private static final String PATH = String.format("/company/%s/metrics/recalculate", COMPANY_NUMBER);
-
-    private static final String UPDATEDBY = "updatedBy";
-
-    private static final String RESOURCEURI = String.format("/company/%s/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg", COMPANY_NUMBER);
-
-    private static final String CONTEXTID = "context_id";
+    private static final String UPDATED_BY = "updatedBy";
+    private static final String RESOURCE_URI = String.format("/company/%s/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg", COMPANY_NUMBER);
+    private static final String CONTEXT_ID = "context_id";
+    private static final String CHARGES_DELTA_TYPE = "charges";
+    private static final String INVALID_PATH = "invalid/path";
+    private static final boolean IS_MORTGAGE = true;
+    private static final boolean IS_APPOINTMENTS = false;
+    private static final boolean IS_PSC = false;
 
     @Mock
     private Supplier<InternalApiClient> internalApiClientSupplier;
@@ -62,11 +61,10 @@ class DeletedChargesClientTest {
     private ChargesDataApiService chargesDataApiService;
 
     @Mock
-    private Logger logger;
+    private MetricsApiResponseHandlerImpl responseHandler;
 
     @InjectMocks
     private DeletedChargesClient client;
-
 
     @Test
     void testDelete() throws ApiErrorResponseException, URIValidationException {
@@ -75,116 +73,118 @@ class DeletedChargesClientTest {
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(chargesMetricsPostHandler);
         when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
         when(privateCompanyMetricsUpsert.execute()).thenReturn(new ApiResponse<>(200, Collections.emptyMap()));
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
-
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
 
         // when
-        client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+        client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATEDBY));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
     }
 
     @Test
     void testThrowNonRetryableExceptionIfClientErrorReturned() throws ApiErrorResponseException, URIValidationException {
         // given
+        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(new HttpResponseException.Builder(404, "Not found", new HttpHeaders()));
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(chargesMetricsPostHandler);
         when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
-        when(privateCompanyMetricsUpsert.execute()).thenThrow(new ApiErrorResponseException(new HttpResponseException.Builder(404, "Not found", new HttpHeaders())));
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
+        when(privateCompanyMetricsUpsert.execute()).thenThrow(apiErrorResponseException);
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
 
         // when
-        client.postMetrics(COMPANY_NUMBER,UPDATEDBY, RESOURCEURI, CONTEXTID);
+        client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATEDBY));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(logger).info("Error [404] recalculating charges for company [01203396]");
+        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
     void testThrowRetryableExceptionIfServerErrorReturned() throws ApiErrorResponseException, URIValidationException {
         // given
+        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(new HttpResponseException.Builder(500, "Internal server error", new HttpHeaders()));
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(chargesMetricsPostHandler);
         when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
-        when(privateCompanyMetricsUpsert.execute()).thenThrow(new ApiErrorResponseException(new HttpResponseException.Builder(500, "Internal server error", new HttpHeaders())));
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
+        when(privateCompanyMetricsUpsert.execute()).thenThrow(apiErrorResponseException);
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
 
         // when
-        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+        client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        assertThrows(RetryableErrorException.class, actual);
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATEDBY));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
+        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
     void testThrowNonRetryableExceptionIfBadRequestReturned() throws ApiErrorResponseException, URIValidationException {
         // given
+        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(new HttpResponseException.Builder(400, "Internal server error", new HttpHeaders()));
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(chargesMetricsPostHandler);
         when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
-        when(privateCompanyMetricsUpsert.execute()).thenThrow(new ApiErrorResponseException(new HttpResponseException.Builder(400, "Internal server error", new HttpHeaders())));
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
+        when(privateCompanyMetricsUpsert.execute()).thenThrow(apiErrorResponseException);
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
 
         // when
-        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+        client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        assertThrows(NonRetryableErrorException.class, actual);
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATEDBY));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
+        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
     void testThrowRetryableExceptionIfIllegalArgumentExceptionIsCaught() throws ApiErrorResponseException, URIValidationException {
         // given
+        IllegalArgumentException illegalArgumentException = new IllegalArgumentException("Internal server error");
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(chargesMetricsPostHandler);
         when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
-        when(privateCompanyMetricsUpsert.execute()).thenThrow(new IllegalArgumentException("Internal server error"));
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
+        when(privateCompanyMetricsUpsert.execute()).thenThrow(illegalArgumentException);
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
 
         // when
-        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+        client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        assertThrows(RetryableErrorException.class, actual);
-        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATEDBY));
+        verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
+        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
     }
 
     @Test
     void testThrowNonRetryableExceptionIfComapnyNumberInvalid() throws ApiErrorResponseException, URIValidationException {
         // given
-        // given
+        URIValidationException uriValidationException = new URIValidationException("Invalid URI");
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(chargesMetricsPostHandler);
         when(chargesMetricsPostHandler.postCompanyMetrics(anyString(), any())).thenReturn(privateCompanyMetricsUpsert);
-        when(privateCompanyMetricsUpsert.execute()).thenThrow(new URIValidationException("Invalid URI"));
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
+        when(privateCompanyMetricsUpsert.execute()).thenThrow(uriValidationException);
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(404, Collections.emptyMap()));
 
         // when
-        Executable actual = () -> client.postMetrics("invalid/path", UPDATEDBY, RESOURCEURI, CONTEXTID);
+        client.postMetrics(INVALID_PATH, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         // then
-        assertThrows(NonRetryableErrorException.class, actual);
-        verify(chargesMetricsPostHandler).postCompanyMetrics("/company/invalid/path/metrics/recalculate", metricsApiTransformer.transform(UPDATEDBY));
+        verify(chargesMetricsPostHandler).postCompanyMetrics("/company/invalid/path/metrics/recalculate", metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
+        verify(responseHandler).handle(INVALID_PATH, CHARGES_DELTA_TYPE, uriValidationException, CONTEXT_ID);
     }
 
     @Test
-    void testThrowRetryableExceptionIfChargesDetailsCannotBeFound() throws ApiErrorResponseException, URIValidationException{
+    void testThrowRetryableExceptionIfChargesDetailsCannotBeFound() {
         //given
-        when(chargesDataApiService.getACharge(CONTEXTID, RESOURCEURI)).thenReturn(new ApiResponse<>(200, Collections.emptyMap()));
-
+        when(chargesDataApiService.getACharge(CONTEXT_ID, RESOURCE_URI)).thenReturn(new ApiResponse<>(200, Collections.emptyMap()));
 
         // when
-        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATEDBY, RESOURCEURI, CONTEXTID);
+        Executable actual = () -> client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI, CONTEXT_ID);
 
         //then
         Exception exception = assertThrows(RetryableErrorException.class, actual);
@@ -193,5 +193,4 @@ class DeletedChargesClientTest {
         verifyNoInteractions(chargesMetricsPostHandler);
         verifyNoInteractions(privateCompanyMetricsUpsert);
     }
-
 }
