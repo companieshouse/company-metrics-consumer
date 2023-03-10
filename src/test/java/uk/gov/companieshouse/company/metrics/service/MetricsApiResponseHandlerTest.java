@@ -114,7 +114,8 @@ class MetricsApiResponseHandlerTest {
         Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
 
         // then
-        assertDoesNotThrow(actual);
+        Exception ex = assertThrows(NonRetryableErrorException.class, actual);
+        assertEquals(message, ex.getMessage());
         verify(logger).info(message);
     }
 

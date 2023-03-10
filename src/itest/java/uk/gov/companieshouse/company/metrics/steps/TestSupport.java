@@ -20,7 +20,7 @@ public class TestSupport {
     KafkaTemplate<String, Object> kafkaTemplate;
 
     private static WireMockServer wireMockServer = null;
-    public static final String RESOURCE_KIND = "company-charges";
+    public static final String RESOURCE_KIND = "resource_kind";
     public static final String CONTEXT_ID = "context_id";
     public static final String RESOURCE_ID = "11223344";
     public static final String CHANGED_EVENT_TYPE = "changed";
@@ -30,10 +30,9 @@ public class TestSupport {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public ResourceChangedData createResourceChangedMessage(String companyChargesLink,
-                                                            String companyNumber,
-                                                            String chargeId)
-            {
+    public ResourceChangedData createResourceChangedMessageCharges(String companyChargesLink,
+                                                                   String companyNumber,
+                                                                   String chargeId) {
 
         String chargesRecord = loadFile("payloads", "charges-record.json");
 
@@ -49,10 +48,9 @@ public class TestSupport {
                 .setEvent(eventRecord)
                 .setData(chargesRecord)
                 .build();
-
     }
 
-    public ResourceChangedData createResourceDeletedMessage(String companyChargesLink, String companyNumber, String chargedId, String payload) {
+    public ResourceChangedData createResourceDeletedMessageCharges(String companyChargesLink, String companyNumber, String chargedId, String payload) {
 
         String chargesRecord = loadFile("payloads", payload);
 
@@ -68,6 +66,42 @@ public class TestSupport {
                 .setResourceUri(String.format(companyChargesLink, companyNumber, chargedId))
                 .setEvent(eventRecord)
                 .setData(chargesRecord)
+                .build();
+    }
+
+    public ResourceChangedData createResourceChangedMessageAppointments(String companyAppointmentsLink,
+                                                                        String companyNumber, String EVENT_TYPE)
+    {
+        String appointmentRecord = loadFile("payloads", "appointment-record.json");
+
+        EventRecord eventRecord = new EventRecord();
+        eventRecord.setPublishedAt("2022010351");
+        eventRecord.setType(EVENT_TYPE);
+
+        return ResourceChangedData.newBuilder()
+                .setContextId(CONTEXT_ID)
+                .setResourceId(RESOURCE_ID)
+                .setResourceKind(RESOURCE_KIND)
+                .setResourceUri(String.format(companyAppointmentsLink, companyNumber))
+                .setEvent(eventRecord)
+                .setData(appointmentRecord)
+                .build();
+    }
+
+    public ResourceChangedData createResourceChangedMessageInvalidAppointments(String companyAppointmentsLink,
+                                                                               String companyNumber)
+    {
+        EventRecord eventRecord = new EventRecord();
+        eventRecord.setPublishedAt("2022010351");
+        eventRecord.setType(CHANGED_EVENT_TYPE);
+
+        return ResourceChangedData.newBuilder()
+                .setContextId(CONTEXT_ID)
+                .setResourceId(RESOURCE_ID)
+                .setResourceKind(RESOURCE_KIND)
+                .setResourceUri(String.format(companyAppointmentsLink, companyNumber))
+                .setEvent(eventRecord)
+                .setData("invalidAppointmentsData")
                 .build();
     }
 

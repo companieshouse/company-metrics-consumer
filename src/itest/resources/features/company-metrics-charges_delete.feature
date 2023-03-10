@@ -7,7 +7,6 @@ Feature: Process Company Metrics Consumer delete events
     Then The message is successfully consumed and calls charges-data-api
     Then The message is successfully consumed and calls company-metrics-api with expected payload
 
-
     Examples:
       | companyNumber | KafkaTopic             | payload             |
       | 01203396      | stream-company-charges | charges-record.json |
@@ -32,7 +31,6 @@ Feature: Process Company Metrics Consumer delete events
     When A message with "<payload>" and deleted eventType for "<companyNumber>" is sent to the Kafka topic "<KafkaTopic>"
     Then The message is successfully consumed only once from the "<KafkaTopic>" topic but failed to process
     But  Failed to process and immediately moved the message into "stream-company-charges-company-metrics-consumer-invalid" topic
-
 
     Examples:
       | companyNumber | KafkaTopic             | payload                                              |

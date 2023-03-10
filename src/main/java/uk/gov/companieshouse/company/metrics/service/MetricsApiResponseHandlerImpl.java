@@ -73,6 +73,7 @@ public class MetricsApiResponseHandlerImpl implements MetricsApiResponseHandler 
             throw new RetryableErrorException(message, ex);
         } else if (ex.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
             logger.info(message);
+            throw new NonRetryableErrorException(message, ex);
         } else {
             logger.error(message);
             throw new NonRetryableErrorException(message, ex);

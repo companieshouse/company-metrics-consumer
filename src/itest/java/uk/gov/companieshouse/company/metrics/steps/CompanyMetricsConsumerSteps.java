@@ -60,26 +60,20 @@ public class CompanyMetricsConsumerSteps {
 
     @Autowired
     private TestSupport testSupport;
-
     @Autowired
     public KafkaTemplate<String, Object> kafkaTemplate;
-
     @Autowired
     protected TestRestTemplate restTemplate;
-
     private static WireMockServer wireMockServer;
 
     /**
      * The company number extracted from the current avro file
      */
     private String currentCompanyNumber;
-
     @Autowired
     public KafkaConsumer<String, Object> kafkaConsumer;
-
     @Autowired
     private ResettableCountDownLatch resettableCountDownLatch;
-
 
     @Before
     public void setup() {
@@ -90,19 +84,17 @@ public class CompanyMetricsConsumerSteps {
         configureWiremock();
     }
 
-
     private void configureWiremock() {
         wireMockServer = testSupport.setupWiremock();
         assertThat(wireMockServer.isRunning()).isTrue();
     }
 
-    @When("A message for {string} is successfully sent to the Kafka topic {string}")
+    @When("A message for {string} and changed eventType is successfully sent to the Kafka topic {string}")
     public void generateAvroMessageSendToTheKafkaTopic(String companyNumber,
                                                        String topic)
             throws InterruptedException {
 
-
-        ResourceChangedData avroMessageData = testSupport.createResourceChangedMessage(
+        ResourceChangedData avroMessageData = testSupport.createResourceChangedMessageCharges(
                 VALID_COMPANY_CHARGES_URI, companyNumber, CHARGE_ID);
         currentCompanyNumber = companyNumber;
 
@@ -158,7 +150,6 @@ public class CompanyMetricsConsumerSteps {
     public void a_non_avro_message_is_published_and_failed_to_process(String invalidMessageFileName,
                                                                       String topic)
             throws InterruptedException {
-        configureWiremock();
         String nonAvroMessageData = testSupport.loadAvroMessageFile(invalidMessageFileName);
 
         kafkaTemplate.send(topic, nonAvroMessageData);
@@ -184,7 +175,6 @@ public class CompanyMetricsConsumerSteps {
 
     @Then("The message should be moved to topic {string} after retry attempts of {string}")
     public void the_message_should_retried_and_moved_to_error_topic(String topic, String retryAttempts) {
-
         ConsumerRecord<String, Object> singleRecord =
                 KafkaTestUtils.getSingleRecord(kafkaConsumer, topic, 5000L);
 
@@ -199,7 +189,7 @@ public class CompanyMetricsConsumerSteps {
     @When("A message with {string} and deleted eventType for {string} is sent to the Kafka topic {string}")
     public void a_message_with_deleted_event_type_is_sent_to_the_topic(String payload, String companyNumber, String topicName)
             throws InterruptedException {
-        ResourceChangedData avroMessageData = testSupport.createResourceDeletedMessage(VALID_COMPANY_CHARGES_URI, companyNumber,
+        ResourceChangedData avroMessageData = testSupport.createResourceDeletedMessageCharges(VALID_COMPANY_CHARGES_URI, companyNumber,
                 CHARGE_ID, payload);
         this.currentCompanyNumber = companyNumber;
         sendKafkaMessage(topicName, avroMessageData);
@@ -208,7 +198,7 @@ public class CompanyMetricsConsumerSteps {
     @When("A message with invalid resourceURI and {string} for {string} is sent to the Kafka topic {string}")
     public void a_message_with_invalidResourceUri_payload_and_delete_eventType_is_sent_to_the_topic(String payload, String companyNumber, String topicName)
             throws InterruptedException {
-        ResourceChangedData avroMessageData = testSupport.createResourceDeletedMessage(INVALID_COMPANY_CHARGES_URI, companyNumber,
+        ResourceChangedData avroMessageData = testSupport.createResourceDeletedMessageCharges(INVALID_COMPANY_CHARGES_URI, companyNumber,
                 CHARGE_ID, payload);
         this.currentCompanyNumber = companyNumber;
         sendKafkaMessage(topicName, avroMessageData);
@@ -217,7 +207,7 @@ public class CompanyMetricsConsumerSteps {
     @When("A message with invalid resourceURI for {string} is sent to the Kafka topic {string}")
     public void a_message_with_invalidResourceUri_and_delete_eventType_is_sent_to_the_topic(String companyNumber, String topicName)
             throws InterruptedException {
-        ResourceChangedData avroMessageData = testSupport.createResourceChangedMessage(
+        ResourceChangedData avroMessageData = testSupport.createResourceChangedMessageCharges(
                 INVALID_COMPANY_CHARGES_URI, companyNumber, CHARGE_ID);
         this.currentCompanyNumber = companyNumber;
         sendKafkaMessage(topicName, avroMessageData);
