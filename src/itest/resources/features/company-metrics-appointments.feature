@@ -27,8 +27,8 @@ Feature: Company metrics appointment criteria
       | stream-company-officers | deleted    | SC109614      |
 
   Scenario: Invalid message on topic
-    Given An invalid message exists on the "stream-company-officers" kafka topic
-    And Company Metrics API returns OK status code
+    Given Company Metrics API returns OK status code
+    And An invalid message exists on the "stream-company-officers" kafka topic
     When The message is consumed
     Then A non-retryable exception should be thrown when consuming from "stream-company-officers"
     And The message should be placed on to "stream-company-officers-company-metrics-consumer-invalid" kafka topic

@@ -23,6 +23,7 @@ import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorExceptio
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -71,6 +72,7 @@ public class AppointmentSteps {
         ResponseEntity<String> response = restTemplate.getForEntity(HEALTHCHECK_URI, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.valueOf(200));
         assertThat(response.getBody()).isEqualTo(HEALTHCHECK_RESPONSE_BODY);
+        kafkaConsumer.poll(Duration.ofSeconds(1));
         configureWiremock();
     }
 
