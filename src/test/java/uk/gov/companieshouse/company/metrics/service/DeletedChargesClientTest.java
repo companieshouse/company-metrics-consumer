@@ -61,7 +61,7 @@ class DeletedChargesClientTest {
     private ChargesDataApiService chargesDataApiService;
 
     @Mock
-    private MetricsApiResponseHandlerImpl responseHandler;
+    private MetricsApiResponseHandler metricsApiResponseHandler;
 
     @InjectMocks
     private DeletedChargesClient client;
@@ -99,7 +99,7 @@ class DeletedChargesClientTest {
         // then
         verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -118,7 +118,7 @@ class DeletedChargesClientTest {
         // then
         verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -137,7 +137,7 @@ class DeletedChargesClientTest {
         // then
         verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -156,7 +156,7 @@ class DeletedChargesClientTest {
         // then
         verify(chargesMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, CHARGES_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
     }
 
     @Test
@@ -175,7 +175,7 @@ class DeletedChargesClientTest {
         // then
         verify(chargesMetricsPostHandler).postCompanyMetrics("/company/invalid/path/metrics/recalculate", metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(INVALID_PATH, CHARGES_DELTA_TYPE, uriValidationException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(INVALID_PATH, CHARGES_DELTA_TYPE, uriValidationException, CONTEXT_ID);
     }
 
     @Test

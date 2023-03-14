@@ -46,7 +46,7 @@ Feature: Company metrics appointment criteria
       | stream-company-officers | SC109614      |
 
   Scenario Outline:  No appointments found
-    Given There are no appointments in the appointments collection for the given "<companyNumber>"
+    Given There are no appointments in the appointments collection
     And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then The message should be placed on to "stream-company-officers-company-metrics-consumer-invalid" kafka topic

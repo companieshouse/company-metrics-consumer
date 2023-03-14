@@ -52,7 +52,7 @@ class AppointmentsClientTest {
     private CompanyMetricsApiTransformer metricsApiTransformer;
 
     @Mock
-    private MetricsApiResponseHandlerImpl responseHandler;
+    private MetricsApiResponseHandler metricsApiResponseHandler;
 
     @InjectMocks
     private AppointmentsClient client;
@@ -88,7 +88,7 @@ class AppointmentsClientTest {
         // then
         verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -106,7 +106,7 @@ class AppointmentsClientTest {
         // then
         verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -124,7 +124,7 @@ class AppointmentsClientTest {
         // then
         verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
     }
 
     @Test
@@ -142,6 +142,6 @@ class AppointmentsClientTest {
         // then
         verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(responseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, uriValidationException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, uriValidationException, CONTEXT_ID);
     }
 }

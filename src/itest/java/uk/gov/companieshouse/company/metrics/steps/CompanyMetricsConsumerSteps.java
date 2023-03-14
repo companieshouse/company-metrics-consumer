@@ -35,7 +35,6 @@ import java.util.stream.StreamSupport;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getAllServeEvents;
 import static com.github.tomakehurst.wiremock.client.WireMock.lessThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -64,7 +63,6 @@ public class CompanyMetricsConsumerSteps {
     public KafkaTemplate<String, Object> kafkaTemplate;
     @Autowired
     protected TestRestTemplate restTemplate;
-    private static WireMockServer wireMockServer;
 
     /**
      * The company number extracted from the current avro file
@@ -85,7 +83,7 @@ public class CompanyMetricsConsumerSteps {
     }
 
     private void configureWiremock() {
-        wireMockServer = testSupport.setupWiremock();
+        WireMockServer wireMockServer = testSupport.setupWiremock();
         assertThat(wireMockServer.isRunning()).isTrue();
     }
 
@@ -136,14 +134,12 @@ public class CompanyMetricsConsumerSteps {
 
     @Then("The message is successfully consumed and calls company-metrics-api with expected payload")
     public void checkMessageComsumedAndCompanyMetricsApiCalledWithCorrectValues(){
-        List<ServeEvent> serverEvents = checkServeEvents();
-        assertMetricsApiSuccessfullyInvoked(serverEvents);
+        assertMetricsApiSuccessfullyInvoked(checkServeEvents());
     }
 
     @Then("The message is successfully consumed and calls charges-data-api")
     public void checkMessageComsumedAndChargesDataApiCalledWithCorrectValues() throws JsonProcessingException {
-        List<ServeEvent> serverEvents = checkServeEvents();
-        assertChargesApiSuccessfullyInvoked(serverEvents);
+        assertChargesApiSuccessfullyInvoked(checkServeEvents());
     }
 
     @When("An invalid message {string} is sent to the Kafka topic {string}")
@@ -183,7 +179,7 @@ public class CompanyMetricsConsumerSteps {
                 .filter(header -> header.key().equalsIgnoreCase(RETRY_TOPIC_ATTEMPTS))
                 .collect(Collectors.toList());
 
-        assertThat(retryList.size()).isEqualTo(Integer.parseInt(retryAttempts));
+        assertThat(retryList).hasSize(Integer.parseInt(retryAttempts));
     }
 
     @When("A message with {string} and deleted eventType for {string} is sent to the Kafka topic {string}")
@@ -234,7 +230,7 @@ public class CompanyMetricsConsumerSteps {
         List<Header> retryList = StreamSupport.stream(singleRecord.headers().spliterator(), false)
                 .filter(header -> header.key().equalsIgnoreCase(RETRY_TOPIC_ATTEMPTS))
                 .collect(Collectors.toList());
-        assertThat(retryList.size()).isEqualTo(retryAttempts);
+        assertThat(retryList).hasSize(retryAttempts);
     }
 
     @Then("Metrics Data API endpoint is never invoked")
@@ -256,15 +252,15 @@ public class CompanyMetricsConsumerSteps {
     @NotNull
     private List<ServeEvent> checkServeEvents() {
         List<ServeEvent> serverEvents = testSupport.getServeEvents();
-        assertThat(serverEvents.size()).isEqualTo(2);
-        assertThat(serverEvents.isEmpty()).isFalse(); // assert that the wiremock did something
+        assertThat(serverEvents).hasSize(2);
+        assertThat(serverEvents).isNotEmpty(); // assert that the wiremock did something
         return serverEvents;
     }
 
     private void assertMetricsApiSuccessfullyInvoked(List<ServeEvent> serverEvents) {
-        ServeEvent serveEvent = getServeEvent(0);
+        ServeEvent serveEvent = serverEvents.get(0);
         assertThat(serveEvent.getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
-        String body = new String(serverEvents.get(0).getRequest().getBody());
+        String body = new String(serveEvent.getRequest().getBody());
         MetricsRecalculateApi payload = null;
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -279,11 +275,11 @@ public class CompanyMetricsConsumerSteps {
     }
 
     private void assertChargesApiSuccessfullyInvoked(List<ServeEvent> serverEvents) throws JsonProcessingException {
-        ServeEvent serveEvent = getServeEvent(1);
+        ServeEvent serveEvent = serverEvents.get(1);
 
         assertThat(serveEvent.getRequest().getUrl()).isEqualTo(String.format(VALID_COMPANY_CHARGES_URI, currentCompanyNumber, CHARGE_ID));
 
-        ChargeApi payload = getPayloadFromWireMock(serveEvent, ChargeApi.class);
+        ChargeApi payload = getPayloadFromWireMock(serveEvent);
         assertThat(payload).isNotNull();
         assertThat(payload.getId()).isEqualTo("3001283055");
         assertThat(payload.getChargeNumber()).isEqualTo(50);
@@ -291,21 +287,17 @@ public class CompanyMetricsConsumerSteps {
     }
 
     @Nullable
-    private <T> T getPayloadFromWireMock(ServeEvent serveEvent, Class<T> T) throws JsonProcessingException {
+    private ChargeApi getPayloadFromWireMock(ServeEvent serveEvent) throws JsonProcessingException {
         String body = new String(serveEvent.getResponse().getBody());
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        return mapper.readValue(body, T);
+        return mapper.readValue(body, ChargeApi.class);
     }
 
     private void sendKafkaMessage(String topic, ResourceChangedData avroMessageData) throws InterruptedException {
         kafkaTemplate.send(topic, avroMessageData);
         kafkaTemplate.flush();
         assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
-    }
-
-    private ServeEvent getServeEvent(int index) {
-        return getAllServeEvents().get(index);
     }
 
     private void stubChargesDataApiGetEndpoint(int requiredStatusValue) {

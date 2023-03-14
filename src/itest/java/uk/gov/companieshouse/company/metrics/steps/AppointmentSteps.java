@@ -53,7 +53,6 @@ public class AppointmentSteps {
     public KafkaTemplate<String, Object> kafkaTemplate;
     @Autowired
     protected TestRestTemplate restTemplate;
-    private static WireMockServer wireMockServer;
 
     /**
      * The company number extracted from the current avro file
@@ -77,17 +76,22 @@ public class AppointmentSteps {
     }
 
     private void configureWiremock() {
-        wireMockServer = testSupport.setupWiremock();
+        WireMockServer wireMockServer = testSupport.setupWiremock();
         assertThat(wireMockServer.isRunning()).isTrue();
     }
 
     @Given("A resource change data message for {string} with an appointment entity exists on the {string} kafka topic")
     public void resourceChangedDataMessageExistsOnMainTopic(String companyNumber, String topic) {
+
         ResourceChangedData messageData = testSupport.createResourceChangedMessageAppointments(
-                COMPANY_METRICS_RECALCULATE_URI, companyNumber, CONTEXT.get(EVENT_TYPE).toString());
-        currentCompanyNumber = companyNumber;
+                COMPANY_METRICS_RECALCULATE_URI, companyNumber, getEventType());
+        this.currentCompanyNumber = companyNumber;
 
         sendKafkaMessage(topic, messageData);
+    }
+
+    private String getEventType(){
+        return CONTEXT.get(EVENT_TYPE) == null ? "changed" : CONTEXT.get(EVENT_TYPE).toString();
     }
 
     @Given("A message for {string} with invalid appointment entity exists on the {string} kafka topic")
@@ -119,9 +123,8 @@ public class AppointmentSteps {
     @Then("A non-retryable exception should be thrown when consuming from {string}")
     public void aNonRetryableExceptionIsThrown(String topic) {
         byte[] invalidMessage = "invalidMessage".getBytes();
-        Exception exception = assertThrows(NonRetryableErrorException.class, () -> {
-            resourceChangedDataDeserializer.deserialize(topic, invalidMessage);
-        });
+        Exception exception = assertThrows(NonRetryableErrorException.class, () ->
+            resourceChangedDataDeserializer.deserialize(topic, invalidMessage));
 
         String expectedMessage = "Malformed data";
         String actualMessage = exception.getMessage();
@@ -159,8 +162,8 @@ public class AppointmentSteps {
         );
     }
 
-    @Given("There are no appointments in the appointments collection for the given {string}")
-    public void metricsApiCannotFindAppointmentsForGivenCompanyNumber(String companyNumber) {
+    @Given("There are no appointments in the appointments collection")
+    public void metricsApiCannotFindAppointmentsForGivenCompanyNumber() {
         stubCompanyMetricsApi(HttpStatus.NOT_FOUND.value());
     }
 
@@ -188,8 +191,8 @@ public class AppointmentSteps {
 
     private List<ServeEvent> checkServeEvents() {
         List<ServeEvent> serverEvents = testSupport.getServeEvents();
-        assertThat(serverEvents.size()).isEqualTo(1);
-        assertThat(serverEvents.isEmpty()).isFalse(); // assert that the wiremock did something
+        assertThat(serverEvents).hasSize(1);
+        assertThat(serverEvents).isNotEmpty(); // assert that the wiremock did something
         return serverEvents;
     }
 }
