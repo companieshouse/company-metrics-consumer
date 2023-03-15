@@ -19,7 +19,7 @@ public class AppointmentsClient implements MetricsClient {
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;
-    private final MetricsApiResponseHandler metricsApiResponseHandlerImpl;
+    private final ResponseHandler metricsApiResponseHandler;
 
     /**
      * Constructs AppointmentsClient object. This object is used to send a POST request to the
@@ -27,10 +27,10 @@ public class AppointmentsClient implements MetricsClient {
      */
     public AppointmentsClient(Supplier<InternalApiClient> internalApiClientFactory,
                               CompanyMetricsApiTransformer metricsApiTransformer,
-                              MetricsApiResponseHandlerImpl metricsApiResponseHandlerImpl) {
+                              ResponseHandler metricsApiResponseHandler) {
         this.internalApiClientFactory = internalApiClientFactory;
         this.metricsApiTransformer = metricsApiTransformer;
-        this.metricsApiResponseHandlerImpl = metricsApiResponseHandlerImpl;
+        this.metricsApiResponseHandler = metricsApiResponseHandler;
     }
 
     /**
@@ -52,13 +52,13 @@ public class AppointmentsClient implements MetricsClient {
                             metricsRecalculateApi)
                     .execute();
         } catch (ApiErrorResponseException ex) {
-            metricsApiResponseHandlerImpl
+            metricsApiResponseHandler
                     .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         } catch (IllegalArgumentException ex) {
-            metricsApiResponseHandlerImpl
+            metricsApiResponseHandler
                     .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         } catch (URIValidationException ex) {
-            metricsApiResponseHandlerImpl
+            metricsApiResponseHandler
                     .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         }
     }

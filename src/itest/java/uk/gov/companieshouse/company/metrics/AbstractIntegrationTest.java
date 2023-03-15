@@ -9,5 +9,4 @@ import uk.gov.companieshouse.company.metrics.config.KafkaTestContainerConfig;
 @Import(KafkaTestContainerConfig.class)
 @ActiveProfiles({"test"})
 public abstract class AbstractIntegrationTest {
-
 }

@@ -17,6 +17,14 @@ company-metrics:
         retry-attempts: 4
         backoff-delay: 10
 
+  appointments:
+    stream:
+      enable: true
+      group-id: company-metrics-consumer
+      topic: stream-company-officers
+      retry-attempts: 4
+      backoff-delay: 100
+
 logger:
   namespace: company-metrics-consumer
 

@@ -24,7 +24,7 @@ public class ChangedChargesClient implements MetricsClient {
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;
     private final ChargesDataApiService chargesDataApiService;
-    private final MetricsApiResponseHandler metricsApiResponseHandlerImpl;
+    private final ResponseHandler metricsApiResponseHandler;
 
     /**
      * Constructor to construct and return instance of
@@ -34,11 +34,11 @@ public class ChangedChargesClient implements MetricsClient {
     public ChangedChargesClient(Supplier<InternalApiClient> internalApiClientFactory,
                                 CompanyMetricsApiTransformer metricsApiTransformer,
                                 ChargesDataApiService chargesDataApiService,
-                                MetricsApiResponseHandler metricsApiResponseHandlerImpl) {
+                                ResponseHandler metricsApiResponseHandler) {
         this.internalApiClientFactory = internalApiClientFactory;
         this.metricsApiTransformer = metricsApiTransformer;
         this.chargesDataApiService = chargesDataApiService;
-        this.metricsApiResponseHandlerImpl = metricsApiResponseHandlerImpl;
+        this.metricsApiResponseHandler = metricsApiResponseHandler;
     }
 
     @Override
@@ -55,13 +55,13 @@ public class ChangedChargesClient implements MetricsClient {
                                 metricsRecalculateApi)
                         .execute();
             } catch (ApiErrorResponseException ex) {
-                metricsApiResponseHandlerImpl
+                metricsApiResponseHandler
                         .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             } catch (IllegalArgumentException ex) {
-                metricsApiResponseHandlerImpl
+                metricsApiResponseHandler
                         .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             } catch (URIValidationException ex) {
-                metricsApiResponseHandlerImpl
+                metricsApiResponseHandler
                         .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
             }
         } else {

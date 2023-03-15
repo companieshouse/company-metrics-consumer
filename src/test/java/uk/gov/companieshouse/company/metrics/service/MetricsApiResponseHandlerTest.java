@@ -14,7 +14,6 @@ import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorExceptio
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +39,7 @@ class MetricsApiResponseHandlerTest {
     private Throwable throwable;
 
     @InjectMocks
-    private MetricsApiResponseHandlerImpl responseHandler;
+    private MetricsApiResponseHandler metricsApiResponseHandler;
 
     @Test
     void testHandleUriValidationException() {
@@ -48,7 +47,7 @@ class MetricsApiResponseHandlerTest {
         String message = String.format(FAILED_MSG, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new URIValidationException(any()), CONTEXT_ID);
+        Executable actual = () -> metricsApiResponseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new URIValidationException(any()), CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(NonRetryableErrorException.class, actual);
@@ -65,7 +64,7 @@ class MetricsApiResponseHandlerTest {
         when(throwable.getMessage()).thenReturn(causeMessage);
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
+        Executable actual = () -> metricsApiResponseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(RetryableErrorException.class, actual);
@@ -79,7 +78,7 @@ class MetricsApiResponseHandlerTest {
         String message = String.format(FAILED_MSG, APPOINTMENTS_DELTA_TYPE, COMPANY_NUMBER, CONTEXT_ID);
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
+        Executable actual = () -> metricsApiResponseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(RetryableErrorException.class, actual);
@@ -95,7 +94,7 @@ class MetricsApiResponseHandlerTest {
         HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCodeInternalServerError, "", new HttpHeaders());
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
+        Executable actual = () -> metricsApiResponseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(RetryableErrorException.class, actual);
@@ -111,11 +110,12 @@ class MetricsApiResponseHandlerTest {
         HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCodeNotFound, "", new HttpHeaders());
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
+        Executable actual = () -> metricsApiResponseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
 
         // then
-        assertDoesNotThrow(actual);
-        verify(logger).info(message);
+        Exception ex = assertThrows(NonRetryableErrorException.class, actual);
+        assertEquals(message, ex.getMessage());
+        verify(logger).error(message);
     }
 
     @Test
@@ -126,7 +126,7 @@ class MetricsApiResponseHandlerTest {
         HttpResponseException.Builder builder = new HttpResponseException.Builder(statusCodeForbidden, "", new HttpHeaders());
 
         // when
-        Executable actual = () -> responseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
+        Executable actual = () -> metricsApiResponseHandler.handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, new ApiErrorResponseException(builder), CONTEXT_ID);
 
         // then
         Exception ex = assertThrows(NonRetryableErrorException.class, actual);
