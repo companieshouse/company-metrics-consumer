@@ -45,8 +45,21 @@ Feature: Company metrics appointment criteria
       | stream-company-officers | 08124207      |
       | stream-company-officers | SC109614      |
 
-  Scenario Outline:  No appointments found
-    Given There are no appointments in the appointments collection
+  Scenario Outline: Processing message with invalid resource URI
+    Given The message resource Uri "<invalidResourceUri>" is invalid
+    And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
+    When The message is consumed
+    Then The message should be placed on to "stream-company-officers-company-metrics-consumer-invalid" kafka topic
+
+    Examples:
+      | mainKafkaTopic          | companyNumber | invalidResourceUri                 |
+      | stream-company-officers | 01203396      |                                    |
+      | stream-company-officers | 08124207      | /companyabc/%s/metrics/recalculate |
+      | stream-company-officers | SC109614      | abcdefg                            |
+
+
+  Scenario Outline: Endpoint does not exist/could not be found in metrics api
+    Given The specified endpoint does not exist within company metrics api
     And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then The message should be placed on to "stream-company-officers-company-metrics-consumer-invalid" kafka topic

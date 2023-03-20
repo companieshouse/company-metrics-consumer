@@ -73,6 +73,7 @@ public class AppointmentSteps {
         assertThat(response.getBody()).isEqualTo(HEALTHCHECK_RESPONSE_BODY);
         kafkaConsumer.poll(Duration.ofSeconds(1));
         configureWiremock();
+        CONTEXT.clear();
     }
 
     private void configureWiremock() {
@@ -84,14 +85,20 @@ public class AppointmentSteps {
     public void resourceChangedDataMessageExistsOnMainTopic(String companyNumber, String topic) {
 
         ResourceChangedData messageData = testSupport.createResourceChangedMessageAppointments(
-                COMPANY_METRICS_RECALCULATE_URI, companyNumber, getEventType());
+                getRecalculateURI(), companyNumber, getEventType());
         this.currentCompanyNumber = companyNumber;
 
         sendKafkaMessage(topic, messageData);
     }
 
-    private String getEventType(){
+    private String getEventType() {
         return CONTEXT.get(EVENT_TYPE) == null ? "changed" : CONTEXT.get(EVENT_TYPE).toString();
+    }
+
+    private String getRecalculateURI() {
+        return CONTEXT.get(COMPANY_METRICS_RECALCULATE_URI) == null
+                ? "/company/%s/metrics/recalculate"
+                : CONTEXT.get(COMPANY_METRICS_RECALCULATE_URI).toString();
     }
 
     @Given("A message for {string} with invalid appointment entity exists on the {string} kafka topic")
@@ -153,6 +160,16 @@ public class AppointmentSteps {
         stubCompanyMetricsApi(HttpStatus.UNAUTHORIZED.value());
     }
 
+    @Given("The message resource Uri {string} is invalid")
+    public void theMessageResourceURIIsInvalid(String invalidResourceUri) {
+        CONTEXT.set(COMPANY_METRICS_RECALCULATE_URI, invalidResourceUri);
+    }
+
+    @Given("The specified endpoint does not exist within company metrics api")
+    public void theSpecifiedEndpointWithinMessageDoesNotExistWithinMetricsConsumer() {
+        stubCompanyMetricsApi(HttpStatus.NOT_FOUND.value());
+    }
+
     private void stubCompanyMetricsApi(int statusCode) {
         stubFor(
                 post(urlPathMatching(COMPANY_METRICS_RECALCULATE_POST))
@@ -160,11 +177,6 @@ public class AppointmentSteps {
                                 .withStatus(statusCode)
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON))
         );
-    }
-
-    @Given("There are no appointments in the appointments collection")
-    public void metricsApiCannotFindAppointmentsForGivenCompanyNumber() {
-        stubCompanyMetricsApi(HttpStatus.NOT_FOUND.value());
     }
 
     private void sendKafkaMessage(String topic, ResourceChangedData messageData) {
