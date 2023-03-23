@@ -12,6 +12,8 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -53,6 +55,7 @@ import static org.mockito.Mockito.verify;
 @TestPropertySource(locations = "classpath:application-test_consumer_main.yml")
 @Import(TestConfig.class)
 @ActiveProfiles("test_consumer_main")
+@Execution(ExecutionMode.SAME_THREAD)
 class OfficersStreamConsumerTest {
 
     private static final long MESSAGE_CONSUMED_TIMEOUT = 30L;
