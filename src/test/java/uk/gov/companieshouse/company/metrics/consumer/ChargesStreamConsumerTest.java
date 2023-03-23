@@ -31,6 +31,8 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +55,7 @@ import static org.mockito.Mockito.verify;
 @ActiveProfiles("test_consumer_main")
 class ChargesStreamConsumerTest {
 
-    private static final int MESSAGE_CONSUMED_TIMEOUT = 30;
+    private static final long MESSAGE_CONSUMED_TIMEOUT = 30L;
 
     @Autowired
     private KafkaConsumer<String, byte[]> testConsumer;
@@ -70,6 +72,7 @@ class ChargesStreamConsumerTest {
     @BeforeEach
     public void beforeEach() {
         resettableCountDownLatch.resetLatch(4);
+        testConsumer.poll(Duration.of(1, ChronoUnit.SECONDS));
     }
 
     @Test
