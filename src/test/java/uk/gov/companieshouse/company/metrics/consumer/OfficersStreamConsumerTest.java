@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
@@ -40,14 +41,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = CompanyMetricsConsumerApplication.class)
-@DirtiesContext
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
         topics = {"stream-company-officers", "stream-company-officers-company-metrics-consumer-retry", "stream-company-officers-company-metrics-consumer-error"
                 , "stream-company-officers-company-metrics-consumer-invalid"},
@@ -57,10 +58,12 @@ import static org.mockito.Mockito.verify;
 @TestPropertySource(locations = "classpath:application-test_consumer_main.yml")
 @Import(TestConfig.class)
 @ActiveProfiles("test_consumer_main")
-@Execution(ExecutionMode.SAME_THREAD)
 class OfficersStreamConsumerTest {
 
-    private static final long MESSAGE_CONSUMED_TIMEOUT = 30L;
+    private static final int MESSAGE_CONSUMED_TIMEOUT = 5;
+
+    @Autowired
+    private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Autowired
     private KafkaConsumer<String, byte[]> testConsumer;
@@ -77,7 +80,6 @@ class OfficersStreamConsumerTest {
     @BeforeEach
     public void beforeEach() {
         resettableCountDownLatch.resetLatch(4);
-        testConsumer.poll(Duration.of(1, ChronoUnit.SECONDS));
     }
 
     @Test
@@ -88,15 +90,20 @@ class OfficersStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-officers", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for latch");
+        }
 
         Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
+
         ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, 10000L, 1);
 
         //then
-        assertThat(records.count(), is(1));
+        assertThat(records.count()).isEqualTo(1);
         verify(router).route(any(), any(), any());
     }
 
@@ -108,19 +115,21 @@ class OfficersStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
         doThrow(NonRetryableErrorException.class).when(router).route(any(), any(), any());
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-officers", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
-
-        Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
+        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for latch");
+        }
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-retry"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-error"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-invalid"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-retry")).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-error")).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-invalid")).isEqualTo(1);
     }
 
     @Test
@@ -131,19 +140,21 @@ class OfficersStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
         doThrow(RetryableErrorException.class).when(router).route(any(), any(), any());
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-officers", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
-
-        Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
+        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for latch");
+        }
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 6);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-retry"), is(3));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-error"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-invalid"), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-retry")).isEqualTo(3);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-error")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-invalid")).isZero();
     }
 
     @Test
@@ -153,17 +164,17 @@ class OfficersStreamConsumerTest {
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
         DatumWriter<String> writer = new ReflectDatumWriter<>(String.class);
         writer.write("hello", encoder);
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
 
         //when
         Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-company-officers", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
         future.get();
-        Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-retry"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-error"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-invalid"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-retry")).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-error")).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-invalid")).isEqualTo(1);
     }
 }

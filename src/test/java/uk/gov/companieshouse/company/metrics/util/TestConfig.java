@@ -14,9 +14,7 @@ import org.springframework.context.annotation.Bean;
 import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
-import java.util.Map;
 
 @TestConfiguration
 public class TestConfig {
@@ -27,26 +25,15 @@ public class TestConfig {
     }
 
     @Bean
-    public KafkaConsumer<String, byte[]> testConsumer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
-
-        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(List.of("stream-company-charges",
-                "stream-company-charges-company-metrics-consumer-retry",
-                "stream-company-charges-company-metrics-consumer-invalid",
-                "stream-company-charges-company-metrics-consumer-error",
-                "stream-company-officers",
-                "stream-company-officers-company-metrics-consumer-retry",
-                "stream-company-officers-company-metrics-consumer-invalid",
-                "stream-company-officers-company-metrics-consumer-error"));
-
-        return consumer;
+    KafkaConsumer<String, byte[]> testConsumer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+        return new KafkaConsumer<>(new HashMap<>() {{
+            put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+            put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+            put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
+            put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+            put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+            put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
+        }}, new StringDeserializer(), new ByteArrayDeserializer());
     }
 
     @Bean
