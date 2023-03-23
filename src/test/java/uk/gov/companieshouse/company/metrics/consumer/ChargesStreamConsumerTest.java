@@ -37,13 +37,11 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = CompanyMetricsConsumerApplication.class)
-//Not sure I am really using this massively anyway as most of the Kafka config comes from the TestConfig file not this annotation's inbuilt config.
 @EmbeddedKafka(
         topics = {"stream-company-charges", "stream-company-charges-company-metrics-consumer-retry", "stream-company-charges-company-metrics-consumer-error"
         , "stream-company-charges-company-metrics-consumer-invalid"},
@@ -85,12 +83,8 @@ class ChargesStreamConsumerTest {
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
-//        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
-//            fail("Timed out waiting for latch");
-//        }
 
         Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
-
         ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, 10000L, 1);
 
         //then
@@ -110,9 +104,8 @@ class ChargesStreamConsumerTest {
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
-        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
-            fail("Timed out waiting for latch");
-        }
+
+        Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
@@ -134,9 +127,8 @@ class ChargesStreamConsumerTest {
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
-        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
-            fail("Timed out waiting for latch");
-        }
+
+        Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 6);
 
         //then
