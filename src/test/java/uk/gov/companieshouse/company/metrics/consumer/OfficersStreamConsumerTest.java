@@ -45,7 +45,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = CompanyMetricsConsumerApplication.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
         topics = {"stream-company-officers", "stream-company-officers-company-metrics-consumer-retry", "stream-company-officers-company-metrics-consumer-error"
                 , "stream-company-officers-company-metrics-consumer-invalid"},
@@ -59,8 +59,8 @@ class OfficersStreamConsumerTest {
 
     private static final int MESSAGE_CONSUMED_TIMEOUT = 5;
 
-    @Autowired
-    private EmbeddedKafkaBroker embeddedKafkaBroker;
+//    @Autowired
+//    private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Autowired
     private KafkaConsumer<String, byte[]> testConsumer;
@@ -87,7 +87,7 @@ class OfficersStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
-        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
+//        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-officers", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
@@ -112,7 +112,7 @@ class OfficersStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
-        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
+//        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
         doThrow(NonRetryableErrorException.class).when(router).route(any(), any(), any());
 
         //when
@@ -137,7 +137,7 @@ class OfficersStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
-        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
+//        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
         doThrow(RetryableErrorException.class).when(router).route(any(), any(), any());
 
         //when
@@ -161,7 +161,7 @@ class OfficersStreamConsumerTest {
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
         DatumWriter<String> writer = new ReflectDatumWriter<>(String.class);
         writer.write("hello", encoder);
-        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
+//        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
 
         //when
         Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-company-officers", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
