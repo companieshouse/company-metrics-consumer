@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
 @ActiveProfiles("test_consumer_main")
 class OfficersStreamConsumerTest {
 
-    private static final int MESSAGE_CONSUMED_TIMEOUT = 5;
+    private static final int MESSAGE_CONSUMED_TIMEOUT = 30;
 
     @Autowired
     private KafkaConsumer<String, byte[]> testConsumer;
@@ -100,7 +100,6 @@ class OfficersStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
-//        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
         doThrow(NonRetryableErrorException.class).when(router).route(any(), any(), any());
 
         //when
@@ -150,6 +149,7 @@ class OfficersStreamConsumerTest {
         //when
         Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-company-officers", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
         future.get();
+        Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then

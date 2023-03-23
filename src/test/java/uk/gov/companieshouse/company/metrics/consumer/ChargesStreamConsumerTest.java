@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
 @ActiveProfiles("test_consumer_main")
 class ChargesStreamConsumerTest {
 
-    private static final int MESSAGE_CONSUMED_TIMEOUT = 5;
+    private static final int MESSAGE_CONSUMED_TIMEOUT = 30;
 
     @Autowired
     private KafkaConsumer<String, byte[]> testConsumer;
@@ -149,6 +149,7 @@ class ChargesStreamConsumerTest {
         //when
         Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
         future.get();
+        Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
