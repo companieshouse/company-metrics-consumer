@@ -20,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication;
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = CompanyMetricsConsumerApplication.class)
+@DirtiesContext
 @EmbeddedKafka(
         topics = {"stream-company-charges", "stream-company-charges-company-metrics-consumer-retry", "stream-company-charges-company-metrics-consumer-error"
         , "stream-company-charges-company-metrics-consumer-invalid"},
