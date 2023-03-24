@@ -6,8 +6,6 @@ spring:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
     listener:
       concurrency: 1
-    consumer:
-      auto-offset-reset: earliest
 
 company-metrics:
   consumer:

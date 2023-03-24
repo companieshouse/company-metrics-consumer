@@ -36,9 +36,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -96,7 +95,7 @@ class ChargesStreamConsumerTest {
         ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, 10000L, 1);
 
         //then
-        assertThat(records.count(), is(1));
+        assertThat(records.count()).isEqualTo(1);
         verify(router).route(any(), any(), any());
     }
 
@@ -119,10 +118,10 @@ class ChargesStreamConsumerTest {
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-retry"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-error"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-invalid"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-retry")).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-error")).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-invalid")).isEqualTo(1);
     }
 
     @Test
@@ -144,10 +143,10 @@ class ChargesStreamConsumerTest {
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 6);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-retry"), is(3));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-error"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-invalid"), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-retry")).isEqualTo(3);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-error")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-invalid")).isZero();
     }
 
     @Test
@@ -165,9 +164,9 @@ class ChargesStreamConsumerTest {
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-retry"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-error"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-invalid"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-retry")).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-error")).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges-company-metrics-consumer-invalid")).isEqualTo(1);
     }
 }
