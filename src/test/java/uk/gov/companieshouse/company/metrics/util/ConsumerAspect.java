@@ -19,6 +19,8 @@ public class ConsumerAspect {
             "execution(* uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer" +
                 ".receive(..))" +
             "|| execution(* uk.gov.companieshouse.company.metrics.consumer.OfficersStreamConsumer" +
+                ".receive(..))" +
+            "|| execution(* uk.gov.companieshouse.company.metrics.consumer.PscStatementsStreamConsumer" +
                 ".receive(..))")
     void onSuccessfulProcessing() {
         resettableCountDownLatch.countDownAll();
@@ -28,6 +30,8 @@ public class ConsumerAspect {
             "execution(* uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer" +
                 ".receive(..))" +
             "|| execution(* uk.gov.companieshouse.company.metrics.consumer.OfficersStreamConsumer" +
+                ".receive(..))" +
+            "|| execution(* uk.gov.companieshouse.company.metrics.consumer.PscStatementsStreamConsumer" +
                 ".receive(..))", throwing = "ex")
     void onConsumerException(Exception ex) {
         if (ex instanceof NonRetryableErrorException) {

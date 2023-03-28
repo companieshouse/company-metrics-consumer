@@ -25,6 +25,14 @@ company-metrics:
         retry-attempts: 4
         backoff-delay: 100
 
+    psc-statements:
+      stream:
+        enable: true
+        group-id: company-metrics-consumer
+        topic: stream-psc-statements
+        retry-attempts: 4
+        backoff-delay: 100
+
 logger:
   namespace: company-metrics-consumer
 
