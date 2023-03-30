@@ -2,9 +2,7 @@ package uk.gov.companieshouse.company.metrics.steps;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
-import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -12,9 +10,7 @@ import io.cucumber.java.en.When;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
@@ -23,7 +19,6 @@ import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorExceptio
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -39,8 +34,6 @@ import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTE
 
 public class AppointmentSteps {
 
-    private static final String HEALTHCHECK_URI = "/company-metrics-consumer/healthcheck";
-    private static final String HEALTHCHECK_RESPONSE_BODY = "{\"status\":\"UP\"}";
     public static final String COMPANY_METRICS_RECALCULATE_POST = "/company/([a-zA-Z0-9]*)/metrics/recalculate";
     public static final String COMPANY_METRICS_RECALCULATE_URI = "/company/%s/metrics/recalculate";
     public static final String CONTENT_TYPE = "Content-Type";
@@ -51,8 +44,6 @@ public class AppointmentSteps {
     private TestSupport testSupport;
     @Autowired
     public KafkaTemplate<String, Object> kafkaTemplate;
-    @Autowired
-    protected TestRestTemplate restTemplate;
 
     /**
      * The company number extracted from the current avro file
@@ -64,22 +55,6 @@ public class AppointmentSteps {
     private ResettableCountDownLatch resettableCountDownLatch;
     @Autowired
     private ResourceChangedDataDeserializer resourceChangedDataDeserializer;
-
-    @Before
-    public void setup() {
-        resettableCountDownLatch.resetLatch(4);
-        ResponseEntity<String> response = restTemplate.getForEntity(HEALTHCHECK_URI, String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.valueOf(200));
-        assertThat(response.getBody()).isEqualTo(HEALTHCHECK_RESPONSE_BODY);
-        kafkaConsumer.poll(Duration.ofSeconds(1));
-        configureWiremock();
-        CONTEXT.clear();
-    }
-
-    private void configureWiremock() {
-        WireMockServer wireMockServer = testSupport.setupWiremock();
-        assertThat(wireMockServer.isRunning()).isTrue();
-    }
 
     @Given("A resource change data message for {string} with an appointment entity exists on the {string} kafka topic")
     public void resourceChangedDataMessageExistsOnMainTopic(String companyNumber, String topic) {
