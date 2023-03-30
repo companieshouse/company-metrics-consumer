@@ -24,14 +24,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PscStatementsClientTest {
+class PscsClientTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String PATH = String.format("/company/%s/metrics/recalculate", COMPANY_NUMBER);
     private static final String UPDATED_BY = "updated_by";
     private static final String RESOURCE_URI = "resource_uri";
     private static final String CONTEXT_ID = "context_id";
-    private static final String PSC_STATEMENTS_DELTA_TYPE = "psc-statements";
+    private static final String PSCS_DELTA_TYPE = "pscs";
     private static final boolean IS_MORTGAGE = false;
     private static final boolean IS_APPOINTMENTS = false;
     private static final boolean IS_PSC = true;
@@ -55,7 +55,7 @@ class PscStatementsClientTest {
     private MetricsApiResponseHandler metricsApiResponseHandler;
 
     @InjectMocks
-    private PscStatementsClient client;
+    private PscsClient client;
 
     @Test
     void testSuccessfulPostRequest() throws ApiErrorResponseException, URIValidationException {
@@ -88,7 +88,7 @@ class PscStatementsClientTest {
         // then
         verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSC_STATEMENTS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSCS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -106,7 +106,7 @@ class PscStatementsClientTest {
         // then
         verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSC_STATEMENTS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSCS_DELTA_TYPE, apiErrorResponseException, CONTEXT_ID);
     }
 
     @Test
@@ -124,7 +124,7 @@ class PscStatementsClientTest {
         // then
         verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSC_STATEMENTS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSCS_DELTA_TYPE, illegalArgumentException, CONTEXT_ID);
     }
 
     @Test
@@ -142,6 +142,6 @@ class PscStatementsClientTest {
         // then
         verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
         verify(privateCompanyMetricsUpsert).execute();
-        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSC_STATEMENTS_DELTA_TYPE, uriValidationException, CONTEXT_ID);
+        verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSCS_DELTA_TYPE, uriValidationException, CONTEXT_ID);
     }
 }

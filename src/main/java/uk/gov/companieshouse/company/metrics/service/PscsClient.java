@@ -9,9 +9,9 @@ import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
 @Component
-public class PscStatementsClient implements MetricsClient {
+public class PscsClient implements MetricsClient {
 
-    private static final String PSC_STATEMENTS_DELTA_TYPE = "psc-statements";
+    private static final String PSCS_DELTA_TYPE = "pscs";
     private static final boolean IS_MORTGAGE = false;
     private static final boolean IS_APPOINTMENT = false;
     private static final boolean IS_PSC = true;
@@ -21,12 +21,12 @@ public class PscStatementsClient implements MetricsClient {
     private final ResponseHandler metricsApiResponseHandler;
 
     /**
-     * Constructs PscStatementsClient object. This object is used to send a POST request to the
+     * Constructs PscsClient object. This object is used to send a POST request to the
      * recalculation endpoint in company-metrics-api.
      */
-    public PscStatementsClient(Supplier<InternalApiClient> internalApiClientFactory,
-                               CompanyMetricsApiTransformer metricsApiTransformer,
-                               ResponseHandler metricsApiResponseHandler) {
+    public PscsClient(Supplier<InternalApiClient> internalApiClientFactory,
+                      CompanyMetricsApiTransformer metricsApiTransformer,
+                      ResponseHandler metricsApiResponseHandler) {
         this.internalApiClientFactory = internalApiClientFactory;
         this.metricsApiTransformer = metricsApiTransformer;
         this.metricsApiResponseHandler = metricsApiResponseHandler;
@@ -52,13 +52,13 @@ public class PscStatementsClient implements MetricsClient {
                     .execute();
         } catch (ApiErrorResponseException ex) {
             metricsApiResponseHandler
-                    .handle(companyNumber, PSC_STATEMENTS_DELTA_TYPE, ex, contextId);
+                    .handle(companyNumber, PSCS_DELTA_TYPE, ex, contextId);
         } catch (IllegalArgumentException ex) {
             metricsApiResponseHandler
-                    .handle(companyNumber, PSC_STATEMENTS_DELTA_TYPE, ex, contextId);
+                    .handle(companyNumber, PSCS_DELTA_TYPE, ex, contextId);
         } catch (URIValidationException ex) {
             metricsApiResponseHandler
-                    .handle(companyNumber, PSC_STATEMENTS_DELTA_TYPE, ex, contextId);
+                    .handle(companyNumber, PSCS_DELTA_TYPE, ex, contextId);
         }
     }
 }

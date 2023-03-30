@@ -55,7 +55,7 @@ import static org.mockito.Mockito.verify;
 @TestPropertySource(locations = "classpath:application-test_consumer_main.yml")
 @Import(TestConfig.class)
 @ActiveProfiles("test_consumer_main")
-class PscStatementsStreamConsumerTest {
+class PscsStreamConsumerTest {
 
     private static final int MESSAGE_CONSUMED_TIMEOUT = 5;
 
@@ -80,7 +80,7 @@ class PscStatementsStreamConsumerTest {
     }
 
     @Test
-    void testConsumeMessage() throws IOException, InterruptedException {
+    void testConsumePscStatementMessage() throws IOException, InterruptedException {
         //given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
@@ -105,7 +105,7 @@ class PscStatementsStreamConsumerTest {
     }
 
     @Test
-    void testRepublishToInvalidMessageTopicIfNonRetryableExceptionThrown() throws InterruptedException, IOException {
+    void testRepublishPscStatementToInvalidMessageTopicIfNonRetryableExceptionThrown() throws InterruptedException, IOException {
         //given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
@@ -130,7 +130,7 @@ class PscStatementsStreamConsumerTest {
     }
 
     @Test
-    void testRepublishToErrorTopicThroughRetryTopics() throws InterruptedException, IOException {
+    void testRepublishPscStatementToErrorTopicThroughRetryTopics() throws InterruptedException, IOException {
         //given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
@@ -155,7 +155,7 @@ class PscStatementsStreamConsumerTest {
     }
 
     @Test
-    void testPublishToInvalidMessageTopicIfInvalidDataDeserialised() throws InterruptedException, IOException, ExecutionException {
+    void testPublishPscStatementToInvalidMessageTopicIfInvalidDataDeserialised() throws InterruptedException, IOException, ExecutionException {
         //given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);

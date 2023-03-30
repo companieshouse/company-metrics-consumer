@@ -15,14 +15,14 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
-public class PscStatementsStreamConsumer {
+public class PscsStreamConsumer {
 
 
-    private static final String PSC_STATEMENTS_DELTA_TYPE = "psc-statements";
+    private static final String PSCS_DELTA_TYPE = "pscs";
     private final MetricsRouter router;
     private final Logger logger;
 
-    public PscStatementsStreamConsumer(MetricsRouter router, Logger logger) {
+    public PscsStreamConsumer(MetricsRouter router, Logger logger) {
         this.router = router;
         this.logger = logger;
     }
@@ -56,8 +56,8 @@ public class PscStatementsStreamConsumer {
                 topic, partition, offset, contextId));
         try {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
-            router.route(new ResourceChange(payload), PSC_STATEMENTS_DELTA_TYPE, updatedBy);
-            logger.debug(String.format("Company PSC Statement message processed. ContextId: %s",
+            router.route(new ResourceChange(payload), PSCS_DELTA_TYPE, updatedBy);
+            logger.debug(String.format("Company PSC message processed. ContextId: %s",
                     contextId));
         } catch (Exception exception) {
             logger.error(String.format("Exception processing message. Topic: %s; Offset: %s",

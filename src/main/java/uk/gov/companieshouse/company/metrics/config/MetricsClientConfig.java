@@ -12,7 +12,7 @@ public class MetricsClientConfig {
     Map<String, Map<String, MetricsClient>> metricsClientMap(MetricsClient changedChargesClient,
                                                              MetricsClient deletedChargesClient,
                                                              MetricsClient appointmentsClient,
-                                                             MetricsClient pscStatementsClient) {
+                                                             MetricsClient pscsClient) {
         return Map.of(
                 "charges", Map.of(
                         "changed", changedChargesClient,
@@ -20,8 +20,8 @@ public class MetricsClientConfig {
                 "officers", Map.of(
                         "changed", appointmentsClient,
                         "deleted", appointmentsClient),
-                "psc-statements", Map.of(
-                        "changed", pscStatementsClient,
-                        "deleted", pscStatementsClient));
+                "pscs", Map.of(
+                        "changed", pscsClient,
+                        "deleted", pscsClient));
     }
 }

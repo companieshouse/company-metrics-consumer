@@ -65,25 +65,25 @@ class MetricsClientFactoryTest {
     }
 
     @Test
-    @DisplayName("Metrics factory correctly returns a psc-statements client with a changed event type")
-    void getPscStatementsClientWhenChangedEventType() {
+    @DisplayName("Metrics factory correctly returns a Pscs client with a changed event type")
+    void getPSCsClientWhenChangedEventType() {
         // given
         // when
-        MetricsClient metricsClient = factory.getMetricsClient("psc-statements", "changed");
+        MetricsClient metricsClient = factory.getMetricsClient("pscs", "changed");
 
         // then
-        assertTrue(metricsClient instanceof PscStatementsClient);
+        assertTrue(metricsClient instanceof PscsClient);
     }
 
     @Test
-    @DisplayName("Metrics factory correctly returns a psc-statements client with a deleted event type")
-    void getPscStatementsClientWhenDeletedEventType() {
+    @DisplayName("Metrics factory correctly returns a Pscs client with a deleted event type")
+    void getPSCsClientWhenDeletedEventType() {
         // given
         // when
-        MetricsClient metricsClient = factory.getMetricsClient("psc-statements", "deleted");
+        MetricsClient metricsClient = factory.getMetricsClient("pscs", "deleted");
 
         // then
-        assertTrue(metricsClient instanceof PscStatementsClient);
+        assertTrue(metricsClient instanceof PscsClient);
     }
 
     @Test
