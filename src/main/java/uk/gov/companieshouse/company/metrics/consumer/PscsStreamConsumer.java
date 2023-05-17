@@ -15,14 +15,14 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
-public class PscEventStreamConsumer {
+public class PscsStreamConsumer {
 
 
-    private static final String PSC_DELTA_TYPE = "psc";
+    private static final String PSCS_DELTA_TYPE = "pscs";
     private final MetricsRouter router;
     private final Logger logger;
 
-    public PscEventStreamConsumer(MetricsRouter router, Logger logger) {
+    public PscsStreamConsumer(MetricsRouter router, Logger logger) {
         this.router = router;
         this.logger = logger;
     }
@@ -31,19 +31,19 @@ public class PscEventStreamConsumer {
      * Receives main topic messages.
      */
     @RetryableTopic(
-            attempts = "${company-metrics.consumer.psc-events.stream.retry-attempts}",
+            attempts = "${company-metrics.consumer.psc-statements.stream.retry-attempts}",
             backoff = @Backoff(delayExpression =
-                    "${company-metrics.consumer.psc-events.stream.backoff-delay}"),
+                    "${company-metrics.consumer.psc-statements.stream.backoff-delay}"),
             fixedDelayTopicStrategy = FixedDelayStrategy.SINGLE_TOPIC,
-            retryTopicSuffix = "-${company-metrics.consumer.psc-events.stream.group-id}-retry",
-            dltTopicSuffix = "-${company-metrics.consumer.psc-events.stream.group-id}-error",
+            retryTopicSuffix = "-${company-metrics.consumer.psc-statements.stream.group-id}-retry",
+            dltTopicSuffix = "-${company-metrics.consumer.psc-statements.stream.group-id}-error",
             autoCreateTopics = "false",
             exclude = NonRetryableErrorException.class)
     @KafkaListener(
-            id = "${company-metrics.consumer.psc-events.stream.topic}-consumer",
-            topics = "#{'${company-metrics.consumer.psc-events.stream.topic}'.split(',')}",
-            groupId = "${company-metrics.consumer.psc-events.stream.group-id}",
-            autoStartup = "${company-metrics.consumer.psc-events.stream.enable}",
+            id = "${company-metrics.consumer.psc-statements.stream.topic}-consumer",
+            topics = "${company-metrics.consumer.psc-statements.stream.topic}",
+            groupId = "${company-metrics.consumer.psc-statements.stream.group-id}",
+            autoStartup = "${company-metrics.consumer.psc-statements.stream.enable}",
             containerFactory = "listenerContainerFactory")
     public void receive(Message<ResourceChangedData> resourceChangedDataMessage,
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
@@ -56,7 +56,7 @@ public class PscEventStreamConsumer {
                 topic, partition, offset, contextId));
         try {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
-            router.route(new ResourceChange(payload), PSC_DELTA_TYPE, updatedBy);
+            router.route(new ResourceChange(payload), PSCS_DELTA_TYPE, updatedBy);
             logger.debug(String.format("Company PSC message processed. ContextId: %s",
                     contextId));
         } catch (Exception exception) {
