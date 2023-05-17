@@ -48,14 +48,16 @@ import static org.mockito.Mockito.verify;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
         topics = {"stream-psc-statements", "stream-psc-statements-company-metrics-consumer-retry"
-                , "stream-psc-statements-company-metrics-consumer-error", "stream-psc-statements-company-metrics-consumer-invalid"},
+                , "stream-psc-statements-company-metrics-consumer-error", "stream-psc-statements-company-metrics-consumer-invalid",
+                "stream-company-psc", "stream-company-psc-company-metrics-consumer-retry"
+                , "stream-company-psc-company-metrics-consumer-error", "stream-company-psc-company-metrics-consumer-invalid"},
         controlledShutdown = true,
         partitions = 1
 )
 @TestPropertySource(locations = "classpath:application-test_consumer_main.yml")
 @Import(TestConfig.class)
 @ActiveProfiles("test_consumer_main")
-class PscsStreamConsumerTest {
+class PscEventStreamConsumerTest {
 
     private static final int MESSAGE_CONSUMED_TIMEOUT = 5;
 
@@ -103,6 +105,30 @@ class PscsStreamConsumerTest {
         assertThat(records.count(), is(1));
         verify(router).route(any(), any(), any());
     }
+    @Test
+    void testConsumePscMessage() throws IOException, InterruptedException {
+        //given
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
+        DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
+        writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
+                new EventRecord("published_at", "event_type", null)), encoder);
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
+
+        //when
+        testProducer.send(new ProducerRecord<>("stream-company-psc", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for latch");
+        }
+
+        Assertions.assertThat(resettableCountDownLatch.getCountDownLatch().await(MESSAGE_CONSUMED_TIMEOUT, TimeUnit.SECONDS)).isTrue();
+
+        ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, 10000L, 1);
+
+        //then
+        assertThat(records.count(), is(1));
+        verify(router).route(any(), any(), any());
+    }
 
     @Test
     void testRepublishPscStatementToInvalidMessageTopicIfNonRetryableExceptionThrown() throws InterruptedException, IOException {
@@ -127,6 +153,31 @@ class PscsStreamConsumerTest {
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-retry"), is(0));
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-error"), is(0));
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-invalid"), is(1));
+    }
+
+    @Test
+    void testRepublishPscToInvalidMessageTopicIfNonRetryableExceptionThrown() throws InterruptedException, IOException {
+        //given
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
+        DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
+        writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
+                new EventRecord("published_at", "event_type", null)), encoder);
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
+        doThrow(NonRetryableErrorException.class).when(router).route(any(), any(), any());
+
+        //when
+        testProducer.send(new ProducerRecord<>("stream-company-psc", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for latch");
+        }
+        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
+
+        //then
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-retry"), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-error"), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-invalid"), is(1));
     }
 
     @Test
@@ -155,6 +206,31 @@ class PscsStreamConsumerTest {
     }
 
     @Test
+    void testRepublishPscToErrorTopicThroughRetryTopics() throws InterruptedException, IOException {
+        //given
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
+        DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
+        writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
+                new EventRecord("published_at", "event_type", null)), encoder);
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
+        doThrow(RetryableErrorException.class).when(router).route(any(), any(), any());
+
+        //when
+        testProducer.send(new ProducerRecord<>("stream-company-psc", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for latch");
+        }
+        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 6);
+
+        //then
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-retry"), is(3));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-error"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-invalid"), is(0));
+    }
+
+    @Test
     void testPublishPscStatementToInvalidMessageTopicIfInvalidDataDeserialised() throws InterruptedException, IOException, ExecutionException {
         //given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -173,5 +249,26 @@ class PscsStreamConsumerTest {
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-retry"), is(0));
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-error"), is(0));
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-invalid"), is(1));
+    }
+
+    @Test
+    void testPublishPscToInvalidMessageTopicIfInvalidDataDeserialised() throws InterruptedException, IOException, ExecutionException {
+        //given
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
+        DatumWriter<String> writer = new ReflectDatumWriter<>(String.class);
+        writer.write("hello", encoder);
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
+
+        //when
+        Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-company-psc", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        future.get();
+        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
+
+        //then
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-retry"), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-error"), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-psc-company-metrics-consumer-invalid"), is(1));
     }
 }
