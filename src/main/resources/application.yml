@@ -33,7 +33,7 @@ company-metrics:
       stream:
         enable: ${COMPANY_METRICS_CONSUMER_PSC_EVENTS_ENABLED:true}
         group-id: ${COMPANY_METRICS_CONSUMER_PSC_EVENTS_GROUP_ID:company-metrics-consumer}
-        topic: ${COMPANY_METRICS_CONSUMER_PSC_EVENTS_TOPIC:stream-psc-statements, stream-company-psc}
+        topic: ${COMPANY_METRICS_CONSUMER_PSC_EVENTS_TOPIC:stream-psc-statements,stream-company-psc}
         retry-attempts: ${COMPANY_METRICS_CONSUMER_PSC_EVENTS_ATTEMPTS:4}
         backoff-delay: ${COMPANY_METRICS_CONSUMER_PSC_EVENTS_BACKOFF_DELAY:100}
 
