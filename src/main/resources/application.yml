@@ -29,7 +29,7 @@ company-metrics:
         retry-attempts: ${COMPANY_METRICS_CONSUMER_OFFICERS_ATTEMPTS:4}
         backoff-delay: ${COMPANY_METRICS_CONSUMER_OFFICERS_BACKOFF_DELAY:100}
 
-    psc-events:
+    psc-statements:
       stream:
         enable: ${COMPANY_METRICS_CONSUMER_PSC_EVENTS_ENABLED:true}
         group-id: ${COMPANY_METRICS_CONSUMER_PSC_EVENTS_GROUP_ID:company-metrics-consumer}
