@@ -130,7 +130,9 @@ public class KafkaTestContainerConfig {
         consumer.subscribe(List.of("stream-company-charges-company-metrics-consumer-invalid",
                 "stream-company-charges-company-metrics-consumer-error",
                 "stream-company-officers-company-metrics-consumer-invalid",
-                "stream-company-officers-company-metrics-consumer-error"));
+                "stream-company-officers-company-metrics-consumer-error",
+                "stream-company-psc-company-metrics-consumer-invalid",
+                "stream-company-psc-company-metrics-consumer-error"));
 
         return consumer;
     }
