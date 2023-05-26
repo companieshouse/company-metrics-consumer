@@ -18,7 +18,7 @@ public class AppointmentsClient implements MetricsClient {
     private static final boolean IS_PSC = false;
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
-    private final CompanyMetricsApiTransformer metricsApiTransformer;
+    //private final CompanyMetricsApiTransformer metricsApiTransformer;
     private final ResponseHandler metricsApiResponseHandler;
 
     /**
