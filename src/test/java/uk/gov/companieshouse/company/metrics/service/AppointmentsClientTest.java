@@ -60,7 +60,6 @@ class AppointmentsClientTest {
 
     @Test
     void testSuccessfulPostRequest() throws ApiErrorResponseException, URIValidationException {
-        Assertions.fail();
         // given
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(appointmentsMetricsPostHandler);
