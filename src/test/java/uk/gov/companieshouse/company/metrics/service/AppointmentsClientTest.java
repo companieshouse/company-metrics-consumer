@@ -2,6 +2,7 @@ package uk.gov.companieshouse.company.metrics.service;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -59,6 +60,7 @@ class AppointmentsClientTest {
 
     @Test
     void testSuccessfulPostRequest() throws ApiErrorResponseException, URIValidationException {
+        Assertions.fail();
         // given
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateCompanyMetricsUpsertHandler()).thenReturn(appointmentsMetricsPostHandler);
