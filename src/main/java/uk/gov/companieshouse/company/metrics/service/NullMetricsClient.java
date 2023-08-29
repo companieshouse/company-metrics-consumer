@@ -20,7 +20,8 @@ public class NullMetricsClient implements MetricsClient {
     public void postMetrics(String companyNumber,
                             String updatedBy,
                             String resourceUri) {
-        LOGGER.error(String.format(INVALID_DELTA_EVENT_TYPE, companyNumber),  DataMapHolder.getLogMap());
+        LOGGER.error(String.format(INVALID_DELTA_EVENT_TYPE, companyNumber),
+                DataMapHolder.getLogMap());
         throw new NonRetryableErrorException(
                 String.format(INVALID_DELTA_EVENT_TYPE, companyNumber));
     }
