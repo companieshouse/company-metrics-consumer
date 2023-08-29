@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.FixedDelayStrategy;
@@ -9,21 +11,23 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.processor.MetricsRouter;
 import uk.gov.companieshouse.company.metrics.type.ResourceChange;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
 public class OfficersStreamConsumer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+
     private static final String OFFICER_DELTA_TYPE = "officers";
     private final MetricsRouter router;
-    private final Logger logger;
 
-    public OfficersStreamConsumer(MetricsRouter router, Logger logger) {
+    public OfficersStreamConsumer(MetricsRouter router) {
         this.router = router;
-        this.logger = logger;
     }
 
     /**
@@ -48,19 +52,16 @@ public class OfficersStreamConsumer {
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
                         @Header(KafkaHeaders.OFFSET) String offset) {
+        LOGGER.info("Resource changed message received", DataMapHolder.getLogMap());
+
         ResourceChangedData payload = resourceChangedDataMessage.getPayload();
-        String contextId = payload.getContextId();
-        logger.debug(String.format(
-                "New message picked up. Topic: %s; Partition: %s; Offset: %s; ContextId: %s",
-                topic, partition, offset, contextId));
+
         try {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
             router.route(new ResourceChange(payload), OFFICER_DELTA_TYPE, updatedBy);
-            logger.debug(String.format("Company appointments message processed. ContextId: %s",
-                    contextId));
+            LOGGER.debug("Company appointments message processed", DataMapHolder.getLogMap());
         } catch (Exception exception) {
-            logger.error(String.format("Exception processing message. Topic: %s; Offset: %s",
-                    topic, offset));
+            LOGGER.error("Exception processing message.", DataMapHolder.getLogMap());
             throw exception;
         }
     }

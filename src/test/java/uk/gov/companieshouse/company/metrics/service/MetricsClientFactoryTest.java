@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.service;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.company.metrics.util.TestConfig;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application-test_main.yml")
+@TestPropertySource(locations = "classpath:application-test_main.properties")
 @Import(TestConfig.class)
 @ActiveProfiles("test_main")
 class MetricsClientFactoryTest {

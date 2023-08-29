@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.company.metrics.service;
 
 import java.util.function.Supplier;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
@@ -11,6 +10,7 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
+import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
 @Component
@@ -43,9 +43,11 @@ public class ChangedChargesClient implements MetricsClient {
 
     @Override
     public void postMetrics(String companyNumber, String updatedBy,
-                            String resourceUri, String contextId) {
-        if (isChargeAvailable(resourceUri, contextId)) {
+                            String resourceUri) {
+        if (isChargeAvailable(resourceUri)) {
             InternalApiClient client = internalApiClientFactory.get();
+            client.getHttpClient().setRequestId(DataMapHolder.getRequestId());
+
             try {
                 MetricsRecalculateApi metricsRecalculateApi = metricsApiTransformer
                         .transform(updatedBy, IS_MORTGAGE, IS_APPOINTMENT, IS_PSC);
@@ -55,14 +57,11 @@ public class ChangedChargesClient implements MetricsClient {
                                 metricsRecalculateApi)
                         .execute();
             } catch (ApiErrorResponseException ex) {
-                metricsApiResponseHandler
-                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
+                metricsApiResponseHandler.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
             } catch (IllegalArgumentException ex) {
-                metricsApiResponseHandler
-                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
+                metricsApiResponseHandler.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
             } catch (URIValidationException ex) {
-                metricsApiResponseHandler
-                        .handle(companyNumber, CHARGES_DELTA_TYPE, ex, contextId);
+                metricsApiResponseHandler.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
             }
         } else {
             throw new RetryableErrorException(String.format("Charge details not found for "
@@ -70,9 +69,9 @@ public class ChangedChargesClient implements MetricsClient {
         }
     }
 
-    private boolean isChargeAvailable(String resourceUri, String contextId) {
+    private boolean isChargeAvailable(String resourceUri) {
         ApiResponse<ChargeApi> apiResponseFromChargesDataApi = chargesDataApiService
-                .getACharge(contextId, resourceUri);
+                .getACharge(resourceUri);
         if (apiResponseFromChargesDataApi == null) {
             return false;
         }
