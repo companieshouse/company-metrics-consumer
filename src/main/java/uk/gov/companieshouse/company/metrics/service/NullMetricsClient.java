@@ -4,6 +4,7 @@ import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplic
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -19,7 +20,7 @@ public class NullMetricsClient implements MetricsClient {
     public void postMetrics(String companyNumber,
                             String updatedBy,
                             String resourceUri) {
-        LOGGER.error(String.format(INVALID_DELTA_EVENT_TYPE, companyNumber));
+        LOGGER.error(String.format(INVALID_DELTA_EVENT_TYPE, companyNumber),  DataMapHolder.getLogMap());
         throw new NonRetryableErrorException(
                 String.format(INVALID_DELTA_EVENT_TYPE, companyNumber));
     }

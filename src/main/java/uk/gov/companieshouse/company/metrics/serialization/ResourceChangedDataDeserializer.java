@@ -25,16 +25,10 @@ public class ResourceChangedDataDeserializer implements Deserializer<ResourceCha
     @Override
     public ResourceChangedData deserialize(String topic, byte[] data) {
         try {
-            LOGGER.trace(String.format("Message picked up from topic with data: %s",
-                    new String(data)), DataMapHolder.getLogMap());
             Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
             DatumReader<ResourceChangedData> reader =
                     new ReflectDatumReader<>(ResourceChangedData.class);
-            ResourceChangedData resourceChangedData = reader.read(null, decoder);
-            LOGGER.trace(String.format("Message successfully de-serialised into "
-                    + "Avro ResourceChangedData object: %s", resourceChangedData),
-                    DataMapHolder.getLogMap());
-            return resourceChangedData;
+            return reader.read(null, decoder);
         } catch (Exception ex) {
             LOGGER.error("De-Serialization exception while converting to Avro schema object",
                     ex, DataMapHolder.getLogMap());

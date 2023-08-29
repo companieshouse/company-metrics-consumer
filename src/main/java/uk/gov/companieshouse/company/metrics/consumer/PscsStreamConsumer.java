@@ -60,10 +60,10 @@ public class PscsStreamConsumer {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
             router.route(new ResourceChange(payload), PSCS_DELTA_TYPE, updatedBy);
             LOGGER.debug(String.format("Company PSC message processed. ContextId: %s",
-                    contextId));
+                    contextId), DataMapHolder.getLogMap());
         } catch (Exception exception) {
             LOGGER.error(String.format("Exception processing message. Topic: %s; Offset: %s",
-                    topic, offset));
+                    topic, offset), DataMapHolder.getLogMap());
             throw exception;
         }
     }
