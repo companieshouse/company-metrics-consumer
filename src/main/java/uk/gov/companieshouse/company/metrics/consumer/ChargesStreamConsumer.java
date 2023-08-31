@@ -1,11 +1,9 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static java.lang.String.format;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
 
 import java.time.Duration;
 import java.time.Instant;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
@@ -16,24 +14,23 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.processor.MetricsRouter;
 import uk.gov.companieshouse.company.metrics.type.ResourceChange;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 
 @Component
 public class ChargesStreamConsumer {
 
-    public static final String DELETE_EVENT_TYPE = "deleted";
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private final MetricsRouter chargesRouter;
-    private final uk.gov.companieshouse.logging.Logger logger;
 
-    @Autowired
-    public ChargesStreamConsumer(MetricsRouter chargesRouter, Logger logger) {
+    public ChargesStreamConsumer(MetricsRouter chargesRouter) {
         this.chargesRouter = chargesRouter;
-        this.logger = logger;
     }
 
     /**
@@ -59,20 +56,18 @@ public class ChargesStreamConsumer {
         Instant startTime = Instant.now();
         ResourceChangedData payload = resourceChangedMessage.getPayload();
         String contextId = payload.getContextId();
-        logger.info(String.format("A new message successfully picked up from topic: %s, "
-                        + "partition: %s and offset: %s with contextId: %s",
-                topic, partition, offset, contextId));
+        LOGGER.info("Resource changed message received", DataMapHolder.getLogMap());
 
         try {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
 
             chargesRouter.route(new ResourceChange(payload), "charges", updatedBy);
-            logger.info(format("Charges Metrics message with contextId: %s is "
-                            + "successfully processed in %d milliseconds", contextId,
-                    Duration.between(startTime, Instant.now()).toMillis()));
+            LOGGER.info(String.format("Charges Metrics message processed in %d milliseconds",
+                    Duration.between(startTime, Instant.now()).toMillis()),
+                    DataMapHolder.getLogMap());
         } catch (Exception exception) {
-            logger.errorContext(contextId, format("Exception occurred while processing "
-                    + "message on the topic: %s", topic), exception, null);
+            LOGGER.errorContext(contextId, "Exception occurred while processing message",
+                    exception, DataMapHolder.getLogMap());
             throw exception;
         }
     }
