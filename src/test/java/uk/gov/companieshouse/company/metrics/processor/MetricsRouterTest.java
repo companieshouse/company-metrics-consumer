@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.company.metrics.service.ChangedChargesClient;
+import uk.gov.companieshouse.company.metrics.service.ChargesClient;
 import uk.gov.companieshouse.company.metrics.service.CompanyNumberExtractable;
 import uk.gov.companieshouse.company.metrics.service.MetricsClientFactory;
 import uk.gov.companieshouse.company.metrics.type.ResourceChange;
@@ -27,7 +27,7 @@ class MetricsRouterTest {
     private MetricsClientFactory factory;
 
     @Mock
-    private ChangedChargesClient changedChargesClient;
+    private ChargesClient chargesClient;
 
     private MetricsRouter router;
 
@@ -54,14 +54,14 @@ class MetricsRouterTest {
         when(event.getType()).thenReturn("changed");
         when(data.getResourceUri()).thenReturn("/company/01203396/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg");
         when(extractor.extractCompanyNumber(any())).thenReturn("01203396");
-        when(factory.getMetricsClient(any(), any())).thenReturn(changedChargesClient);
+        when(factory.getMetricsClient(any(), any())).thenReturn(chargesClient);
 
         // when
         router.route(message, "deltaType", "updatedBy");
 
         // then
         verify(extractor).extractCompanyNumber("/company/01203396/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg");
-        verify(changedChargesClient).postMetrics("01203396", "updatedBy", "/company/01203396/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg");
+        verify(chargesClient).postMetrics("01203396", "updatedBy", "/company/01203396/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg");
     }
 
     @Test
@@ -73,13 +73,13 @@ class MetricsRouterTest {
         when(event.getType()).thenReturn("deleted");
         when(data.getResourceUri()).thenReturn("/company/01203396/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg");
         when(extractor.extractCompanyNumber(any())).thenReturn("01203396");
-        when(factory.getMetricsClient(any(), any())).thenReturn(changedChargesClient);
+        when(factory.getMetricsClient(any(), any())).thenReturn(chargesClient);
 
         // when
         router.route(message, "deltaType", "updatedBy");
 
         // then
         verify(extractor).extractCompanyNumber("/company/01203396/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg");
-        verify(changedChargesClient).postMetrics("01203396", "updatedBy", "/company/01203396/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg");
+        verify(chargesClient).postMetrics("01203396", "updatedBy", "/company/01203396/charges/MYdKM_YnzAmJ8JtSgVXr61n1bgg");
     }
 }

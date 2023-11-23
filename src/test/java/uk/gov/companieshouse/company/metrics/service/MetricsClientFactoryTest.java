@@ -28,18 +28,7 @@ class MetricsClientFactoryTest {
         MetricsClient metricsClient = factory.getMetricsClient("charges", "changed");
 
         // then
-        assertTrue(metricsClient instanceof ChangedChargesClient);
-    }
-
-    @Test
-    @DisplayName("Metrics factory correctly returns a deleted charges client")
-    void getDeleteChargesClient() {
-        // given
-        // when
-        MetricsClient metricsClient = factory.getMetricsClient("charges", "deleted");
-
-        // then
-        assertTrue(metricsClient instanceof DeletedChargesClient);
+        assertTrue(metricsClient instanceof ChargesClient);
     }
 
     @Test
