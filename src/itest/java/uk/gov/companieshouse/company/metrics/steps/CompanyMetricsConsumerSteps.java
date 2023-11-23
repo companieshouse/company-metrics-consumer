@@ -263,19 +263,6 @@ public class CompanyMetricsConsumerSteps {
         assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
     }
 
-    private void stubChargesDataApiGetEndpoint(int requiredStatusValue) {
-
-        String chargesRecord = testSupport.loadFile("payloads", "get_charge_response.json");
-
-        stubFor(
-                get(urlEqualTo(String.format(VALID_COMPANY_CHARGES_URI, currentCompanyNumber, CHARGE_ID)))
-                        .willReturn(aResponse()
-                                .withStatus(requiredStatusValue)
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-                                .withBody(chargesRecord))
-        );
-    }
-
     private void stubCompanyMetricsApi(int statusCode) {
         stubFor(
                 post(urlPathMatching(COMPANY_METRICS_RECALCULATE_POST))
