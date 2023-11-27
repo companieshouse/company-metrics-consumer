@@ -20,24 +20,23 @@
 
 		<main.class>uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication</main.class>
 
-		<test-containers.version>1.18.1</test-containers.version>
-		<kafka-test-containers.version>1.16.2</kafka-test-containers.version>
-		<map-struct.version>1.4.2.Final</map-struct.version>
-		<maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
-		<maven-build-helper-plugin.version>3.2.0</maven-build-helper-plugin.version>
-		<maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
-		<docker-maven-plugin.version>1.0.0</docker-maven-plugin.version>
+		<test-containers.version>1.19.3</test-containers.version>
+		<kafka-test-containers.version>1.19.3</kafka-test-containers.version>
+		<map-struct.version>1.5.3.Final</map-struct.version>
+		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+		<maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
+		<maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
 		<ch-kafka.version>1.4.8</ch-kafka.version>
-		<structured-logging.version>1.9.25</structured-logging.version>
-		<kafka-models.version>1.0.31</kafka-models.version>
-		<private-api-sdk-java.version>2.0.290</private-api-sdk-java.version>
-		<api-sdk-manager-java-library.version>1.0.11</api-sdk-manager-java-library.version>
-		<jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
-		<io-cucumber.version>7.11.2</io-cucumber.version>
+		<structured-logging.version>1.9.27</structured-logging.version>
+		<kafka-models.version>1.0.38</kafka-models.version>
+		<private-api-sdk-java.version>2.0.327</private-api-sdk-java.version>
+		<api-sdk-manager-java-library.version>1.0.9</api-sdk-manager-java-library.version>
+		<jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
+		<io-cucumber.version>7.13.0</io-cucumber.version>
 		<skip.integration.tests>false</skip.integration.tests>
 		<skip.unit.tests>false</skip.unit.tests>
 		<springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
-		<wiremock.standalone.version>2.35.0</wiremock.standalone.version>
+		<wiremock.standalone.version>2.35.1</wiremock.standalone.version>
 		<!--sonar configuration-->
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -49,11 +48,11 @@
 			${project.basedir}/target/site/jacoco/jacoco.xml
 		</sonar.coverage.jacoco.xmlReportPaths>
 		<sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
-		<spring.boot.version>2.7.14</spring.boot.version>
+		<spring.boot.version>2.7.17</spring.boot.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-		<maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+		<maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 	</properties>
 
 	<dependencyManagement>
