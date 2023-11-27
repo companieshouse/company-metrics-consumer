@@ -21,11 +21,22 @@ class MetricsClientFactoryTest {
     private MetricsClientFactory factory;
 
     @Test
-    @DisplayName("Metrics factory correctly returns a changed charges client")
-    void getRecalculateChargesClient() {
+    @DisplayName("Metrics factory correctly returns a changed charges client with a changed type")
+    void getChargesClientWhenChangedEventType() {
         // given
         // when
         MetricsClient metricsClient = factory.getMetricsClient("charges", "changed");
+
+        // then
+        assertTrue(metricsClient instanceof ChargesClient);
+    }
+
+    @Test
+    @DisplayName("Metrics factory correctly returns an charges client with a deleted event type")
+    void getChargesClientWhenDeletedEventType() {
+        // given
+        // when
+        MetricsClient metricsClient = factory.getMetricsClient("charges", "deleted");
 
         // then
         assertTrue(metricsClient instanceof ChargesClient);
