@@ -44,18 +44,4 @@ kafka-topics.sh --list --zookeeper zookeeper:2181
 ### Produce kafka test messages locally
 kafka-console-producer.sh --topic delta-topic --broker-list localhost:9092
 
-## Makefile Changes
-The `analyse-pull-request` job on concourse runs when we push code to an open PR and this job runs `make test-unit` AND 
-`make sonar-pr-analysis`.
-
-The issue with this is that `make sonar-pr-analysis` also ran `make verify` which runs both unit and integration tests.
-
-Therefore, this meant the `analyse-pull-request` job on concourse was first running unit tests, then running them again,
-and finally running integration tests. 
-
-To prevent having to run the unit test twice, we can change the `make test-unit` command to run both unit and itests and 
-change the `make sonar-pr-analysis` command to just run the sonar job.
-
-For a more in-depth explanation, please see: https://companieshouse.atlassian.net/wiki/spaces/TEAM4/pages/4357128294/DSND-1990+Tech+Debt+Spike+-+Fix+SonarQube+within+Pom+of+Projects
-
 #
