@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.service;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.company.metrics.util.TestConfig;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application-test_main.yml")
+@TestPropertySource(locations = "classpath:application-test_main.properties")
 @Import(TestConfig.class)
 @ActiveProfiles("test_main")
 class MetricsClientFactoryTest {
@@ -21,25 +21,25 @@ class MetricsClientFactoryTest {
     private MetricsClientFactory factory;
 
     @Test
-    @DisplayName("Metrics factory correctly returns a changed charges client")
-    void getRecalculateChargesClient() {
+    @DisplayName("Metrics factory correctly returns a changed charges client with a changed type")
+    void getChargesClientWhenChangedEventType() {
         // given
         // when
         MetricsClient metricsClient = factory.getMetricsClient("charges", "changed");
 
         // then
-        assertTrue(metricsClient instanceof ChangedChargesClient);
+        assertTrue(metricsClient instanceof ChargesClient);
     }
 
     @Test
-    @DisplayName("Metrics factory correctly returns a deleted charges client")
-    void getDeleteChargesClient() {
+    @DisplayName("Metrics factory correctly returns an charges client with a deleted event type")
+    void getChargesClientWhenDeletedEventType() {
         // given
         // when
         MetricsClient metricsClient = factory.getMetricsClient("charges", "deleted");
 
         // then
-        assertTrue(metricsClient instanceof DeletedChargesClient);
+        assertTrue(metricsClient instanceof ChargesClient);
     }
 
     @Test

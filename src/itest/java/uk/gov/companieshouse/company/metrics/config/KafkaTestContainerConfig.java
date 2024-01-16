@@ -1,17 +1,16 @@
 package uk.gov.companieshouse.company.metrics.config;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -33,20 +32,14 @@ import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataSe
 import uk.gov.companieshouse.company.metrics.steps.TestSupport;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-
 @TestConfiguration
 public class KafkaTestContainerConfig {
 
     public static final String COMPANY_METRICS_CONSUMER = "company-metrics-test-consumer";
-    @Value("${logger.namespace}")
-    String loggerNamespace;
 
-     private final ResourceChangedDataDeserializer resourceChangedDataDeserializer;
-     private final ResourceChangedDataSerializer resourceChangedDataSerializer;
+    private final ResourceChangedDataDeserializer resourceChangedDataDeserializer;
+    private final ResourceChangedDataSerializer resourceChangedDataSerializer;
 
-
-    @Autowired
     public KafkaTestContainerConfig(ResourceChangedDataDeserializer resourceChangedDataDeserializer,
                                     ResourceChangedDataSerializer resourceChangedDataSerializer) {
         this.resourceChangedDataDeserializer = resourceChangedDataDeserializer;

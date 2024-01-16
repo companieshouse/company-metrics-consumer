@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.company.metrics.processor;
 
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.service.CompanyNumberExtractable;
 import uk.gov.companieshouse.company.metrics.service.MetricsClientFactory;
 import uk.gov.companieshouse.company.metrics.type.ResourceChange;
@@ -20,9 +21,11 @@ public class MetricsRouter implements MetricsRoutable {
     public void route(ResourceChange message, String deltaType, String updatedBy) {
         String eventType = message.getData().getEvent().getType();
         String resourceUri = message.getData().getResourceUri();
-        String contextId = message.getData().getContextId();
         String companyNumber = extractor.extractCompanyNumber(message.getData().getResourceUri());
+
+        DataMapHolder.get().companyNumber(companyNumber);
+
         factory.getMetricsClient(deltaType, eventType)
-                .postMetrics(companyNumber, updatedBy, resourceUri, contextId);
+                .postMetrics(companyNumber, updatedBy, resourceUri);
     }
 }

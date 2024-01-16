@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.FixedDelayStrategy;
@@ -9,22 +11,23 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.processor.MetricsRouter;
 import uk.gov.companieshouse.company.metrics.type.ResourceChange;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
 public class PscsStreamConsumer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private static final String PSCS_DELTA_TYPE = "pscs";
     private final MetricsRouter router;
-    private final Logger logger;
 
-    public PscsStreamConsumer(MetricsRouter router, Logger logger) {
+    public PscsStreamConsumer(MetricsRouter router) {
         this.router = router;
-        this.logger = logger;
     }
 
     /**
@@ -51,17 +54,16 @@ public class PscsStreamConsumer {
                         @Header(KafkaHeaders.OFFSET) String offset) {
         ResourceChangedData payload = resourceChangedDataMessage.getPayload();
         String contextId = payload.getContextId();
-        logger.debug(String.format(
-                "New message picked up. Topic: %s; Partition: %s; Offset: %s; ContextId: %s",
-                topic, partition, offset, contextId));
+        LOGGER.info("Resource changed message received", DataMapHolder.getLogMap());
+
         try {
             final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
             router.route(new ResourceChange(payload), PSCS_DELTA_TYPE, updatedBy);
-            logger.debug(String.format("Company PSC message processed. ContextId: %s",
-                    contextId));
+            LOGGER.debug(String.format("Company PSC message processed. ContextId: %s",
+                    contextId), DataMapHolder.getLogMap());
         } catch (Exception exception) {
-            logger.error(String.format("Exception processing message. Topic: %s; Offset: %s",
-                    topic, offset));
+            LOGGER.error(String.format("Exception processing message. Topic: %s; Offset: %s",
+                    topic, offset), DataMapHolder.getLogMap());
             throw exception;
         }
     }
