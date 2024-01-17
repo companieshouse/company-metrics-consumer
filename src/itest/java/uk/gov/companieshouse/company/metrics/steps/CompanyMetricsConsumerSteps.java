@@ -1,20 +1,12 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.lessThanOrExactly;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.But;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -31,10 +23,22 @@ import uk.gov.companieshouse.api.charges.ChargeApi;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
 import uk.gov.companieshouse.stream.ResourceChangedData;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.lessThanOrExactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CompanyMetricsConsumerSteps {
 
@@ -91,6 +95,19 @@ public class CompanyMetricsConsumerSteps {
     @And("Company Metrics API returns SERVICE_UNAVAILABLE status code")
     public void stubbedCompanyMetricsApiReturnsServiceUnavailableStatusCode(){
         stubCompanyMetricsApi(HttpStatus.SERVICE_UNAVAILABLE.value());
+    }
+
+    @Given("Charges Data API returns OK status code for relevant {string}")
+    public void stubChargesDataApiEndpointForOKResponse(String companyNumber){
+        this.currentCompanyNumber = companyNumber;
+
+        stubChargesDataApiGetEndpoint(HttpStatus.OK.value());
+    }
+    @Given("Charges Data API returns NOT_FOUND status code for relevant {string}")
+    public void stubChargesDataApiEndpointForNotFoundResponse(String companyNumber){
+        this.currentCompanyNumber = companyNumber;
+
+        stubChargesDataApiGetEndpoint(HttpStatus.NOT_FOUND.value());
     }
 
     @Then("The message is successfully consumed and calls company-metrics-api with expected payload")
@@ -213,7 +230,7 @@ public class CompanyMetricsConsumerSteps {
     @NotNull
     private List<ServeEvent> checkServeEvents() {
         List<ServeEvent> serverEvents = testSupport.getServeEvents();
-        assertThat(serverEvents).hasSize(1);
+        assertThat(serverEvents).hasSize(2);
         assertThat(serverEvents).isNotEmpty(); // assert that the wiremock did something
         return serverEvents;
     }
@@ -259,6 +276,19 @@ public class CompanyMetricsConsumerSteps {
         kafkaTemplate.send(topic, avroMessageData);
         kafkaTemplate.flush();
         assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
+    }
+
+    private void stubChargesDataApiGetEndpoint(int requiredStatusValue) {
+
+        String chargesRecord = testSupport.loadFile("payloads", "get_charge_response.json");
+
+        stubFor(
+                get(urlEqualTo(String.format(VALID_COMPANY_CHARGES_URI, currentCompanyNumber, CHARGE_ID)))
+                        .willReturn(aResponse()
+                                .withStatus(requiredStatusValue)
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                .withBody(chargesRecord))
+        );
     }
 
     private void stubCompanyMetricsApi(int statusCode) {

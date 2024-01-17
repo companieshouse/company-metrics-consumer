@@ -1,16 +1,5 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
@@ -41,6 +30,18 @@ import uk.gov.companieshouse.company.metrics.util.TestUtils;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
 @SpringBootTest(classes = CompanyMetricsConsumerApplication.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
@@ -49,11 +50,12 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
         controlledShutdown = true,
         partitions = 1
 )
-@TestPropertySource(locations = "classpath:application-test_consumer_main.properties")
+@TestPropertySource(locations = "classpath:application-test_consumer_main.yml")
 @Import(TestConfig.class)
 @ActiveProfiles("test_consumer_main")
 class ChargesStreamConsumerTest {
 
+    private static final int MESSAGE_CONSUMED_TIMEOUT = 5;
     @Autowired
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 

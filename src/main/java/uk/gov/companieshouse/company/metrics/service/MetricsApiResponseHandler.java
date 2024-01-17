@@ -1,25 +1,26 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
-
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
-import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
 public class MetricsApiResponseHandler implements ResponseHandler {
 
-    private static final String FAILED_MSG = "Failed recalculating %s for company %s";
-    private static final String ERROR_MSG = "Error %s recalculating %s for company %s";
+    private static final String FAILED_MSG =
+            "Failed recalculating %s for company %s with context id %s";
+    private static final String ERROR_MSG =
+            "Error %s recalculating %s for company %s with context id %s";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private final Logger logger;
+
+    public MetricsApiResponseHandler(Logger logger) {
+        this.logger = logger;
+    }
 
     /**
      * Handles logging an error message and throwing the appropriate exception when a
@@ -29,10 +30,11 @@ public class MetricsApiResponseHandler implements ResponseHandler {
      * @param deltaType The type of delta that has come through on the topic.
      * @param ex The exception that was caught in the client.
      */
-    @Override
-    public void handle(String companyNumber, String deltaType, URIValidationException ex) {
-        String message = String.format(FAILED_MSG, deltaType, companyNumber);
-        LOGGER.error(message, DataMapHolder.getLogMap());
+    public void handle(String companyNumber, String deltaType,
+                       URIValidationException ex, String contextId) {
+        String message =
+                String.format(FAILED_MSG, deltaType, companyNumber, contextId);
+        logger.error(message);
         throw new NonRetryableErrorException(message, ex);
     }
 
@@ -44,12 +46,13 @@ public class MetricsApiResponseHandler implements ResponseHandler {
      * @param deltaType The type of delta that has come through on the topic.
      * @param ex The exception that was caught in the client.
      */
-    @Override
-    public void handle(String companyNumber, String deltaType, IllegalArgumentException ex) {
-        String message = String.format(FAILED_MSG, deltaType, companyNumber);
+    public void handle(String companyNumber, String deltaType,
+                       IllegalArgumentException ex, String contextId) {
+        String message =
+                String.format(FAILED_MSG, deltaType, companyNumber, contextId);
         String causeMessage = ex.getCause() != null
                 ? String.format("; %s", ex.getCause().getMessage()) : "";
-        LOGGER.info(message + causeMessage, DataMapHolder.getLogMap());
+        logger.info(message + causeMessage);
         throw new RetryableErrorException(message, ex);
     }
 
@@ -61,16 +64,15 @@ public class MetricsApiResponseHandler implements ResponseHandler {
      * @param deltaType The type of delta that has come through on the topic.
      * @param ex The exception that was caught in the client.
      */
-    @Override
-    public void handle(String companyNumber, String deltaType, ApiErrorResponseException ex) {
-        String message = String.format(ERROR_MSG, ex.getStatusCode(), deltaType, companyNumber);
-        Map<String, Object> logMap = DataMapHolder.getLogMap();
-        logMap.put("status", ex.getStatusCode());
+    public void handle(String companyNumber, String deltaType,
+                       ApiErrorResponseException ex, String contextId) {
+        String message =
+                String.format(ERROR_MSG, ex.getStatusCode(), deltaType, companyNumber, contextId);
         if (HttpStatus.valueOf(ex.getStatusCode()).is5xxServerError()) {
-            LOGGER.info(message, logMap);
+            logger.info(message);
             throw new RetryableErrorException(message, ex);
         } else {
-            LOGGER.error(message, logMap);
+            logger.error(message);
             throw new NonRetryableErrorException(message, ex);
         }
     }
