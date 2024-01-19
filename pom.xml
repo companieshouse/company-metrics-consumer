@@ -20,23 +20,25 @@
 
 		<main.class>uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication</main.class>
 
-		<test-containers.version>1.19.3</test-containers.version>
-		<kafka-test-containers.version>1.19.3</kafka-test-containers.version>
-		<map-struct.version>1.5.3.Final</map-struct.version>
-		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
-		<maven-build-helper-plugin.version>3.4.0</maven-build-helper-plugin.version>
-		<maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
-		<ch-kafka.version>1.4.8</ch-kafka.version>
-		<structured-logging.version>1.9.27</structured-logging.version>
-		<kafka-models.version>1.0.38</kafka-models.version>
-		<private-api-sdk-java.version>2.0.327</private-api-sdk-java.version>
-		<api-sdk-manager-java-library.version>1.0.9</api-sdk-manager-java-library.version>
-		<jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
-		<io-cucumber.version>7.13.0</io-cucumber.version>
+		<assertj-core.version>3.22.0</assertj-core.version>
+		<test-containers.version>1.16.3</test-containers.version>
+		<kafka-test-containers.version>1.16.2</kafka-test-containers.version>
+		<map-struct.version>1.4.2.Final</map-struct.version>
+		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+		<maven-build-helper-plugin.version>3.2.0</maven-build-helper-plugin.version>
+		<maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
+		<docker-maven-plugin.version>1.0.0</docker-maven-plugin.version>
+		<ch-kafka.version>1.4.2</ch-kafka.version>
+		<structured-logging.version>1.9.12</structured-logging.version>
+		<kafka-models.version>1.0.27</kafka-models.version>
+		<private-api-sdk-java.version>2.0.183</private-api-sdk-java.version>
+		<api-sdk-manager-java-library.version>1.0.4</api-sdk-manager-java-library.version>
+		<jib-maven-plugin.version>3.1.1</jib-maven-plugin.version>
+		<io-cucumber.version>7.2.3</io-cucumber.version>
 		<skip.integration.tests>false</skip.integration.tests>
 		<skip.unit.tests>false</skip.unit.tests>
 		<springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
-		<wiremock.standalone.version>2.35.1</wiremock.standalone.version>
+		<wiremock.standalone.version>2.32.0</wiremock.standalone.version>
 		<!--sonar configuration-->
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -48,11 +50,11 @@
 			${project.basedir}/target/site/jacoco/jacoco.xml
 		</sonar.coverage.jacoco.xmlReportPaths>
 		<sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
-		<spring.boot.version>2.7.17</spring.boot.version>
+		<spring.boot.version>2.7.9</spring.boot.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+		<maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -71,12 +73,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
-			<exclusions>
-			<exclusion>
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-			</exclusion>
-		</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -153,6 +149,7 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
+			<version>${assertj-core.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -212,14 +209,6 @@
 				<exclusion>
 					<groupId>com.github.jknack</groupId>
 					<artifactId>handlebars-helpers</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-fileupload</groupId>
-					<artifactId>commons-fileupload</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-xml</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

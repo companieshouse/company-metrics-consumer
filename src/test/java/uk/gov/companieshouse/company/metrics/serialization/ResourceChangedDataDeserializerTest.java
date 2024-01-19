@@ -1,21 +1,28 @@
 package uk.gov.companieshouse.company.metrics.serialization;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-class ResourceChangedDataDeserializerTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@ExtendWith(MockitoExtension.class)
+public class ResourceChangedDataDeserializerTest {
+
+    @Mock
+    private Logger logger;
     private ResourceChangedDataDeserializer deserializer;
 
     @BeforeEach
     public void init() {
-        deserializer = new ResourceChangedDataDeserializer();
+        deserializer = new ResourceChangedDataDeserializer(logger);
     }
 
     @Test
@@ -32,7 +39,7 @@ class ResourceChangedDataDeserializerTest {
     }
 
     private byte[] encodedData(ResourceChangedData resourceChangedData){
-        ResourceChangedDataSerializer serializer = new ResourceChangedDataSerializer();
+        ResourceChangedDataSerializer serializer = new ResourceChangedDataSerializer(this.logger);
         return serializer.serialize("", resourceChangedData);
     }
 

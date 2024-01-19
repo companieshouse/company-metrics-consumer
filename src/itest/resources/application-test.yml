@@ -1,0 +1,46 @@
+server:
+  port: 8085
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      concurrency: 1
+
+company-metrics:
+  consumer:
+    charges:
+      stream:
+        enable: true
+        group-id: company-metrics-consumer
+        topic: stream-company-charges
+        retry-attempts: 4
+        backoff-delay: 10
+
+  appointments:
+    stream:
+      enable: true
+      group-id: company-metrics-consumer
+      topic: stream-company-officers
+      retry-attempts: 4
+      backoff-delay: 100
+
+  psc-events:
+    stream:
+      enable: true
+      group-id: company-metrics-consumer
+      topic: stream-psc-statements,stream-company-psc
+      retry-attempts: 4
+      backoff-delay: 100
+
+logger:
+  namespace: company-metrics-consumer
+
+api:
+  api-url: http://localhost:8888
+  company-metrics-api-key: ${COMPANY_METRICS_API_KEY:localhost}
+
+
+wiremock:
+  server:
+    port: 8888

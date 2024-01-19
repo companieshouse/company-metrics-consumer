@@ -1,12 +1,12 @@
 package uk.gov.companieshouse.company.metrics.service;
 
 import java.util.function.Supplier;
+
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
-import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
 @Component
@@ -41,10 +41,8 @@ public class AppointmentsClient implements MetricsClient {
      */
     @Override
     public void postMetrics(String companyNumber, String updatedBy,
-                            String resourceUri) {
+                            String resourceUri, String contextId) {
         InternalApiClient client = internalApiClientFactory.get();
-        client.getHttpClient().setRequestId(DataMapHolder.getRequestId());
-
         try {
             MetricsRecalculateApi metricsRecalculateApi = metricsApiTransformer
                     .transform(updatedBy, IS_MORTGAGE, IS_APPOINTMENT, IS_PSC);
@@ -55,13 +53,13 @@ public class AppointmentsClient implements MetricsClient {
                     .execute();
         } catch (ApiErrorResponseException ex) {
             metricsApiResponseHandler
-                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex);
+                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         } catch (IllegalArgumentException ex) {
             metricsApiResponseHandler
-                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex);
+                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         } catch (URIValidationException ex) {
             metricsApiResponseHandler
-                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex);
+                    .handle(companyNumber, APPOINTMENTS_DELTA_TYPE, ex, contextId);
         }
     }
 }
