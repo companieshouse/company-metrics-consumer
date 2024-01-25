@@ -132,7 +132,7 @@ public class TestSupport {
     }
 
     public String loadFile(String dir, String fileName) {
-        final String filePath = "classpath:" + dir + "/" + fileName;
+        final String filePath = "src/itest/resources/payloads/" + fileName;
         try {
             return FileUtils.readFileToString(ResourceUtils.getFile(filePath), StandardCharsets.UTF_8);
         } catch (IOException e) {
