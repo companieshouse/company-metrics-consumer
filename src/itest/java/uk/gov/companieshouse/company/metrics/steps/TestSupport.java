@@ -88,6 +88,25 @@ public class TestSupport {
                 .build();
     }
 
+    public ResourceChangedData createResourceChangedMessagePsc(String pscLink,
+                                                                        String companyNumber, String EVENT_TYPE)
+    {
+        String pscRecord = loadFile("payloads", "psc-record.json");
+
+        EventRecord eventRecord = new EventRecord();
+        eventRecord.setPublishedAt("2022010351");
+        eventRecord.setType(EVENT_TYPE);
+
+        return ResourceChangedData.newBuilder()
+                .setContextId(CONTEXT_ID)
+                .setResourceId(RESOURCE_ID)
+                .setResourceKind(RESOURCE_KIND)
+                .setResourceUri(String.format(pscLink, companyNumber))
+                .setEvent(eventRecord)
+                .setData(pscRecord)
+                .build();
+    }
+
     public ResourceChangedData createResourceChangedMessageInvalidAppointments(String companyAppointmentsLink,
                                                                                String companyNumber)
     {
