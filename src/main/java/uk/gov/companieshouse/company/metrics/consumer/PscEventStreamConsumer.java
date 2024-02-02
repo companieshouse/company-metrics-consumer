@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.FixedDelayStrategy;
@@ -15,7 +17,6 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
 
 @Component
 public class PscEventStreamConsumer {

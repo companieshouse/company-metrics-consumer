@@ -173,7 +173,7 @@ public class AppointmentSteps {
         assertThat(payload).isNotNull();
         assertThat(payload.getMortgage()).isFalse();
         assertThat(payload.getAppointments()).isTrue();
-        assertThat(payload.getPersonsWithSignificantControl()).isTrue();
+        assertThat(payload.getPersonsWithSignificantControl()).isFalse();
     }
 
     private List<ServeEvent> checkServeEvents() {
