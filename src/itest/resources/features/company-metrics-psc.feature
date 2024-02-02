@@ -13,7 +13,7 @@ Feature: Company metrics PSC criteria
     And A resource change data message for "<companyNumber>" with an psc entity exists on the "<mainKafkaTopic>" kafka topic
     And Company Metrics API returns OK status code
     When The message is consumed
-    Then A request is sent to the Company Metrics Recalculate endpoint
+    Then A request is sent to the Company Metrics Recalculate endpoint for PSCs
 
     Examples:
       | mainKafkaTopic     | eventType  | companyNumber |

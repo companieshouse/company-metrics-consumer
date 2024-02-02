@@ -21,7 +21,7 @@ import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplic
 public class PscEventStreamConsumer {
 
 
-    private static final String PSC_DELTA_TYPE = "psc";
+    private static final String PSC_DELTA_TYPE = "pscs";
     private final MetricsRouter router;
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 

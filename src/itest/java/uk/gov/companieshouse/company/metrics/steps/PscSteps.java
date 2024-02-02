@@ -1,13 +1,22 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
+import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.getAllServeEvents;
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
 
 public class PscSteps {
@@ -58,6 +67,36 @@ public class PscSteps {
         this.currentCompanyNumber = companyNumber;
 
         sendKafkaMessage(topic, messageData);
+    }
+
+    @And("A request is sent to the Company Metrics Recalculate endpoint for PSCs")
+    public void requestSentToCompanyMetricsRecalculateEndpoint() {
+        List<ServeEvent> serverEvents = checkServeEvents();
+        assertMetricsApiSuccessfullyInvoked(serverEvents);
+    }
+
+    private void assertMetricsApiSuccessfullyInvoked(List<ServeEvent> serverEvents) {
+        ServeEvent serveEvent = getAllServeEvents().get(0);
+        assertThat(serveEvent.getRequest().getUrl()).isEqualTo(String.format(COMPANY_METRICS_RECALCULATE_URI, currentCompanyNumber));
+        String body = new String(serverEvents.get(0).getRequest().getBody());
+        MetricsRecalculateApi payload = null;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            payload = mapper.readValue(body, MetricsRecalculateApi.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        assertThat(payload).isNotNull();
+        assertThat(payload.getMortgage()).isFalse();
+        assertThat(payload.getAppointments()).isFalse();
+        assertThat(payload.getPersonsWithSignificantControl()).isTrue();
+    }
+
+    private List<ServeEvent> checkServeEvents() {
+        List<ServeEvent> serverEvents = testSupport.getServeEvents();
+        assertThat(serverEvents).hasSize(1);
+        assertThat(serverEvents).isNotEmpty(); // assert that the wiremock did something
+        return serverEvents;
     }
 
 }
