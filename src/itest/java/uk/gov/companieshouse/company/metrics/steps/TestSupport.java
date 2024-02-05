@@ -88,6 +88,25 @@ public class TestSupport {
                 .build();
     }
 
+    public ResourceChangedData createResourceChangedMessagePsc(String pscLink,
+                                                                        String companyNumber, String EVENT_TYPE)
+    {
+        String pscRecord = loadFile("payloads", "psc-record.json");
+
+        EventRecord eventRecord = new EventRecord();
+        eventRecord.setPublishedAt("2022010351");
+        eventRecord.setType(EVENT_TYPE);
+
+        return ResourceChangedData.newBuilder()
+                .setContextId(CONTEXT_ID)
+                .setResourceId(RESOURCE_ID)
+                .setResourceKind(RESOURCE_KIND)
+                .setResourceUri(String.format(pscLink, companyNumber))
+                .setEvent(eventRecord)
+                .setData(pscRecord)
+                .build();
+    }
+
     public ResourceChangedData createResourceChangedMessageInvalidAppointments(String companyAppointmentsLink,
                                                                                String companyNumber)
     {
@@ -132,7 +151,7 @@ public class TestSupport {
     }
 
     public String loadFile(String dir, String fileName) {
-        final String filePath = "classpath:" + dir + "/" + fileName;
+        final String filePath = "src/itest/resources/payloads/" + fileName;
         try {
             return FileUtils.readFileToString(ResourceUtils.getFile(filePath), StandardCharsets.UTF_8);
         } catch (IOException e) {
