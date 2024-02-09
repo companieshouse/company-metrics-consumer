@@ -54,7 +54,7 @@ public class PscEventStreamConsumer {
                         @Header(KafkaHeaders.OFFSET) String offset) {
         ResourceChangedData payload = resourceChangedDataMessage.getPayload();
         String contextId = payload.getContextId();
-        LOGGER.debug(String.format(
+        LOGGER.info(String.format(
                 "New message picked up. Topic: %s; Partition: %s; Offset: %s; ContextId: %s",
                 topic, partition, offset, contextId));
         try {
