@@ -21,11 +21,12 @@ class CompanyMetricsApiTransformerTest {
                 .mortgage(true)
                 .appointments(false)
                 .personsWithSignificantControl(false)
+                .registers(false)
                 .internalData(new InternalData()
                         .updatedBy(updatedBy));
 
         // when
-        MetricsRecalculateApi actual = transformer.transform(updatedBy, true, false, false);
+        MetricsRecalculateApi actual = transformer.transform(updatedBy, true, false, false, false);
 
         // then
         assertEquals(expected, actual);
@@ -39,11 +40,31 @@ class CompanyMetricsApiTransformerTest {
                 .mortgage(false)
                 .appointments(true)
                 .personsWithSignificantControl(false)
+                .registers(false)
                 .internalData(new InternalData()
                         .updatedBy(updatedBy));
 
         // when
-        MetricsRecalculateApi actual = transformer.transform(updatedBy, false, true, false);
+        MetricsRecalculateApi actual = transformer.transform(updatedBy, false, true, false, false);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testSuccessfulTransformForRegistersIsTrue() {
+        // given
+        final String updatedBy = String.format("%s-%s-%s", MOCK_TOPIC, MOCK_PARTITION, MOCK_OFFSET);
+        MetricsRecalculateApi expected = new MetricsRecalculateApi()
+                .mortgage(false)
+                .appointments(false)
+                .personsWithSignificantControl(false)
+                .registers(true)
+                .internalData(new InternalData()
+                        .updatedBy(updatedBy));
+
+        // when
+        MetricsRecalculateApi actual = transformer.transform(updatedBy, false, false, false, true);
 
         // then
         assertEquals(expected, actual);

@@ -2,7 +2,6 @@ package uk.gov.companieshouse.company.metrics.service;
 
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
-
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -10,14 +9,15 @@ import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
-@Component
-public class ChargesClient implements MetricsClient {
 
-    private static final String CHARGES_DELTA_TYPE = "charges";
-    private static final boolean IS_MORTGAGE = true;
+@Component
+public class RegistersClient implements MetricsClient {
+
+    private static final String REGISTERS_DELTA_TYPE = "registers";
+    private static final boolean IS_MORTGAGE = false;
     private static final boolean IS_APPOINTMENT = false;
     private static final boolean IS_PSC = false;
-    private static final boolean IS_REGISTERS = false;
+    private static final boolean IS_REGISTERS = true;
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;
@@ -27,9 +27,9 @@ public class ChargesClient implements MetricsClient {
      * Constructor to construct and return instance of
      * changedChargesClient - used to post a recalculation of company charges metrics.
      */
-    public ChargesClient(Supplier<InternalApiClient> internalApiClientFactory,
-                         CompanyMetricsApiTransformer metricsApiTransformer,
-                         ResponseHandler metricsApiResponseHandler) {
+    public RegistersClient(Supplier<InternalApiClient> internalApiClientFactory,
+                           CompanyMetricsApiTransformer metricsApiTransformer,
+                           ResponseHandler metricsApiResponseHandler) {
         this.internalApiClientFactory = internalApiClientFactory;
         this.metricsApiTransformer = metricsApiTransformer;
         this.metricsApiResponseHandler = metricsApiResponseHandler;
@@ -49,11 +49,11 @@ public class ChargesClient implements MetricsClient {
                             metricsRecalculateApi)
                     .execute();
         } catch (ApiErrorResponseException ex) {
-            metricsApiResponseHandler.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
+            metricsApiResponseHandler.handle(companyNumber, REGISTERS_DELTA_TYPE, ex);
         } catch (IllegalArgumentException ex) {
-            metricsApiResponseHandler.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
+            metricsApiResponseHandler.handle(companyNumber, REGISTERS_DELTA_TYPE, ex);
         } catch (URIValidationException ex) {
-            metricsApiResponseHandler.handle(companyNumber, CHARGES_DELTA_TYPE, ex);
+            metricsApiResponseHandler.handle(companyNumber, REGISTERS_DELTA_TYPE, ex);
         }
     }
 }

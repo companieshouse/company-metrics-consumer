@@ -13,11 +13,13 @@ public class CompanyMetricsApiTransformer {
     public MetricsRecalculateApi transform(String updatedBy,
                                            boolean isMortgage,
                                            boolean isAppointment,
-                                           boolean isPsc) {
+                                           boolean isPsc,
+                                           boolean isRegister) {
         return new MetricsRecalculateApi()
                 .mortgage(isMortgage)
                 .appointments(isAppointment)
                 .personsWithSignificantControl(isPsc)
+                .registers(isRegister)
                 .internalData(new InternalData()
                         .updatedBy(updatedBy));
     }

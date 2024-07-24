@@ -29,7 +29,7 @@
 		<ch-kafka.version>1.4.8</ch-kafka.version>
 		<structured-logging.version>1.9.27</structured-logging.version>
 		<kafka-models.version>1.0.38</kafka-models.version>
-		<private-api-sdk-java.version>2.0.327</private-api-sdk-java.version>
+		<private-api-sdk-java.version>2.0.423</private-api-sdk-java.version>
 		<api-sdk-manager-java-library.version>1.0.9</api-sdk-manager-java-library.version>
 		<jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
 		<io-cucumber.version>7.13.0</io-cucumber.version>
