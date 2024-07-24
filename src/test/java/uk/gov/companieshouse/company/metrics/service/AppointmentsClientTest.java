@@ -35,6 +35,7 @@ class AppointmentsClientTest {
     private static final boolean IS_MORTGAGE = false;
     private static final boolean IS_APPOINTMENTS = true;
     private static final boolean IS_PSC = false;
+    private static final boolean IS_REGISTERS = false;
 
     @Mock
     private Supplier<InternalApiClient> internalApiClientSupplier;
@@ -77,7 +78,7 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
     }
 
@@ -91,7 +92,7 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
         verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException);
     }
@@ -106,7 +107,7 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
         verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, apiErrorResponseException);
     }
@@ -121,7 +122,7 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
         verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, illegalArgumentException);
     }
@@ -136,7 +137,7 @@ class AppointmentsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(appointmentsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
         verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, APPOINTMENTS_DELTA_TYPE, uriValidationException);
     }

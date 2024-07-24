@@ -35,6 +35,7 @@ class PscsClientTest {
     private static final boolean IS_MORTGAGE = false;
     private static final boolean IS_APPOINTMENTS = false;
     private static final boolean IS_PSC = true;
+    private static final boolean IS_REGISTERS = false;
 
     @Mock
     private Supplier<InternalApiClient> internalApiClientSupplier;
@@ -77,7 +78,7 @@ class PscsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
     }
 
@@ -92,7 +93,7 @@ class PscsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
         verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSCS_DELTA_TYPE, apiErrorResponseException);
     }
@@ -108,7 +109,7 @@ class PscsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
         verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSCS_DELTA_TYPE, apiErrorResponseException);
     }
@@ -124,7 +125,7 @@ class PscsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
         verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSCS_DELTA_TYPE, illegalArgumentException);
     }
@@ -140,7 +141,7 @@ class PscsClientTest {
         client.postMetrics(COMPANY_NUMBER, UPDATED_BY, RESOURCE_URI);
 
         // then
-        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC));
+        verify(pscStatementsMetricsPostHandler).postCompanyMetrics(PATH, metricsApiTransformer.transform(UPDATED_BY, IS_MORTGAGE, IS_APPOINTMENTS, IS_PSC, IS_REGISTERS));
         verify(privateCompanyMetricsUpsert).execute();
         verify(metricsApiResponseHandler).handle(COMPANY_NUMBER, PSCS_DELTA_TYPE, uriValidationException);
     }

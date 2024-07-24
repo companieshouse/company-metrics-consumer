@@ -16,6 +16,7 @@ public class AppointmentsClient implements MetricsClient {
     private static final boolean IS_MORTGAGE = false;
     private static final boolean IS_APPOINTMENT = true;
     private static final boolean IS_PSC = false;
+    private static final boolean IS_REGISTERS = false;
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final CompanyMetricsApiTransformer metricsApiTransformer;
@@ -47,7 +48,7 @@ public class AppointmentsClient implements MetricsClient {
 
         try {
             MetricsRecalculateApi metricsRecalculateApi = metricsApiTransformer
-                    .transform(updatedBy, IS_MORTGAGE, IS_APPOINTMENT, IS_PSC);
+                    .transform(updatedBy, IS_MORTGAGE, IS_APPOINTMENT, IS_PSC, IS_REGISTERS);
             client.privateCompanyMetricsUpsertHandler()
                     .postCompanyMetrics(
                             String.format("/company/%s/metrics/recalculate", companyNumber),

@@ -13,11 +13,13 @@ public class MetricsClientConfig {
     private static final String DELETED = "deleted";
     private static final String OFFICERS = "officers";
     private static final String PSCS = "pscs";
+    private static final String REGISTERS = "registers";
 
     @Bean
     Map<String, Map<String, MetricsClient>> metricsClientMap(MetricsClient chargesClient,
                                                              MetricsClient appointmentsClient,
-                                                             MetricsClient pscsClient) {
+                                                             MetricsClient pscsClient,
+                                                             MetricsClient registersClient) {
         return Map.of(
                 CHARGES, Map.of(
                         CHANGED, chargesClient,
@@ -27,6 +29,9 @@ public class MetricsClientConfig {
                         DELETED, appointmentsClient),
                 PSCS, Map.of(
                         CHANGED, pscsClient,
-                        DELETED, pscsClient));
+                        DELETED, pscsClient),
+                REGISTERS, Map.of(
+                        CHANGED, registersClient,
+                        DELETED, registersClient));
     }
 }
