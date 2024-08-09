@@ -8,9 +8,11 @@ import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
@@ -31,10 +33,14 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
+import uk.gov.companieshouse.company.metrics.kafka.AbstractKafkaTest;
+import uk.gov.companieshouse.company.metrics.kafka.TestConsumerAspect;
 import uk.gov.companieshouse.company.metrics.processor.MetricsRouter;
 import uk.gov.companieshouse.company.metrics.util.TestConfig;
 import uk.gov.companieshouse.company.metrics.util.TestUtils;
@@ -42,36 +48,31 @@ import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @SpringBootTest(classes = CompanyMetricsConsumerApplication.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@EmbeddedKafka(
-        topics = {"stream-company-charges", "stream-company-charges-company-metrics-consumer-retry", "stream-company-charges-company-metrics-consumer-error"
-        , "stream-company-charges-company-metrics-consumer-invalid"},
-        controlledShutdown = true,
-        partitions = 1
-)
-@TestPropertySource(locations = "classpath:application-test_consumer_main.properties")
-@Import(TestConfig.class)
-@ActiveProfiles("test_consumer_main")
-class ChargesStreamConsumerTest {
-
-    @Autowired
-    private EmbeddedKafkaBroker embeddedKafkaBroker;
+@WireMockTest(httpPort = 8888)
+//@TestPropertySource(locations = "classpath:application-test_consumer_main.properties")
+//@ActiveProfiles("test_consumer_main")
+class ChargesStreamConsumerTest extends AbstractKafkaTest {
 
     @Autowired
     private KafkaConsumer<String, byte[]> testConsumer;
-
     @Autowired
     private KafkaProducer<String, byte[]> testProducer;
-
     @Autowired
-    private ResettableCountDownLatch resettableCountDownLatch;
+    private TestConsumerAspect testConsumerAspect;
 
     @MockBean
     private MetricsRouter router;
 
+    @DynamicPropertySource
+    static void props(DynamicPropertyRegistry registry) {
+        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+        registry.add("steps", () -> 1);
+    }
+
     @BeforeEach
-    public void beforeEach() {
-        resettableCountDownLatch.resetLatch(4);
+    public void setup() {
+        testConsumerAspect.resetLatch();
+        testConsumer.poll(Duration.ofMillis(1000));
     }
 
     @Test
@@ -82,11 +83,10 @@ class ChargesStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
-        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
-        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+        if (!testConsumerAspect.getLatch().await(30L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
 
@@ -105,12 +105,11 @@ class ChargesStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
-        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
         doThrow(NonRetryableErrorException.class).when(router).route(any(), any(), any());
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
-        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+        if (!testConsumerAspect.getLatch().await(30L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
@@ -130,12 +129,11 @@ class ChargesStreamConsumerTest {
         DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
         writer.write(new ResourceChangedData("resource_kind", "resource_uri", "context_id", "resource_id", "{}",
                 new EventRecord("published_at", "event_type", null)), encoder);
-        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
         doThrow(RetryableErrorException.class).when(router).route(any(), any(), any());
 
         //when
         testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
-        if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
+        if (!testConsumerAspect.getLatch().await(30L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 6);
@@ -154,7 +152,6 @@ class ChargesStreamConsumerTest {
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
         DatumWriter<String> writer = new ReflectDatumWriter<>(String.class);
         writer.write("hello", encoder);
-        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
 
         //when
         Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));

@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 @TestConfiguration
@@ -26,7 +27,7 @@ public class TestConfig {
 
     @Bean
     KafkaConsumer<String, byte[]> testConsumer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
-        return new KafkaConsumer<>(new HashMap<>() {{
+        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(new HashMap<>() {{
             put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
             put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
@@ -34,6 +35,14 @@ public class TestConfig {
             put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
             put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
         }}, new StringDeserializer(), new ByteArrayDeserializer());
+
+        consumer.subscribe(List.of(
+                "stream-company-charges",
+                "stream-company-charges-company-metrics-consumer-retry",
+                "stream-company-charges-company-metrics-consumer-error",
+                "stream-company-charges-company-metrics-consumer-invalid"));
+
+        return consumer;
     }
 
     @Bean
