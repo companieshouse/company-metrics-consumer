@@ -12,9 +12,6 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.companieshouse.company.metrics.util.TestConfig;
 
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application-test_main.properties")
-@Import(TestConfig.class)
-@ActiveProfiles("test_main")
 class MetricsClientFactoryTest {
 
     @Autowired

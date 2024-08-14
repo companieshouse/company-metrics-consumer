@@ -5,6 +5,7 @@ import com.google.api.client.http.HttpResponseException;
 import org.springframework.http.HttpStatus;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 
+//TODO delete this class as it's unused.
 public class TestSupport {
 
     public static ApiErrorResponseException buildApiErrorResponseCustomException(int nonHttpStatusCode) {

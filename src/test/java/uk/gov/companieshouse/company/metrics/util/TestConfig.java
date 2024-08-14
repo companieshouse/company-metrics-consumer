@@ -1,5 +1,18 @@
 package uk.gov.companieshouse.company.metrics.util;
 
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_CHARGES_COMPANY_METRICS_CONSUMER_ERROR_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_CHARGES_COMPANY_METRICS_CONSUMER_INVALID_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_CHARGES_COMPANY_METRICS_CONSUMER_RETRY_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_CHARGES_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_TOPIC;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -12,18 +25,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 @TestConfiguration
 public class TestConfig {
-
-    @Bean
-    public ResettableCountDownLatch resettableCountDownLatch() {
-        return new ResettableCountDownLatch();
-    }
+//TODO get rid of below bean.
+//    @Bean
+//    public ResettableCountDownLatch resettableCountDownLatch() {
+//        return new ResettableCountDownLatch();
+//    }
 
     @Bean
     KafkaConsumer<String, byte[]> testConsumer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
@@ -37,10 +49,19 @@ public class TestConfig {
         }}, new StringDeserializer(), new ByteArrayDeserializer());
 
         consumer.subscribe(List.of(
-                "stream-company-charges",
-                "stream-company-charges-company-metrics-consumer-retry",
-                "stream-company-charges-company-metrics-consumer-error",
-                "stream-company-charges-company-metrics-consumer-invalid"));
+                STREAM_COMPANY_CHARGES_TOPIC,
+                STREAM_COMPANY_CHARGES_COMPANY_METRICS_CONSUMER_RETRY_TOPIC,
+                STREAM_COMPANY_CHARGES_COMPANY_METRICS_CONSUMER_ERROR_TOPIC,
+                STREAM_COMPANY_CHARGES_COMPANY_METRICS_CONSUMER_INVALID_TOPIC,
+                STREAM_COMPANY_OFFICERS_TOPIC,
+                STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC,
+                STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC,
+                STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC,
+                STREAM_PSC_STATEMENTS_TOPIC,
+                STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC,
+                STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC,
+                STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC
+        ));
 
         return consumer;
     }
