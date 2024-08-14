@@ -2,6 +2,10 @@ package uk.gov.companieshouse.company.metrics.consumer.pscs;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_TOPIC;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.apache.avro.io.DatumWriter;
@@ -66,14 +70,14 @@ class PcsStreamConsumerInvalidTopicTest extends AbstractKafkaTest {
         writer.write("hello", encoder);
 
         //when
-        Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-psc-statements", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>(STREAM_PSC_STATEMENTS_TOPIC, 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
         future.get();
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-retry"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-error"), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-invalid"), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_PSC_STATEMENTS_TOPIC), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC), is(1));
     }
 }

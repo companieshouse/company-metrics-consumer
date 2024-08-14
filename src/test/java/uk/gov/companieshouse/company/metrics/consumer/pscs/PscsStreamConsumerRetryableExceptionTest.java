@@ -5,6 +5,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_TOPIC;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.apache.avro.io.DatumWriter;
@@ -72,16 +76,16 @@ class PscsStreamConsumerRetryableExceptionTest extends AbstractKafkaTest {
         doThrow(RetryableErrorException.class).when(router).route(any(), any(), any());
 
         //when
-        testProducer.send(new ProducerRecord<>("stream-psc-statements", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        testProducer.send(new ProducerRecord<>(STREAM_PSC_STATEMENTS_TOPIC, 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
         if (!testConsumerAspect.getLatch().await(5L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 6);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-retry"), is(3));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-error"), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-invalid"), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_PSC_STATEMENTS_TOPIC), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC), is(3));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC), is(1));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_PSC_STATEMENTS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC), is(0));
     }
 }

@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_PSC_STATEMENTS_TOPIC;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.apache.avro.io.DatumWriter;
@@ -72,7 +73,7 @@ class PscsStreamConsumerPositiveTest extends AbstractKafkaTest {
                 new EventRecord("published_at", "event_type", null)), encoder);
 
         //when
-        testProducer.send(new ProducerRecord<>("stream-psc-statements", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        testProducer.send(new ProducerRecord<>(STREAM_PSC_STATEMENTS_TOPIC, 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
         if (!testConsumerAspect.getLatch().await(5L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }

@@ -1,6 +1,10 @@
 package uk.gov.companieshouse.company.metrics.consumer.officers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC;
+import static uk.gov.companieshouse.company.metrics.util.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.apache.avro.io.DatumWriter;
@@ -65,14 +69,14 @@ class OfficersStreamConsumerInvalidTopicTest extends AbstractKafkaTest {
         writer.write("hello", encoder);
 
         //when
-        Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-company-officers", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
+        Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>(STREAM_COMPANY_OFFICERS_TOPIC, 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
         future.get();
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers")).isEqualTo(1);
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-retry")).isZero();
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-error")).isZero();
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-officers-company-metrics-consumer-invalid")).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_COMPANY_OFFICERS_TOPIC)).isEqualTo(1);
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_RETRY_TOPIC)).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_ERROR_TOPIC)).isZero();
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_COMPANY_OFFICERS_COMPANY_METRICS_CONSUMER_INVALID_TOPIC)).isEqualTo(1);
     }
 }

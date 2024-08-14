@@ -34,7 +34,7 @@ public class TestSupport {
                                                                    String companyNumber,
                                                                    String chargeId) {
 
-        String chargesRecord = loadFile("payloads", "charges-record.json");
+        String chargesRecord = loadFile("charges-record.json");
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
@@ -52,7 +52,7 @@ public class TestSupport {
 
     public ResourceChangedData createResourceDeletedMessageCharges(String companyChargesLink, String companyNumber, String chargedId, String payload) {
 
-        String chargesRecord = loadFile("payloads", payload);
+        String chargesRecord = loadFile(payload);
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
@@ -70,13 +70,13 @@ public class TestSupport {
     }
 
     public ResourceChangedData createResourceChangedMessageAppointments(String companyAppointmentsLink,
-                                                                        String companyNumber, String EVENT_TYPE)
+                                                                        String companyNumber, String eventType)
     {
-        String appointmentRecord = loadFile("payloads", "appointment-record.json");
+        String appointmentRecord = loadFile("appointment-record.json");
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
-        eventRecord.setType(EVENT_TYPE);
+        eventRecord.setType(eventType);
 
         return ResourceChangedData.newBuilder()
                 .setContextId(CONTEXT_ID)
@@ -89,13 +89,13 @@ public class TestSupport {
     }
 
     public ResourceChangedData createResourceChangedMessagePsc(String pscLink,
-                                                                        String companyNumber, String EVENT_TYPE)
+                                                                        String companyNumber, String eventType)
     {
-        String pscRecord = loadFile("payloads", "psc-record.json");
+        String pscRecord = loadFile("psc-record.json");
 
         EventRecord eventRecord = new EventRecord();
         eventRecord.setPublishedAt("2022010351");
-        eventRecord.setType(EVENT_TYPE);
+        eventRecord.setType(eventType);
 
         return ResourceChangedData.newBuilder()
                 .setContextId(CONTEXT_ID)
@@ -150,7 +150,7 @@ public class TestSupport {
         wireMockServer.start();
     }
 
-    public String loadFile(String dir, String fileName) {
+    public String loadFile(String fileName) {
         final String filePath = "src/itest/resources/payloads/" + fileName;
         try {
             return FileUtils.readFileToString(ResourceUtils.getFile(filePath), StandardCharsets.UTF_8);
@@ -160,6 +160,6 @@ public class TestSupport {
     }
 
     public String loadAvroMessageFile(String fileName) {
-        return loadFile("payloads", fileName);
+        return loadFile(fileName);
     }
 }
