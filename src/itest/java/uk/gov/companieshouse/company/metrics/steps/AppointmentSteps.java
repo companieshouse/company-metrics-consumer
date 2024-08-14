@@ -1,5 +1,15 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.getAllServeEvents;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
@@ -14,23 +24,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
-import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
+import uk.gov.companieshouse.company.metrics.consumer.KafkaMessageConsumerAspect;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.getAllServeEvents;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
 
 public class AppointmentSteps {
 
@@ -52,13 +51,12 @@ public class AppointmentSteps {
     @Autowired
     public KafkaConsumer<String, Object> kafkaConsumer;
     @Autowired
-    private ResettableCountDownLatch resettableCountDownLatch;
+    private KafkaMessageConsumerAspect kafkaMessageConsumerAspect;
     @Autowired
     private ResourceChangedDataDeserializer resourceChangedDataDeserializer;
 
     @Given("A resource change data message for {string} with an appointment entity exists on the {string} kafka topic")
     public void resourceChangedDataMessageExistsOnMainTopic(String companyNumber, String topic) {
-
         ResourceChangedData messageData = testSupport.createResourceChangedMessageAppointments(
                 getRecalculateURI(), companyNumber, getEventType());
         this.currentCompanyNumber = companyNumber;
@@ -121,7 +119,7 @@ public class AppointmentSteps {
 
     @When("The message is consumed")
     public void messageSuccessfullyConsumed() throws InterruptedException {
-        assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(kafkaMessageConsumerAspect.getLatch().await(5, TimeUnit.SECONDS)).isTrue();
     }
 
     @And("A request is sent to the Company Metrics Recalculate endpoint")

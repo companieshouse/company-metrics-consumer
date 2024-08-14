@@ -1,5 +1,9 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.getAllServeEvents;
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
@@ -9,15 +13,10 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
-import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
+import uk.gov.companieshouse.company.metrics.consumer.KafkaMessageConsumerAspect;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
-
 import java.util.List;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.getAllServeEvents;
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
 
 public class PscSteps {
 
@@ -40,7 +39,7 @@ public class PscSteps {
     @Autowired
     public KafkaConsumer<String, Object> kafkaConsumer;
     @Autowired
-    private ResettableCountDownLatch resettableCountDownLatch;
+    private KafkaMessageConsumerAspect kafkaMessageConsumerAspect;
     @Autowired
     private ResourceChangedDataDeserializer resourceChangedDataDeserializer;
 

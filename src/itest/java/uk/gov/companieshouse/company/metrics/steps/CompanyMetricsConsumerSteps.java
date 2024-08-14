@@ -29,7 +29,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import uk.gov.companieshouse.api.charges.ChargeApi;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
-import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
+import uk.gov.companieshouse.company.metrics.consumer.KafkaMessageConsumerAspect;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +59,7 @@ public class CompanyMetricsConsumerSteps {
     @Autowired
     public KafkaConsumer<String, Object> kafkaConsumer;
     @Autowired
-    private ResettableCountDownLatch resettableCountDownLatch;
+    private KafkaMessageConsumerAspect kafkaMessageConsumerAspect;
 
     @When("A message for {string} and changed eventType is successfully sent to the Kafka topic {string}")
     public void generateAvroMessageSendToTheKafkaTopic(String companyNumber,
@@ -112,7 +112,7 @@ public class CompanyMetricsConsumerSteps {
         kafkaTemplate.send(topic, nonAvroMessageData);
         kafkaTemplate.flush();
 
-        assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(kafkaMessageConsumerAspect.getLatch().await(5, TimeUnit.SECONDS)).isTrue();
     }
 
     @Then("The message should be moved to topic {string}")
@@ -258,7 +258,7 @@ public class CompanyMetricsConsumerSteps {
     private void sendKafkaMessage(String topic, ResourceChangedData avroMessageData) throws InterruptedException {
         kafkaTemplate.send(topic, avroMessageData);
         kafkaTemplate.flush();
-        assertThat(resettableCountDownLatch.getCountDownLatch().await(5, TimeUnit.SECONDS)).isTrue();
+        assertThat(kafkaMessageConsumerAspect.getLatch().await(5, TimeUnit.SECONDS)).isTrue();
     }
 
     private void stubCompanyMetricsApi(int statusCode) {

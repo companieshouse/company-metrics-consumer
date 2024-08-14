@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -11,12 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
-
+import uk.gov.companieshouse.company.metrics.consumer.KafkaMessageConsumerAspect;
 import java.time.Duration;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
 
 public class CommonApiSteps {
 
@@ -30,7 +29,7 @@ public class CommonApiSteps {
     @Autowired
     public KafkaConsumer<String, Object> kafkaConsumer;
     @Autowired
-    private ResettableCountDownLatch resettableCountDownLatch;
+    private KafkaMessageConsumerAspect kafkaMessageConsumerAspect;
 
     @Autowired
     private TestSupport testSupport;
@@ -42,7 +41,7 @@ public class CommonApiSteps {
      */
     @Before
     public void setup() {
-        resettableCountDownLatch.resetLatch(4);
+        kafkaMessageConsumerAspect.resetLatch();
         ResponseEntity<String> response = restTemplate.getForEntity(HEALTHCHECK_URI, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.valueOf(200));
         assertThat(response.getBody()).isEqualTo(HEALTHCHECK_RESPONSE_BODY);

@@ -1,35 +1,58 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import java.util.concurrent.CountDownLatch;
 
 @Aspect
+@Component
 public class KafkaMessageConsumerAspect {
 
-    @Autowired
-    private ResettableCountDownLatch resettableCountDownLatch;
+    private final int steps;
+    private CountDownLatch latch;
 
-    @AfterReturning("execution(* uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer" +
-            ".receive(..))")
-    void onSuccessfulProcessing() {
-        resettableCountDownLatch.countDownAll();
+    public KafkaMessageConsumerAspect(@Value("${steps:1}") int steps) {
+        this.steps = steps;
+        this.latch = new CountDownLatch(steps);
+    }
+
+    @After(
+            "execution(* uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer" +
+                    ".receive(..))" +
+                    "|| execution(* uk.gov.companieshouse.company.metrics.consumer.OfficersStreamConsumer" +
+                    ".receive(..))" +
+                    "|| execution(* uk.gov.companieshouse.company.metrics.consumer.PscEventStreamConsumer" +
+                    ".receive(..))")
+    void onSuccessfulProcessing(JoinPoint joinPoint) {
+        latch.countDown();
     }
 
     @AfterThrowing(value = "execution(* uk.gov.companieshouse.company.metrics.consumer.ChargesStreamConsumer" +
             ".receive(..))", throwing = "ex")
     void onConsumerException(Exception ex) {
         if (ex instanceof NonRetryableErrorException) {
-            resettableCountDownLatch.countDownAll();
+            latch.countDown();
         } else {
-            resettableCountDownLatch.countDown();
+            latch.countDown();
         }
     }
 
     @AfterThrowing("execution(* org.apache.kafka.common.serialization.Deserializer.deserialize(..))")
     void deserialize() {
-        resettableCountDownLatch.countDownAll();
+        latch.countDown();
     }
+
+    public CountDownLatch getLatch() {
+        return latch;
+    }
+
+    public void resetLatch() {
+        latch = new CountDownLatch(steps);
+    }
+
 }
