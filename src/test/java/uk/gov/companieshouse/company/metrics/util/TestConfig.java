@@ -24,18 +24,12 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 @TestConfiguration
 public class TestConfig {
-//TODO get rid of below bean.
-//    @Bean
-//    public ResettableCountDownLatch resettableCountDownLatch() {
-//        return new ResettableCountDownLatch();
-//    }
 
     @Bean
     KafkaConsumer<String, byte[]> testConsumer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {

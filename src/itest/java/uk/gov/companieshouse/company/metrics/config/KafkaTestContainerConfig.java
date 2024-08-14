@@ -20,7 +20,6 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
-import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
 import uk.gov.companieshouse.company.metrics.exception.RetryableTopicErrorInterceptor;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataSerializer;
@@ -128,10 +127,4 @@ public class KafkaTestContainerConfig {
 
         return consumer;
     }
-
-    @Bean
-    public ResettableCountDownLatch resettableCountDownLatch() {
-        return new ResettableCountDownLatch();
-    }
-
 }
