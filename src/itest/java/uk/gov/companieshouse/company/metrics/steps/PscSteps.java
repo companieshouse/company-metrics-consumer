@@ -9,12 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
-import uk.gov.companieshouse.company.metrics.consumer.KafkaMessageConsumerAspect;
-import uk.gov.companieshouse.company.metrics.serialization.ResourceChangedDataDeserializer;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 import java.util.List;
 
@@ -36,12 +33,6 @@ public class PscSteps {
      * The company number extracted from the current avro file
      */
     private String currentCompanyNumber;
-    @Autowired
-    public KafkaConsumer<String, Object> kafkaConsumer;
-    @Autowired
-    private KafkaMessageConsumerAspect kafkaMessageConsumerAspect;
-    @Autowired
-    private ResourceChangedDataDeserializer resourceChangedDataDeserializer;
 
     private String getRecalculateURI() {
         return CONTEXT.get(COMPANY_METRICS_RECALCULATE_URI) == null
@@ -97,5 +88,4 @@ public class PscSteps {
         assertThat(serverEvents).isNotEmpty(); // assert that the wiremock did something
         return serverEvents;
     }
-
 }
