@@ -2,8 +2,8 @@ Feature: Company metrics appointment criteria
 
   Scenario Outline: Post officers recalculate successfully - event type changed
     Given The event type is "<eventType>"
-    And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     And Company Metrics API returns OK status code
+    And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then A request is sent to the Company Metrics Recalculate endpoint
 
@@ -15,8 +15,8 @@ Feature: Company metrics appointment criteria
 
   Scenario Outline: Post officers recalculate successfully - event type deleted
     Given The event type is "<eventType>"
-    And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     And Company Metrics API returns OK status code
+    And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then A request is sent to the Company Metrics Recalculate endpoint
 
@@ -33,8 +33,8 @@ Feature: Company metrics appointment criteria
     Then A non-retryable exception should be thrown when consuming from "stream-company-officers"
     And The message should be placed on to "stream-company-officers-company-metrics-consumer-invalid" kafka topic
 
-  Scenario Outline: Service not authenticated or authorised
-    Given The consumer has been configured with api key without internal app privileges for "<companyNumber>"
+  Scenario Outline: Metrics Api returns 400 bad request
+    Given Company Metrics API returns BAD_REQUEST status code
     And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then The message should be placed on to "stream-company-officers-company-metrics-consumer-invalid" kafka topic
@@ -58,8 +58,8 @@ Feature: Company metrics appointment criteria
       | stream-company-officers | SC109614      | abcdefg                            |
 
 
-  Scenario Outline: Endpoint does not exist/could not be found in metrics api
-    Given The specified endpoint does not exist within company metrics api
+  Scenario Outline: Metrics Api returns 409 conflict
+    Given Company Metrics API returns CONFLICT status code
     And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then The message should be placed on to "stream-company-officers-company-metrics-consumer-invalid" kafka topic

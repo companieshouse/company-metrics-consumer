@@ -130,19 +130,14 @@ public class AppointmentSteps {
         assertMetricsApiSuccessfullyInvoked(serverEvents);
     }
 
-    @Given("The consumer has been configured with api key without internal app privileges for {string}")
-    public void consumerBeenConfiguredAsUnauthorised(String companyNumber) {
-        stubCompanyMetricsApi(HttpStatus.UNAUTHORIZED.value());
-    }
-
     @Given("The message resource Uri {string} is invalid")
     public void theMessageResourceURIIsInvalid(String invalidResourceUri) {
         CONTEXT.set(COMPANY_METRICS_RECALCULATE_URI, invalidResourceUri);
     }
 
-    @Given("The specified endpoint does not exist within company metrics api")
-    public void theSpecifiedEndpointWithinMessageDoesNotExistWithinMetricsConsumer() {
-        stubCompanyMetricsApi(HttpStatus.NOT_FOUND.value());
+    @Given("Company Metrics API returns CONFLICT status code")
+    public void companyMetricsApiReturnsConflictStatusCode() {
+        stubCompanyMetricsApi(HttpStatus.CONFLICT.value());
     }
 
     private void stubCompanyMetricsApi(int statusCode) {
