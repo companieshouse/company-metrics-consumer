@@ -2,6 +2,7 @@ package uk.gov.companieshouse.company.metrics.service;
 
 import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
 
+import java.util.Arrays;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -11,13 +12,13 @@ import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import java.util.Arrays;
 
 @Component
 public class MetricsApiResponseHandler implements ResponseHandler {
 
     private static final String FAILED_MSG = "Failed recalculating %s for company %s";
-    private static final String ERROR_MSG = "HTTP response code %s  when recalculating %s for company %s";
+    private static final String ERROR_MSG = "HTTP response code %s  when recalculating %s for "
+            + "company %s";
     private static final String API_INFO_RESPONSE_MSG = "Call to API failed, status code: %d. %s";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
@@ -64,10 +65,13 @@ public class MetricsApiResponseHandler implements ResponseHandler {
      */
     @Override
     public void handle(String companyNumber, String deltaType, ApiErrorResponseException ex) {
-        String errorMessage = String.format(ERROR_MSG, ex.getStatusCode(), deltaType, companyNumber);
-        String infoMessage = String.format(API_INFO_RESPONSE_MSG, ex.getStatusCode(), Arrays.toString(ex.getStackTrace()));
+        String errorMessage = String.format(ERROR_MSG, ex.getStatusCode(),
+                deltaType, companyNumber);
+        String infoMessage = String.format(API_INFO_RESPONSE_MSG, ex.getStatusCode(),
+                Arrays.toString(ex.getStackTrace()));
         DataMapHolder.getLogMap().put("status", ex.getStatusCode());
-        if (HttpStatus.BAD_REQUEST.value() == ex.getStatusCode() || HttpStatus.CONFLICT.value() == ex.getStatusCode()) {
+        if (HttpStatus.BAD_REQUEST.value() == ex.getStatusCode()
+                || HttpStatus.CONFLICT.value() == ex.getStatusCode()) {
             LOGGER.error(errorMessage, DataMapHolder.getLogMap());
             throw new NonRetryableErrorException(errorMessage, ex);
         } else {
