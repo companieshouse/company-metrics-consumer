@@ -10,8 +10,8 @@ Feature: Company metrics PSC criteria
 
   Scenario Outline: Post psc recalculate successfully - event type changed
     Given The event type is "<eventType>"
-    And A resource change data message for "<companyNumber>" with an psc entity exists on the "<mainKafkaTopic>" kafka topic
     And Company Metrics API returns OK status code
+    And A resource change data message for "<companyNumber>" with an psc entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then A request is sent to the Company Metrics Recalculate endpoint for PSCs
 
@@ -23,8 +23,8 @@ Feature: Company metrics PSC criteria
 
   Scenario Outline: Post psc recalculate successfully - event type deleted
     Given The event type is "<eventType>"
-    And A resource change data message for "<companyNumber>" with an psc entity exists on the "<mainKafkaTopic>" kafka topic
     And Company Metrics API returns OK status code
+    And A resource change data message for "<companyNumber>" with an psc entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then A request is sent to the Company Metrics Recalculate endpoint for PSCs
 
@@ -34,8 +34,8 @@ Feature: Company metrics PSC criteria
       | stream-company-psc | deleted    | 08124207      |
       | stream-company-psc | deleted    | SC109614      |
 
-  Scenario Outline: Service not authenticated or authorised
-    Given The consumer has been configured with api key without internal app privileges for "<companyNumber>"
+  Scenario Outline: Metrics Api returns 400 bad request
+    Given Company Metrics API returns BAD_REQUEST status code
     And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then The message should be placed on to "stream-company-psc-company-metrics-consumer-invalid" kafka topic
@@ -58,14 +58,14 @@ Feature: Company metrics PSC criteria
       | stream-company-psc | 08124207      | /companyabc/%s/metrics/recalculate |
       | stream-company-psc | SC109614      | abcdefg                            |
 
-  Scenario Outline: Endpoint does not exist/could not be found in metrics api
-    Given The specified endpoint does not exist within company metrics api
+  Scenario Outline: Metrics Api returns 409 conflict
+    Given Company Metrics API returns CONFLICT status code
     And A resource change data message for "<companyNumber>" with an appointment entity exists on the "<mainKafkaTopic>" kafka topic
     When The message is consumed
     Then The message should be placed on to "stream-company-psc-company-metrics-consumer-invalid" kafka topic
 
     Examples:
-      | mainKafkaTopic          | companyNumber |
+      | mainKafkaTopic     | companyNumber |
       | stream-company-psc | 01203396      |
       | stream-company-psc | 08124207      |
       | stream-company-psc | SC109614      |
