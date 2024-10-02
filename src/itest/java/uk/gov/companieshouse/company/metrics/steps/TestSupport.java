@@ -135,19 +135,9 @@ public class TestSupport {
             wireMockServer.start();
             configureFor("localhost", wireMockServer.port());
         } else {
-            resetWiremock();
+            wireMockServer.resetAll();
         }
         return wireMockServer;
-    }
-
-    public void resetWiremock() {
-        if (wireMockServer == null) {
-            throw new RuntimeException("Wiremock not initialised");
-        }
-        wireMockServer.resetRequests();
-        wireMockServer.resetAll();
-        wireMockServer.stop();
-        wireMockServer.start();
     }
 
     public String loadFile(String dir, String fileName) {

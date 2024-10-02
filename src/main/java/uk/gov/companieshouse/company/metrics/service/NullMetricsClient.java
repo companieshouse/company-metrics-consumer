@@ -8,7 +8,7 @@ import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-@Component
+@Component("nullMetricsClient")
 public class NullMetricsClient implements MetricsClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);

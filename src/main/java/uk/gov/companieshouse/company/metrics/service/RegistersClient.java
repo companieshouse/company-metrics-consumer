@@ -10,7 +10,7 @@ import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
 
-@Component
+@Component("registersClient")
 public class RegistersClient implements MetricsClient {
 
     private static final String REGISTERS_DELTA_TYPE = "registers";

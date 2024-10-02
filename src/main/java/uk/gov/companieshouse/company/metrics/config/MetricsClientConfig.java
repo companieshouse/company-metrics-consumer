@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.company.metrics.config;
 
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.companieshouse.company.metrics.service.MetricsClient;
@@ -16,10 +17,11 @@ public class MetricsClientConfig {
     private static final String REGISTERS = "registers";
 
     @Bean
-    Map<String, Map<String, MetricsClient>> metricsClientMap(MetricsClient chargesClient,
-                                                             MetricsClient appointmentsClient,
-                                                             MetricsClient pscsClient,
-                                                             MetricsClient registersClient) {
+    Map<String, Map<String, MetricsClient>> metricsClientMap(
+            @Qualifier("chargesClient") MetricsClient chargesClient,
+            @Qualifier("appointmentsClient") MetricsClient appointmentsClient,
+            @Qualifier("pscsClient") MetricsClient pscsClient,
+            @Qualifier("registersClient") MetricsClient registersClient) {
         return Map.of(
                 CHARGES, Map.of(
                         CHANGED, chargesClient,
