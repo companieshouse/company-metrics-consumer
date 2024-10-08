@@ -9,7 +9,7 @@ import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
-@Component
+@Component("appointmentsClient")
 public class AppointmentsClient implements MetricsClient {
 
     private static final String APPOINTMENTS_DELTA_TYPE = "appointments";

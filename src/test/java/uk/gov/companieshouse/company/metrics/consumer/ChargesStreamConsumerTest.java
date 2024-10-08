@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -90,7 +91,7 @@ class ChargesStreamConsumerTest {
             fail("Timed out waiting for latch");
         }
 
-        ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, 10000L, 1);
+        ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 1);
 
         //then
         assertThat(records.count()).isEqualTo(1);
@@ -113,7 +114,7 @@ class ChargesStreamConsumerTest {
         if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
-        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
+        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 2);
 
         //then
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges")).isEqualTo(1);
@@ -138,7 +139,7 @@ class ChargesStreamConsumerTest {
         if (!resettableCountDownLatch.getCountDownLatch().await(30L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
-        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 6);
+        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 6);
 
         //then
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges")).isEqualTo(1);
@@ -159,7 +160,7 @@ class ChargesStreamConsumerTest {
         //when
         Future<RecordMetadata> future = testProducer.send(new ProducerRecord<>("stream-company-charges", 0, System.currentTimeMillis(), "key", outputStream.toByteArray()));
         future.get();
-        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
+        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 2);
 
         //then
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-company-charges")).isEqualTo(1);

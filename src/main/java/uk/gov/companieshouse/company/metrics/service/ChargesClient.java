@@ -2,7 +2,6 @@ package uk.gov.companieshouse.company.metrics.service;
 
 import java.util.function.Supplier;
 import org.springframework.stereotype.Component;
-
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -10,7 +9,7 @@ import uk.gov.companieshouse.api.metrics.MetricsRecalculateApi;
 import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.transformer.CompanyMetricsApiTransformer;
 
-@Component
+@Component("chargesClient")
 public class ChargesClient implements MetricsClient {
 
     private static final String CHARGES_DELTA_TYPE = "charges";

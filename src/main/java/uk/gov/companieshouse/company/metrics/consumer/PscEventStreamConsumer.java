@@ -4,7 +4,7 @@ import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplic
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
-import org.springframework.kafka.retrytopic.FixedDelayStrategy;
+import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
@@ -37,7 +37,7 @@ public class PscEventStreamConsumer {
             attempts = "${company-metrics.consumer.psc-events.stream.retry-attempts}",
             backoff = @Backoff(delayExpression =
                     "${company-metrics.consumer.psc-events.stream.backoff-delay}"),
-            fixedDelayTopicStrategy = FixedDelayStrategy.SINGLE_TOPIC,
+            sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
             retryTopicSuffix = "-${company-metrics.consumer.psc-events.stream.group-id}-retry",
             dltTopicSuffix = "-${company-metrics.consumer.psc-events.stream.group-id}-error",
             autoCreateTopics = "false",
@@ -50,7 +50,7 @@ public class PscEventStreamConsumer {
             containerFactory = "listenerContainerFactory")
     public void receive(Message<ResourceChangedData> resourceChangedDataMessage,
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                        @Header(KafkaHeaders.RECEIVED_PARTITION_ID) String partition,
+                        @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
                         @Header(KafkaHeaders.OFFSET) String offset) {
         ResourceChangedData payload = resourceChangedDataMessage.getPayload();
         String contextId = payload.getContextId();

@@ -7,6 +7,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.time.Duration;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,7 @@ public class AppointmentSteps {
     @Then("The message should be placed on to {string} kafka topic")
     public void messageShouldBePlacedOntoTopic(String topic) {
         ConsumerRecord<String, Object> singleRecord =
-                KafkaTestUtils.getSingleRecord(kafkaConsumer,topic, 5000L);
+                KafkaTestUtils.getSingleRecord(kafkaConsumer,topic, Duration.ofMillis(5000L));
 
         String recordTopic = singleRecord.topic();
         assertThat(recordTopic).isEqualTo(topic);
