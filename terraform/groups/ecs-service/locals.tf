@@ -54,6 +54,7 @@ locals {
       { "name"  = "${replace(upper(local.service_name), "-", "_")}_${var.ssm_version_prefix}${replace(upper(basename(sec.name)), "-", "_")}", "value" = sec.version }
   ]
 
+
   # secrets to go in list
   task_secrets = concat(local.global_secret_list,local.service_secret_list)
 
