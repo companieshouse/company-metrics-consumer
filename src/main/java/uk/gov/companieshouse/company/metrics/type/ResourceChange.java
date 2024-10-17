@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.company.metrics.type;
 
 import java.util.Objects;
-
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 

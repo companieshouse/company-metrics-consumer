@@ -17,6 +17,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.But;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.time.Duration;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.header.Header;
@@ -118,7 +119,7 @@ public class CompanyMetricsConsumerSteps {
     @Then("The message should be moved to topic {string}")
     public void the_message_should_be_moved_to_topic(String topic) {
         ConsumerRecord<String, Object> singleRecord =
-                KafkaTestUtils.getSingleRecord(kafkaConsumer, topic, 5000L);
+                KafkaTestUtils.getSingleRecord(kafkaConsumer, topic, Duration.ofMillis(5000L));
         assertThat(singleRecord.value()).isNotNull();
     }
 
@@ -133,7 +134,7 @@ public class CompanyMetricsConsumerSteps {
     @Then("The message should be moved to topic {string} after retry attempts of {string}")
     public void the_message_should_retried_and_moved_to_error_topic(String topic, String retryAttempts) {
         ConsumerRecord<String, Object> singleRecord =
-                KafkaTestUtils.getSingleRecord(kafkaConsumer, topic, 5000L);
+                KafkaTestUtils.getSingleRecord(kafkaConsumer, topic, Duration.ofMillis(5000L));
 
         assertThat(singleRecord.value()).isNotNull();
         List<Header> retryList = StreamSupport.stream(singleRecord.headers().spliterator(), false)
@@ -173,7 +174,7 @@ public class CompanyMetricsConsumerSteps {
     @Then("The message is successfully consumed only once from the {string} topic but failed to process")
     public void the_message_is_successfully_consumed_only_once_from_the_topic_but_failed_to_process(String topicName) {
         Assert.assertThrows(IllegalStateException.class,
-                () -> KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName, 5000L));
+                () -> KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName, Duration.ofMillis(5000L)));
     }
 
     @But("Failed to process and immediately moved the message into {string} topic")
@@ -185,7 +186,7 @@ public class CompanyMetricsConsumerSteps {
     @But("Failed to process and moved the message into {string} topic after {int} attempts")
     public void moved_the_message_into_topic_after_attempts(String topicName, Integer retryAttempts) {
         ConsumerRecord<String, Object> singleRecord =
-                KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName, 5000L);
+                KafkaTestUtils.getSingleRecord(kafkaConsumer, topicName, Duration.ofMillis(5000L));
 
         assertThat(singleRecord.value()).isNotNull();
         List<Header> retryList = StreamSupport.stream(singleRecord.headers().spliterator(), false)
