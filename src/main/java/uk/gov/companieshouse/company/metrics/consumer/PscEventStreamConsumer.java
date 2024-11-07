@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -24,7 +24,7 @@ public class PscEventStreamConsumer {
 
     private static final String PSC_DELTA_TYPE = "pscs";
     private final MetricsRouter router;
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     public PscEventStreamConsumer(MetricsRouter router) {
         this.router = router;

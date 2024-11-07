@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.serialization;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import java.nio.charset.StandardCharsets;
 import org.apache.avro.io.DatumWriter;
@@ -18,7 +18,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class ResourceChangedDataSerializer implements Serializer<Object> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     @Override
     public byte[] serialize(String topic, Object payload) {

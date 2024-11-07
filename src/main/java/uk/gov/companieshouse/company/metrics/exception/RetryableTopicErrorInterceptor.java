@@ -3,7 +3,7 @@ package uk.gov.companieshouse.company.metrics.exception;
 import static java.lang.String.format;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_CAUSE_FQCN;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_STACKTRACE;
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
@@ -16,7 +16,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 public class RetryableTopicErrorInterceptor implements ProducerInterceptor<String, Object> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     @Override
     public ProducerRecord<String, Object> onSend(ProducerRecord<String, Object> message) {

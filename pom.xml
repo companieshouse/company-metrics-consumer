@@ -45,7 +45,7 @@
 		<kafka-models.version>3.0.8</kafka-models.version>
 		<private-api-sdk-java.version>4.0.205</private-api-sdk-java.version>
 		<api-sdk-manager-java-library.version>3.0.5</api-sdk-manager-java-library.version>
-		<structured-logging.version>3.0.9</structured-logging.version>
+		<structured-logging.version>3.0.20</structured-logging.version>
 
 		<!-- Test -->
 		<spring.boot.starter.test.version>3.3.4</spring.boot.starter.test.version>

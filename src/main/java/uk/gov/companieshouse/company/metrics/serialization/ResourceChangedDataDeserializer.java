@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.serialization;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
@@ -17,7 +17,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class ResourceChangedDataDeserializer implements Deserializer<ResourceChangedData> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     /**
      * deserialize.

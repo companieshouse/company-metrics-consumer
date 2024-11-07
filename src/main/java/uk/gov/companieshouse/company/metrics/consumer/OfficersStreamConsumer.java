@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -21,7 +21,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class OfficersStreamConsumer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     private static final String OFFICER_DELTA_TYPE = "officers";
     private final MetricsRouter router;

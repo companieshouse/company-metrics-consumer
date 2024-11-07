@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +14,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Component
 public class CompanyNumberExtractor implements CompanyNumberExtractable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     private static final Pattern EXTRACT_COMPANY_NUMBER_PATTERN =
             Pattern.compile("(?<=company/)([a-zA-Z0-9]{6,10})(?=/.*)");
