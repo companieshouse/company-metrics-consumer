@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import java.util.Arrays;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,7 @@ public class MetricsApiResponseHandler implements ResponseHandler {
             + "company %s";
     private static final String API_INFO_RESPONSE_MSG = "Call to API failed, status code: %d. %s";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     /**
      * Handles logging an error message and throwing the appropriate exception when a

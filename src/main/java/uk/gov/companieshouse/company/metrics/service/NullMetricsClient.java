@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
@@ -11,7 +11,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Component("nullMetricsClient")
 public class NullMetricsClient implements MetricsClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     private static final String INVALID_DELTA_EVENT_TYPE =
             "Invalid delta type and/or event type for company number %s";

@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.NAMESPACE;
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -25,7 +25,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Component
 public class ChargesStreamConsumer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     private final MetricsRouter chargesRouter;
 

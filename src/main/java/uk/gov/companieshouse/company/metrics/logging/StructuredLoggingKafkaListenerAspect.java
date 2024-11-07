@@ -17,7 +17,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 class StructuredLoggingKafkaListenerAspect {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(
-            CompanyMetricsConsumerApplication.NAMESPACE);
+            CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE);
 
     private static final String LOG_MESSAGE_RECEIVED = "Processing delta";
     private static final String LOG_MESSAGE_PROCESSED = "Processed delta";
