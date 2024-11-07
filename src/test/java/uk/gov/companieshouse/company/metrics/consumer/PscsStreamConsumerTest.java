@@ -79,7 +79,7 @@ class PscsStreamConsumerTest {
         resettableCountDownLatch.resetLatch(4);
     }
 
-   /* @Test
+    @Test
     void testConsumePscStatementMessage() throws IOException, InterruptedException {
         //given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -173,5 +173,5 @@ class PscsStreamConsumerTest {
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-retry"), is(0));
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-error"), is(0));
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, "stream-psc-statements-company-metrics-consumer-invalid"), is(1));
-    }*/
+    }
 }
