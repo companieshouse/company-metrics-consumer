@@ -11,6 +11,8 @@ help:
         | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' \
         | xargs -I _ sh -c 'printf "%-20s " _; make _ -nB | (grep -i "^# Help:" || echo "") | tail -1 | sed "s/^# Help: //g"'
 
+dependency_check_runner := 416670754337.dkr.ecr.eu-west-2.amazonaws.com/dependency-check-runner
+
 .PHONY: all
 all:
 	@# Help: Calls methods required to build a locally runnable version, typically the build target
@@ -121,26 +123,7 @@ lint/docker-compose:
 
 .PHONY: dependency-check
 dependency-check:
-	@ if [ -n "$(DEPENDENCY_CHECK_SUPPRESSIONS_HOME)" ]; then \
-		if [ -d "$(DEPENDENCY_CHECK_SUPPRESSIONS_HOME)" ]; then \
-			suppressions_home="$${DEPENDENCY_CHECK_SUPPRESSIONS_HOME}"; \
-		else \
-			printf -- 'DEPENDENCY_CHECK_SUPPRESSIONS_HOME is set, but its value "%s" does not point to a directory\n' "$(DEPENDENCY_CHECK_SUPPRESSIONS_HOME)"; \
-			exit 1; \
-		fi; \
-	fi; \
-	if [ ! -d "$${suppressions_home}" ]; then \
-		suppressions_home_target_dir="./target/dependency-check-suppressions"; \
-		if [ -d "$${suppressions_home_target_dir}" ]; then \
-			suppressions_home="$${suppressions_home_target_dir}"; \
-		else \
-			mkdir -p "./target"; \
-			git clone git@github.com:companieshouse/dependency-check-suppressions.git "$${suppressions_home_target_dir}" && \
-				suppressions_home="$${suppressions_home_target_dir}"; \
-		fi; \
-	fi; \
-	printf -- 'suppressions_home="%s"\n' "$${suppressions_home}"; \
-	DEPENDENCY_CHECK_SUPPRESSIONS_HOME="$${suppressions_home}" "$${suppressions_home}/scripts/depcheck" --repo-name=company-metrics-consumer
+	docker run --rm -e DEPENDENCY_CHECK_SUPPRESSIONS_HOME=/opt -v "$$(pwd)":/app -w /app ${dependency_check_runner} --repo-name="$(basename "$$(pwd)")"
 
 .PHONY: security-check
 security-check: dependency-check
