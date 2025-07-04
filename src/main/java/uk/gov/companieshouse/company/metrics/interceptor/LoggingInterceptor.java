@@ -1,9 +1,8 @@
 package uk.gov.companieshouse.company.metrics.interceptor;
 
+import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -11,6 +10,8 @@ import uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.RequestLogger;
+
+import javax.annotation.Nullable;
 
 @Component
 public class LoggingInterceptor implements AsyncHandlerInterceptor, RequestLogger {
