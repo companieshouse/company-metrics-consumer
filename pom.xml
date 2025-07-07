@@ -18,7 +18,6 @@
   <properties>
     <!-- Spring/Java/Maven -->
     <java.version>21</java.version>
-    <spring-override.version>7.0.0-M6</spring-override.version>
     <spring.boot.version>3.5.3</spring.boot.version>
 
     <!-- External -->
@@ -29,7 +28,7 @@
     <map-struct.version>1.6.3</map-struct.version>
     <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
     <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-    <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
+    <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
     <springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
@@ -71,13 +70,7 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-framework-bom</artifactId>
-        <version>${spring-override.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
@@ -85,11 +78,7 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-logging</artifactId>
-        <version>${spring.boot.version}</version>
-      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
