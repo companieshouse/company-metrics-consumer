@@ -43,7 +43,7 @@
 
     <!-- Test -->
     <assertj-core.version>3.27.3</assertj-core.version>
-    <io-cucumber.version>7.24.0</io-cucumber.version>
+    <io-cucumber.version>7.21.1</io-cucumber.version>
     <testcontainers.version>1.21.3</testcontainers.version>
     <wiremock.standalone.version>3.13.1</wiremock.standalone.version>
 
