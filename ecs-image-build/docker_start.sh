@@ -6,4 +6,4 @@
 
 
 PORT=8080
-exec java -jar -Dserver.port="${PORT}" "company-metrics-consumer.jar"
+exec java -jar -Dserver.port="${PORT}" -XX:MaxRAMPercentage=80 "company-metrics-consumer.jar"
