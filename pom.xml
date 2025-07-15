@@ -22,6 +22,7 @@
 
     <!-- External -->
     <apache.avro.version>1.12.0</apache.avro.version>
+    <apache-commons-lang3.version>3.18.0</apache-commons-lang3.version>
     <classgraph.version>4.8.180</classgraph.version>
     <jackson-databind-version>2.18.4</jackson-databind-version>
     <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
@@ -33,6 +34,7 @@
     <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
     <springdoc-openapi-starter-webmvc-ui.version>2.8.9</springdoc-openapi-starter-webmvc-ui.version>
+    <opentelemetry-instrumentation-bom.version>2.14.0</opentelemetry-instrumentation-bom.version>
 
     <!-- Companies House -->
     <api-sdk-manager-java-library.version>3.0.7</api-sdk-manager-java-library.version>
@@ -77,6 +79,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom</artifactId>
+        <version>${opentelemetry-instrumentation-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -107,6 +116,11 @@
       <artifactId>mapstruct</artifactId>
       <version>${map-struct.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${apache-commons-lang3.version}</version>
+    </dependency>
     <!-- Companies House -->
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
@@ -117,6 +131,12 @@
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>ch-kafka</artifactId>
       <version>${ch-kafka.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
@@ -126,6 +146,10 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -142,6 +166,12 @@
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>api-sdk-manager-java-library</artifactId>
       <version>${api-sdk-manager-java-library.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
