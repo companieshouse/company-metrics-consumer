@@ -18,7 +18,7 @@
   <properties>
     <!-- Spring/Java/Maven -->
     <java.version>21</java.version>
-    <spring.boot.version>3.5.3</spring.boot.version>
+    <spring.boot.version>3.5.4</spring.boot.version>
 
     <!-- External -->
     <apache.avro.version>1.12.0</apache.avro.version>
@@ -35,13 +35,14 @@
     <springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
     <springdoc-openapi-starter-webmvc-ui.version>2.8.9</springdoc-openapi-starter-webmvc-ui.version>
     <opentelemetry-instrumentation-bom.version>2.14.0</opentelemetry-instrumentation-bom.version>
+    <io-grpc-context.version>1.74.0</io-grpc-context.version>
 
     <!-- Companies House -->
-    <api-sdk-manager-java-library.version>3.0.7</api-sdk-manager-java-library.version>
-    <ch-kafka.version>3.0.3</ch-kafka.version>
-    <kafka-models.version>3.0.18</kafka-models.version>
-    <private-api-sdk-java.version>4.0.319</private-api-sdk-java.version>
-    <structured-logging.version>3.0.34</structured-logging.version>
+    <api-sdk-manager-java-library.version>3.0.9</api-sdk-manager-java-library.version>
+    <ch-kafka.version>3.0.6</ch-kafka.version>
+    <kafka-models.version>3.0.19</kafka-models.version>
+    <private-api-sdk-java.version>4.0.331</private-api-sdk-java.version>
+    <structured-logging.version>3.0.37</structured-logging.version>
 
     <!-- Test -->
     <assertj-core.version>3.27.3</assertj-core.version>
@@ -255,6 +256,11 @@
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-context</artifactId>
+      <version>${io-grpc-context.version}</version>
     </dependency>
   </dependencies>
 
