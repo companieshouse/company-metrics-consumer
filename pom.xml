@@ -18,35 +18,37 @@
   <properties>
     <!-- Spring/Java/Maven -->
     <java.version>21</java.version>
-    <spring-override.version>6.2.4</spring-override.version>
-    <spring.boot.version>3.4.3</spring.boot.version>
+    <spring.boot.version>3.5.4</spring.boot.version>
 
     <!-- External -->
     <apache.avro.version>1.12.0</apache.avro.version>
-    <classgraph.version>4.8.179</classgraph.version>
-    <jackson-databind-version>2.18.3</jackson-databind-version>
-    <jib-maven-plugin.version>3.4.4</jib-maven-plugin.version>
+    <apache-commons-lang3.version>3.18.0</apache-commons-lang3.version>
+    <classgraph.version>4.8.180</classgraph.version>
+    <jackson-databind-version>2.18.4</jackson-databind-version>
+    <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
     <map-struct.version>1.6.3</map-struct.version>
-    <maven-build-helper-plugin.version>3.6.0</maven-build-helper-plugin.version>
+    <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
     <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
-    <springdoc-openapi-starter-webmvc-ui.version>2.8.5</springdoc-openapi-starter-webmvc-ui.version>
+    <springdoc-openapi-starter-webmvc-ui.version>2.8.9</springdoc-openapi-starter-webmvc-ui.version>
+    <opentelemetry-instrumentation-bom.version>2.14.0</opentelemetry-instrumentation-bom.version>
+    <io-grpc-context.version>1.74.0</io-grpc-context.version>
 
     <!-- Companies House -->
-    <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
-    <ch-kafka.version>3.0.3</ch-kafka.version>
-    <kafka-models.version>3.0.12</kafka-models.version>
-    <private-api-sdk-java.version>4.0.280</private-api-sdk-java.version>
-    <structured-logging.version>3.0.26</structured-logging.version>
+    <api-sdk-manager-java-library.version>3.0.9</api-sdk-manager-java-library.version>
+    <ch-kafka.version>3.0.6</ch-kafka.version>
+    <kafka-models.version>3.0.19</kafka-models.version>
+    <private-api-sdk-java.version>4.0.331</private-api-sdk-java.version>
+    <structured-logging.version>3.0.37</structured-logging.version>
 
     <!-- Test -->
     <assertj-core.version>3.27.3</assertj-core.version>
     <io-cucumber.version>7.21.1</io-cucumber.version>
-    <testcontainers.version>1.19.3</testcontainers.version>
-    <wiremock.standalone.version>3.12.1</wiremock.standalone.version>
+    <testcontainers.version>1.21.3</testcontainers.version>
+    <wiremock.standalone.version>3.13.1</wiremock.standalone.version>
 
     <!-- Config -->
     <main.class>uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication</main.class>
@@ -58,7 +60,7 @@
     <skip.unit.tests>false</skip.unit.tests>
 
     <!-- Sonar -->
-    <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
+    <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml
     </sonar.coverage.jacoco.xmlReportPaths>
     <sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
@@ -72,9 +74,9 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-framework-bom</artifactId>
-        <version>${spring-override.version}</version>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom</artifactId>
+        <version>${opentelemetry-instrumentation-bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -115,28 +117,27 @@
       <artifactId>mapstruct</artifactId>
       <version>${map-struct.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${apache-commons-lang3.version}</version>
+    </dependency>
     <!-- Companies House -->
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>kafka-models</artifactId>
       <version>${kafka-models.version}</version>
-      <exclusions>
-        <!-- CVE-2024-8184, CVE-2024-6763 -->
-        <exclusion>
-          <groupId>org.eclipse.jetty.http2</groupId>
-          <artifactId>http2-server</artifactId>
-        </exclusion>
-        <!-- CVE-2024-8184, CVE-2024-6763, CVE-2024-22201 -->
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-webapp</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>ch-kafka</artifactId>
       <version>${ch-kafka.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>uk.gov.companieshouse</groupId>
@@ -146,6 +147,10 @@
         <exclusion>
           <groupId>org.slf4j</groupId>
           <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -162,6 +167,12 @@
       <groupId>uk.gov.companieshouse</groupId>
       <artifactId>api-sdk-manager-java-library</artifactId>
       <version>${api-sdk-manager-java-library.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -177,25 +188,12 @@
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
-      <exclusions>
-        <!-- CVE-2025-26791 -->
-        <exclusion>
-          <groupId>org.webjars</groupId>
-          <artifactId>swagger-ui</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <!-- Test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.junit.jupiter</groupId>
-          <artifactId>junit-jupiter-engine</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.kafka</groupId>
@@ -254,6 +252,15 @@
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
       <version>${apache.avro.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-context</artifactId>
+      <version>${io-grpc-context.version}</version>
     </dependency>
   </dependencies>
 
