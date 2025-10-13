@@ -32,6 +32,16 @@
       "place_registered" : "United Kingdom",
       "registration_number" : "38298"
     },
+    "identity_verification_details": {
+      "appointment_verification_end_on": "3099-03-03T10:36:28.595Z",
+      "appointment_verification_statement_due_on": "2023-03-05T10:36:28.595Z",
+      "anti_money_laundering_supervisory_bodies": [
+        "Supervisor Ltd"
+      ],
+      "authorised_corporate_service_provider_name": "Provider Corp.",
+      "preferred_name": "Phil Glover",
+      "identity_verified_on": "2023-03-03T10:36:28.595Z"
+    },
     "surname" : "GLOVER",
     "forename" : "PHIL",
     "other_forenames" : "Peter",
