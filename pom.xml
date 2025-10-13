@@ -18,7 +18,7 @@
   <properties>
     <!-- Spring/Java/Maven -->
     <java.version>21</java.version>
-    <spring.boot.version>3.5.4</spring.boot.version>
+    <spring.boot.version>3.5.6</spring.boot.version>
 
     <!-- External -->
     <apache.avro.version>1.12.0</apache.avro.version>
@@ -41,7 +41,7 @@
     <api-sdk-manager-java-library.version>3.0.9</api-sdk-manager-java-library.version>
     <ch-kafka.version>3.0.6</ch-kafka.version>
     <kafka-models.version>3.0.19</kafka-models.version>
-    <private-api-sdk-java.version>4.0.331</private-api-sdk-java.version>
+    <private-api-sdk-java.version>4.0.386</private-api-sdk-java.version>
     <structured-logging.version>3.0.37</structured-logging.version>
 
     <!-- Test -->
