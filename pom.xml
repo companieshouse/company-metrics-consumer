@@ -6,7 +6,7 @@
   <parent>
     <groupId>uk.gov.companieshouse</groupId>
     <artifactId>companies-house-parent</artifactId>
-    <version>2.1.12</version>
+    <version>2.1.14</version>
     <relativePath/>
   </parent>
 
@@ -42,7 +42,7 @@
     <ch-kafka.version>3.0.6</ch-kafka.version>
     <kafka-models.version>3.0.19</kafka-models.version>
     <private-api-sdk-java.version>4.0.386</private-api-sdk-java.version>
-    <structured-logging.version>3.0.37</structured-logging.version>
+    <structured-logging.version>3.0.57</structured-logging.version>
 
     <!-- Test -->
     <assertj-core.version>3.27.3</assertj-core.version>
@@ -73,6 +73,7 @@
 
   <dependencyManagement>
     <dependencies>
+
       <dependency>
         <groupId>io.opentelemetry.instrumentation</groupId>
         <artifactId>opentelemetry-instrumentation-bom</artifactId>
