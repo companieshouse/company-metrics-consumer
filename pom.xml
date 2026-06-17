@@ -81,7 +81,6 @@
         <groupId>org.webjars</groupId>
         <artifactId>swagger-ui</artifactId>
         <version>${swagger-ui-override.version}</version>
-        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
