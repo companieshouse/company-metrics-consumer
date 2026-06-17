@@ -93,6 +93,11 @@
         <version>${log4j-override.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>${log4j-override.version}</version>
+      </dependency>
+      <dependency>
         <groupId>io.opentelemetry.instrumentation</groupId>
         <artifactId>opentelemetry-instrumentation-bom</artifactId>
         <version>${opentelemetry-instrumentation-bom.version}</version>
