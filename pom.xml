@@ -76,7 +76,7 @@
 
   <dependencyManagement>
     <dependencies>
-      <!-- Sec vulns  -->
+      <!-- Security vulnerabilities -->
       <dependency>
         <groupId>org.webjars</groupId>
         <artifactId>swagger-ui</artifactId>
