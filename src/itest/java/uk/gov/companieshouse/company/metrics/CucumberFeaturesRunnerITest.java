@@ -5,14 +5,12 @@ import io.cucumber.junit.CucumberOptions;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.runner.RunWith;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
-import org.springframework.boot.test.context.SpringBootTest;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(features = "src/itest/resources/features",
         plugin = {"pretty", "json:target/cucumber-report.json"},
         glue = {"uk.gov.companieshouse.company.metrics"})
 @CucumberContextConfiguration
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
 public class CucumberFeaturesRunnerITest extends AbstractIntegrationTest {
 
