@@ -50,30 +50,10 @@
     <apache.avro.version>1.12.1</apache.avro.version>
     <map-struct.version>1.6.3</map-struct.version>
 
-    <!-- External -->
-<!--    <apache.avro.version>1.12.0</apache.avro.version>-->
-<!--    <apache-commons-lang3.version>3.18.0</apache-commons-lang3.version>-->
-<!--    <classgraph.version>4.8.180</classgraph.version>-->
-<!--    <jackson-databind-version>2.18.4</jackson-databind-version>-->
-<!--    <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>-->
-<!--    <map-struct.version>1.6.3</map-struct.version>-->
-<!--    <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>-->
-<!--    <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>-->
-<!--    <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>-->
-<!--    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>-->
-<!--    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>-->
-<!--    <springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>-->
-<!--    <springdoc-openapi-starter-webmvc-ui.version>2.8.17</springdoc-openapi-starter-webmvc-ui.version>-->
-<!--    <opentelemetry-instrumentation-bom.version>2.28.1</opentelemetry-instrumentation-bom.version>-->
-<!--    <io-grpc-context.version>1.74.0</io-grpc-context.version>-->
-
     <!-- Test -->
     <assertj-core.version>3.27.3</assertj-core.version>
     <io-cucumber.version>7.21.1</io-cucumber.version>
     <wiremock.standalone.version>3.13.1</wiremock.standalone.version>
-
-    <!-- Config -->
-<!--    <main.class>uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication</main.class>-->
 
   </properties>
 
@@ -326,12 +306,12 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>${jacoco-maven-plugin.version}</version>
-        <configuration>
-          <append>true</append>
-          <destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>
-          <dataFile>${sonar.jacoco.reports}/jacoco.exec</dataFile>
-          <outputDirectory>${sonar.jacoco.reports}/jacoco</outputDirectory>
-        </configuration>
+<!--        <configuration>-->
+<!--          <append>true</append>-->
+<!--          <destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>-->
+<!--          <dataFile>${sonar.jacoco.reports}/jacoco.exec</dataFile>-->
+<!--          <outputDirectory>${sonar.jacoco.reports}/jacoco</outputDirectory>-->
+<!--        </configuration>-->
 
         <executions>
           <execution>
@@ -399,6 +379,8 @@
           <argLine>${surefireArgLine}</argLine>
           <excludes>
             <exclude>**/*ITest.java</exclude>
+            <exclude>**/*IntegrationTest.java</exclude>
+            <exclude>**/*IT.java</exclude>
           </excludes>
           <skipTests>${skip.unit.tests}</skipTests>
         </configuration>
