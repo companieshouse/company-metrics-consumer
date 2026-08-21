@@ -35,18 +35,19 @@ build:
 	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
 
 .PHONY: test
-test: test-integration test-unit
-	@# Help: Run all test-* targets (convenience method for developers)
+test: test-unit test-integration
 
 .PHONY: test-unit
 test-unit:
-	@# Help: Run unit tests
-	mvn test -Dskip.integration.tests=true
+	mvn clean verify
 
 .PHONY: test-integration
 test-integration:
-	@# Help: Run integration tests
-	mvn integration-test -Dskip.unit.tests=true
+	mvn clean verify -Dskip.unit.tests=true -Dskip.integration.tests=false
+
+.PHONY: docker-image
+docker-image: clean
+	mvn package -Dskip.unit.tests=true -Dskip.integration.tests=true jib:dockerBuild
 
 .PHONY: run-local
 run-local:
