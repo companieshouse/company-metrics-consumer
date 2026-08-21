@@ -1,7 +1,7 @@
 artifact_name       := company-metrics-consumer
 version             := unversioned
 
-## Create help from comments in Makefile
+# Create help from comments in Makefile
 help:
 	@printf "%-20s %s\n" "Target" "Description"
 	@printf "%-20s %s\n" "------" "-----------"
