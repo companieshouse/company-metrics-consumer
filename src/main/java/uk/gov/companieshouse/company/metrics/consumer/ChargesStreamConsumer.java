@@ -4,6 +4,8 @@ import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplic
 
 import java.time.Duration;
 import java.time.Instant;
+import org.jspecify.annotations.NonNull;
+import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
@@ -11,7 +13,6 @@ import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
@@ -20,7 +21,6 @@ import uk.gov.companieshouse.company.metrics.type.ResourceChange;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
-
 
 @Component
 public class ChargesStreamConsumer {
@@ -37,8 +37,7 @@ public class ChargesStreamConsumer {
      * Receives Main topic messages.
      */
     @RetryableTopic(attempts = "${company-metrics.consumer.charges.stream.retry-attempts}",
-            backoff = @Backoff(delayExpression =
-                    "${company-metrics.consumer.charges.stream.backoff-delay}"),
+            backOff = @BackOff(delayString = "${company-metrics.consumer.charges.stream.backoff-delay}"),
             sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
             retryTopicSuffix = "-${company-metrics.consumer.charges.stream.group-id}-retry",
             dltTopicSuffix = "-${company-metrics.consumer.charges.stream.group-id}-error",
@@ -49,7 +48,7 @@ public class ChargesStreamConsumer {
             groupId = "${company-metrics.consumer.charges.stream.group-id}",
             autoStartup = "${company-metrics.consumer.charges.stream.enable}",
             containerFactory = "listenerContainerFactory")
-    public void receive(Message<ResourceChangedData> resourceChangedMessage,
+    public void receive(Message<@NonNull ResourceChangedData> resourceChangedMessage,
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
                         @Header(KafkaHeaders.OFFSET) String offset) {

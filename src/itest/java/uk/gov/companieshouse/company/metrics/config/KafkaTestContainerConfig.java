@@ -11,6 +11,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -22,8 +23,8 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
-import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 import uk.gov.companieshouse.company.metrics.consumer.KafkaMessageConsumerAspect;
 import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
@@ -54,16 +55,17 @@ public class KafkaTestContainerConfig {
 
     @Bean
     public ConfluentKafkaContainer kafkaContainer() {
-        ConfluentKafkaContainer kafkaContainer = new ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
-        kafkaContainer.setWaitStrategy(Wait.defaultWaitStrategy()
-                .withStartupTimeout(Duration.of(300, SECONDS)));
+        var kafkaContainer = new ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+        WaitStrategy waitStrategy = Wait.defaultWaitStrategy()
+                .withStartupTimeout(Duration.of(300, SECONDS));
+        kafkaContainer.setWaitStrategy(waitStrategy);
         kafkaContainer.start();
         return kafkaContainer;
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> listenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> factory =
+    ConcurrentKafkaListenerContainerFactory<@NonNull String, @NonNull ResourceChangedData> listenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<@NonNull String, @NonNull ResourceChangedData> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(kafkaConsumerFactory());
         factory.getContainerProperties().setIdleBetweenPolls(0);
@@ -73,7 +75,7 @@ public class KafkaTestContainerConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, ResourceChangedData> kafkaConsumerFactory() {
+    public ConsumerFactory<@NonNull String, ResourceChangedData> kafkaConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs(kafkaContainer()),
                 new StringDeserializer(),
                 new ErrorHandlingDeserializer<>(resourceChangedDataDeserializer));
@@ -94,7 +96,7 @@ public class KafkaTestContainerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory(ConfluentKafkaContainer kafkaContainer) {
+    public ProducerFactory<@NonNull String, Object> producerFactory(ConfluentKafkaContainer kafkaContainer) {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.company.metrics.logging;
 
+import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+
 import java.util.Optional;
 import java.util.UUID;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -7,7 +9,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -16,8 +17,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Aspect
 class StructuredLoggingKafkaListenerAspect {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(
-            CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
     private static final String LOG_MESSAGE_RECEIVED = "Processing delta";
     private static final String LOG_MESSAGE_PROCESSED = "Processed delta";

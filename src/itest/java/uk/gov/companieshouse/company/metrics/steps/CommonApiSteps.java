@@ -1,28 +1,28 @@
 package uk.gov.companieshouse.company.metrics.steps;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.time.Duration;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.company.metrics.consumer.ResettableCountDownLatch;
-
-import java.time.Duration;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.companieshouse.company.metrics.config.CucumberContext.CONTEXT;
 
 public class CommonApiSteps {
 
     private static final String HEALTHCHECK_URI = "/company-metrics-consumer/healthcheck";
     private static final String HEALTHCHECK_RESPONSE_BODY = "{\"status\":\"UP\"}";
-    private ResponseEntity<String> lastResponse;
+    private ResponseEntity<@NonNull String> lastResponse;
 
     @Autowired
     protected TestRestTemplate restTemplate;
@@ -43,7 +43,7 @@ public class CommonApiSteps {
     @Before
     public void setup() {
         resettableCountDownLatch.resetLatch(4);
-        ResponseEntity<String> response = restTemplate.getForEntity(HEALTHCHECK_URI, String.class);
+        ResponseEntity<@NonNull String> response = restTemplate.getForEntity(HEALTHCHECK_URI, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.valueOf(200));
         assertThat(response.getBody()).isEqualTo(HEALTHCHECK_RESPONSE_BODY);
         kafkaConsumer.poll(Duration.ofSeconds(1));

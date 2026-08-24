@@ -3,6 +3,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>uk.gov.companieshouse</groupId>
     <artifactId>companies-house-parent</artifactId>
@@ -16,232 +17,229 @@
   <description>Company Metrics Consumer</description>
 
   <properties>
-    <!-- Spring/Java/Maven -->
+    <!-- Encoding -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- JDK Version -->
     <java.version>21</java.version>
-    <spring.boot.version>3.5.15</spring.boot.version>
 
-    <!-- External -->
-    <apache.avro.version>1.12.0</apache.avro.version>
-    <apache-commons-lang3.version>3.18.0</apache-commons-lang3.version>
-    <classgraph.version>4.8.180</classgraph.version>
-    <jackson-databind-version>2.18.4</jackson-databind-version>
-    <jib-maven-plugin.version>3.4.6</jib-maven-plugin.version>
-    <map-struct.version>1.6.3</map-struct.version>
-    <maven-build-helper-plugin.version>3.6.1</maven-build-helper-plugin.version>
+    <!-- Build Configuration -->
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
     <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-    <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-    <springfox-boot-starter.version>3.0.0</springfox-boot-starter.version>
-    <springdoc-openapi-starter-webmvc-ui.version>2.8.17</springdoc-openapi-starter-webmvc-ui.version>
-    <opentelemetry-instrumentation-bom.version>2.28.1</opentelemetry-instrumentation-bom.version>
-    <io-grpc-context.version>1.74.0</io-grpc-context.version>
+    <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
+    <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+    <jib-maven-plugin.version>3.5.2</jib-maven-plugin.version>
 
-    <!-- Companies House -->
-    <api-sdk-manager-java-library.version>3.0.23</api-sdk-manager-java-library.version>
-    <ch-kafka.version>3.0.6</ch-kafka.version>
-    <kafka-models.version>3.0.19</kafka-models.version>
-    <private-api-sdk-java.version>6.0.29</private-api-sdk-java.version>
-    <structured-logging.version>3.0.57</structured-logging.version>
+    <skip.integration.tests>false</skip.integration.tests>
+    <skip.unit.tests>false</skip.unit.tests>
+
+    <!-- Spring Boot -->
+    <spring-boot-dependencies.version>4.1.1</spring-boot-dependencies.version>
+    <spring-boot-starter-aop.version>4.0.0-M2</spring-boot-starter-aop.version>
+
+    <!-- Internal Dependencies -->
+    <ch-boms.version>0.1.16</ch-boms.version>
+
+    <!-- 3rd Party dependencies -->
+    <test-containers.version>1.21.4</test-containers.version>
+    <apache.avro.version>1.12.1</apache.avro.version>
+    <map-struct.version>1.6.3</map-struct.version>
 
     <!-- Test -->
     <assertj-core.version>3.27.3</assertj-core.version>
     <io-cucumber.version>7.21.1</io-cucumber.version>
-    <testcontainers.version>1.21.3</testcontainers.version>
     <wiremock.standalone.version>3.13.1</wiremock.standalone.version>
 
-    <!-- Config -->
-    <main.class>uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication</main.class>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <skip.integration.tests>false</skip.integration.tests>
-    <skip.unit.tests>false</skip.unit.tests>
-
-    <!-- Sonar -->
-    <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
-    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco/jacoco.xml
-    </sonar.coverage.jacoco.xmlReportPaths>
-    <sonar.jacoco.reports>${project.basedir}/target/site</sonar.jacoco.reports>
-    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-    <sonar.projectKey>uk.gov.companieshouse:company-metrics-consumer</sonar.projectKey>
-    <sonar.sources>src/main</sonar.sources>
-    <sonar.tests>src/test,src/itest</sonar.tests>
-    <sonar.verbose>true</sonar.verbose>
-
-    <log4j-override.version>2.26.0</log4j-override.version>
-    <swagger-ui-override.version>5.32.6</swagger-ui-override.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <!-- Security vulnerabilities -->
+
+      <!-- Import CH BOM first so CH-approved versions (CVE overrides) take precedence -->
       <dependency>
-        <groupId>org.webjars</groupId>
-        <artifactId>swagger-ui</artifactId>
-        <version>${swagger-ui-override.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-api</artifactId>
-        <version>${log4j-override.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-to-slf4j</artifactId>
-        <version>${log4j-override.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>${log4j-override.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.opentelemetry.instrumentation</groupId>
-        <artifactId>opentelemetry-instrumentation-bom</artifactId>
-        <version>${opentelemetry-instrumentation-bom.version}</version>
+        <groupId>uk.gov.companieshouse</groupId>
+        <artifactId>ch-core-bom</artifactId>
+        <version>${ch-boms.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <!-- Import CH BOM first so CH-approved versions (CVE overrides) take precedence -->
+      <dependency>
+        <groupId>uk.gov.companieshouse</groupId>
+        <artifactId>ch-dependency-bom</artifactId>
+        <version>${ch-boms.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Optionally import test BOM for managed test dependency versions -->
+      <dependency>
+        <groupId>uk.gov.companieshouse</groupId>
+        <artifactId>ch-test-bom</artifactId>
+        <version>${ch-boms.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>${spring.boot.version}</version>
+        <version>${spring-boot-dependencies.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${test-containers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 
   <!-- Spring/Java/Maven -->
   <dependencies>
+
+    <!-- Spring Frameworks -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-aop</artifactId>
+      <version>${spring-boot-starter-aop.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
+      <exclusions>
+        <!-- Exclude the default embedded Tomcat server -->
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Include the Jetty server as the embedded server -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jetty</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-logging</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-restclient</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.kafka</groupId>
       <artifactId>spring-kafka</artifactId>
     </dependency>
+
+    <!-- Internal Dependencies -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-aop</artifactId>
+      <groupId>uk.gov.companieshouse</groupId>
+      <artifactId>structured-logging</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>uk.gov.companieshouse</groupId>
+      <artifactId>kafka-models</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>uk.gov.companieshouse</groupId>
+      <artifactId>ch-kafka</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>uk.gov.companieshouse</groupId>
+      <artifactId>api-sdk-manager-java-library</artifactId>
+    </dependency>
+
+    <!-- External Dependencies -->
     <dependency>
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct</artifactId>
       <version>${map-struct.version}</version>
     </dependency>
+
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>${apache-commons-lang3.version}</version>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>${apache.avro.version}</version>
     </dependency>
-    <!-- Companies House -->
-    <dependency>
-      <groupId>uk.gov.companieshouse</groupId>
-      <artifactId>kafka-models</artifactId>
-      <version>${kafka-models.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>uk.gov.companieshouse</groupId>
-      <artifactId>ch-kafka</artifactId>
-      <version>${ch-kafka.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-lang</groupId>
-          <artifactId>commons-lang</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>uk.gov.companieshouse</groupId>
-      <artifactId>structured-logging</artifactId>
-      <version>${structured-logging.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-lang</groupId>
-          <artifactId>commons-lang</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-logging</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>uk.gov.companieshouse</groupId>
-      <artifactId>private-api-sdk-java</artifactId>
-      <version>${private-api-sdk-java.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>uk.gov.companieshouse</groupId>
-      <artifactId>api-sdk-manager-java-library</artifactId>
-      <version>${api-sdk-manager-java-library.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-lang</groupId>
-          <artifactId>commons-lang</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson-databind-version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.github.classgraph</groupId>
-      <artifactId>classgraph</artifactId>
-      <version>${classgraph.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
-    </dependency>
-    <!-- Test -->
+
+    <!-- Testing Dependencies -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+
     <dependency>
-      <groupId>org.springframework.kafka</groupId>
-      <artifactId>spring-kafka-test</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-resttestclient</artifactId>
       <scope>test</scope>
     </dependency>
+
     <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>${assertj-core.version}</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-restclient</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webmvc-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-kafka-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>${testcontainers.version}</version>
+      <version>${test-containers.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>kafka</artifactId>
-      <version>${testcontainers.version}</version>
+      <version>${test-containers.version}</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- Cucumber Dependencies -->
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-core</artifactId>
@@ -273,30 +271,23 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-      <version>${apache.avro.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
     </dependency>
     <dependency>
       <groupId>io.grpc</groupId>
       <artifactId>grpc-context</artifactId>
-      <version>${io-grpc-context.version}</version>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
+
+      <!-- Spring Boot Maven Plugin -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${spring.boot.version}</version>
-        <configuration>
-          <mainClass>${main.class}</mainClass>
-        </configuration>
+        <version>${spring-boot-dependencies.version}</version>
         <executions>
           <execution>
             <goals>
@@ -306,17 +297,26 @@
         </executions>
       </plugin>
 
+      <!-- JIB Maven Plugin for Docker/Containerization -->
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>${jib-maven-plugin.version}</version>
+        <configuration>
+          <containerizingMode>packaged</containerizingMode>
+          <from>
+            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-runtime-21:latest</image>
+          </from>
+          <to>
+            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/${project.artifactId}:latest</image>
+          </to>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>${jacoco-maven-plugin.version}</version>
-        <configuration>
-          <append>true</append>
-          <destFile>${sonar.jacoco.reports}/jacoco.exec</destFile>
-          <dataFile>${sonar.jacoco.reports}/jacoco.exec</dataFile>
-          <outputDirectory>${sonar.jacoco.reports}/jacoco</outputDirectory>
-        </configuration>
-
         <executions>
           <execution>
             <id>pre-unit-test</id>
@@ -357,7 +357,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${maven-build-helper-plugin.version}</version>
+        <version>${build-helper-maven-plugin.version}</version>
         <executions>
           <execution>
             <id>add-integration-test-sources</id>
@@ -383,6 +383,8 @@
           <argLine>${surefireArgLine}</argLine>
           <excludes>
             <exclude>**/*ITest.java</exclude>
+            <exclude>**/*IntegrationTest.java</exclude>
+            <exclude>**/*IT.java</exclude>
           </excludes>
           <skipTests>${skip.unit.tests}</skipTests>
         </configuration>
@@ -438,24 +440,6 @@
           </annotationProcessorPaths>
           <showWarnings>true</showWarnings>
           <showDeprecation>true</showDeprecation>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>com.google.cloud.tools</groupId>
-        <artifactId>jib-maven-plugin</artifactId>
-        <version>${jib-maven-plugin.version}</version>
-        <configuration>
-          <from>
-            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-build-21:latest</image>
-          </from>
-          <to>
-            <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/company-metrics-consumer:latest
-            </image>
-          </to>
-          <container>
-            <expandClasspathDependencies>true</expandClasspathDependencies>
-          </container>
         </configuration>
       </plugin>
 

@@ -45,8 +45,12 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @SpringBootTest(classes = CompanyMetricsConsumerApplication.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
-        topics = {"stream-company-charges", "stream-company-charges-company-metrics-consumer-retry", "stream-company-charges-company-metrics-consumer-error"
-        , "stream-company-charges-company-metrics-consumer-invalid"},
+        topics = {
+                "stream-company-charges",
+                "stream-company-charges-company-metrics-consumer-retry",
+                "stream-company-charges-company-metrics-consumer-error",
+                "stream-company-charges-company-metrics-consumer-invalid"
+        },
         controlledShutdown = true,
         partitions = 1
 )
