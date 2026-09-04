@@ -3,7 +3,7 @@ package uk.gov.companieshouse.company.metrics.exception;
 import static java.lang.String.format;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_CAUSE_FQCN;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_STACKTRACE;
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerInterceptor;

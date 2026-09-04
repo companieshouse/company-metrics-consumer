@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.logging;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,8 +24,7 @@ class StructuredLoggingKafkaListenerAspect {
     private static final String EXCEPTION_MESSAGE = "%s exception thrown: %s";
 
     @Around("@annotation(org.springframework.kafka.annotation.KafkaListener)")
-    public Object manageStructuredLogging(ProceedingJoinPoint joinPoint)
-            throws Throwable {
+    public Object manageStructuredLogging(ProceedingJoinPoint joinPoint) throws Throwable {
 
         try {
             Message<?> message = (Message<?>) joinPoint.getArgs()[0];
@@ -45,18 +44,18 @@ class StructuredLoggingKafkaListenerAspect {
 
             return result;
         } catch (Exception ex) {
-            LOGGER.debug(String.format(EXCEPTION_MESSAGE,
-                            ex.getClass().getSimpleName(), ex.getMessage()),
-                    DataMapHolder.getLogMap());
+            LOGGER.debug(String.format(EXCEPTION_MESSAGE, ex.getClass().getSimpleName(),
+                            ex.getMessage()), DataMapHolder.getLogMap());
             throw ex;
+
         } finally {
             DataMapHolder.clear();
         }
     }
 
     private Optional<String> extractContextId(Object payload) {
-        if (payload instanceof ResourceChangedData) {
-            return Optional.of(((ResourceChangedData) payload).getContextId());
+        if (payload instanceof ResourceChangedData resource) {
+            return Optional.of(resource).map(ResourceChangedData::getContextId);
         }
         return Optional.empty();
     }

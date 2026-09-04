@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
+import jakarta.annotation.PostConstruct;
 import org.jspecify.annotations.NonNull;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -12,12 +13,12 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
+import uk.gov.companieshouse.company.metrics.logging.DataMapHolder;
 import uk.gov.companieshouse.company.metrics.processor.MetricsRouter;
 import uk.gov.companieshouse.company.metrics.type.ResourceChange;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
-
 
 @Component
 public class PscEventStreamConsumer {
@@ -27,8 +28,14 @@ public class PscEventStreamConsumer {
     private final MetricsRouter router;
     private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAME_SPACE);
 
-    public PscEventStreamConsumer(MetricsRouter router) {
+    public PscEventStreamConsumer(final MetricsRouter router) {
         this.router = router;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER.trace("Consumer(class=%s) initialized".formatted(
+                this.getClass().getSimpleName()), DataMapHolder.getLogMap());
     }
 
     /**
@@ -41,13 +48,15 @@ public class PscEventStreamConsumer {
             retryTopicSuffix = "-${company-metrics.consumer.psc-events.stream.group-id}-retry",
             dltTopicSuffix = "-${company-metrics.consumer.psc-events.stream.group-id}-error",
             autoCreateTopics = "false",
-            exclude = NonRetryableErrorException.class)
+            exclude = NonRetryableErrorException.class
+    )
     @KafkaListener(
             id = "${company-metrics.consumer.psc-events.stream.topic}-consumer",
             topics = "#{'${company-metrics.consumer.psc-events.stream.topic}'.split(',')}",
             groupId = "${company-metrics.consumer.psc-events.stream.group-id}",
             autoStartup = "${company-metrics.consumer.psc-events.stream.enable}",
-            containerFactory = "listenerContainerFactory")
+            containerFactory = "listenerContainerFactory"
+    )
     public void receive(Message<@NonNull ResourceChangedData> resourceChangedDataMessage,
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,

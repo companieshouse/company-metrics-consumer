@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.service;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;

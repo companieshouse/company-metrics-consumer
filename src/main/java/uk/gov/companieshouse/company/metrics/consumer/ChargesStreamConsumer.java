@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
+import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
 import org.jspecify.annotations.NonNull;
@@ -29,41 +30,61 @@ public class ChargesStreamConsumer {
 
     private final MetricsRouter chargesRouter;
 
-    public ChargesStreamConsumer(MetricsRouter chargesRouter) {
+    public ChargesStreamConsumer(final MetricsRouter chargesRouter) {
         this.chargesRouter = chargesRouter;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER.trace("Consumer(class=%s) initialized".formatted(
+                this.getClass().getSimpleName()), DataMapHolder.getLogMap());
     }
 
     /**
      * Receives Main topic messages.
      */
-    @RetryableTopic(attempts = "${company-metrics.consumer.charges.stream.retry-attempts}",
+    @RetryableTopic(
+            attempts = "${company-metrics.consumer.charges.stream.retry-attempts}",
             backOff = @BackOff(delayString = "${company-metrics.consumer.charges.stream.backoff-delay}"),
             sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
             retryTopicSuffix = "-${company-metrics.consumer.charges.stream.group-id}-retry",
             dltTopicSuffix = "-${company-metrics.consumer.charges.stream.group-id}-error",
             dltStrategy = DltStrategy.FAIL_ON_ERROR,
             autoCreateTopics = "false",
-            exclude = NonRetryableErrorException.class)
-    @KafkaListener(topics = "${company-metrics.consumer.charges.stream.topic}",
+            exclude = NonRetryableErrorException.class
+    )
+    @KafkaListener(
+            id = "${company-metrics.consumer.charges.stream.topic}-consumer",
+            topics = "${company-metrics.consumer.charges.stream.topic}",
             groupId = "${company-metrics.consumer.charges.stream.group-id}",
             autoStartup = "${company-metrics.consumer.charges.stream.enable}",
-            containerFactory = "listenerContainerFactory")
-    public void receive(Message<@NonNull ResourceChangedData> resourceChangedMessage,
+            containerFactory = "listenerContainerFactory"
+    )
+    public void receive(Message<@NonNull ResourceChangedData> message,
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,
                         @Header(KafkaHeaders.OFFSET) String offset) {
+        LOGGER.info("receive(topic=%s, partition=%s, kind=%s) method called.".formatted(topic, partition,
+                        message.getPayload().getResourceKind()), DataMapHolder.getLogMap());
+
         Instant startTime = Instant.now();
-        ResourceChangedData payload = resourceChangedMessage.getPayload();
+        ResourceChangedData payload = message.getPayload();
         String contextId = payload.getContextId();
-        LOGGER.info("Resource changed message received", DataMapHolder.getLogMap());
 
         try {
-            final String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
+            ResourceChange resourceChange = new ResourceChange(payload);
+            String deltaType = "charges";
+            String updatedBy = String.format("%s-%s-%s", topic, partition, offset);
 
-            chargesRouter.route(new ResourceChange(payload), "charges", updatedBy);
-            LOGGER.info(String.format("Charges Metrics message processed in %d milliseconds",
-                    Duration.between(startTime, Instant.now()).toMillis()),
-                    DataMapHolder.getLogMap());
+            LOGGER.info("Routing message: (resourceChange=%s, deltaType=%s, updatedBy=%s".formatted(
+                    resourceChange, deltaType, updatedBy));
+
+            chargesRouter.route(resourceChange, deltaType, updatedBy);
+
+            long messageProcessingTime = Duration.between(startTime, Instant.now()).toMillis();
+            LOGGER.info("Charges Metrics message processed: %d milliseconds".formatted(
+                    messageProcessingTime), DataMapHolder.getLogMap());
+
         } catch (Exception exception) {
             LOGGER.errorContext(contextId, "Exception occurred while processing message",
                     exception, DataMapHolder.getLogMap());
