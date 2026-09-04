@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.company.metrics.type;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -42,16 +43,15 @@ public class ResourceChange {
     @Override
     public String toString() {
         try {
-            ObjectMapper mapper = new ObjectMapper()
+            return new ObjectMapper()
                     .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
                     .registerModule(new JavaTimeModule())
                     .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                    .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+                    .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                    .writeValueAsString(data);
 
-            return mapper.writeValueAsString(data);
-
-        } catch(Exception ex) {
+        } catch(JsonProcessingException ex) {
             return ex.getMessage();
         }
     }
