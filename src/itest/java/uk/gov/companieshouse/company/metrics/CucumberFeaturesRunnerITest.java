@@ -7,7 +7,8 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 
 @RunWith(Cucumber.class)
-@CucumberOptions(features = "src/itest/resources/features",
+@CucumberOptions(
+        features = "src/itest/resources/features",
         plugin = {"pretty", "json:target/cucumber-report.json"},
         glue = {"uk.gov.companieshouse.company.metrics"})
 @CucumberContextConfiguration
