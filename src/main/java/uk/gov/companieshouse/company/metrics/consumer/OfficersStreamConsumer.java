@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
+import jakarta.annotation.PostConstruct;
 import org.jspecify.annotations.NonNull;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -27,8 +28,14 @@ public class OfficersStreamConsumer {
     private static final String OFFICER_DELTA_TYPE = "officers";
     private final MetricsRouter router;
 
-    public OfficersStreamConsumer(MetricsRouter router) {
+    public OfficersStreamConsumer(final MetricsRouter router) {
         this.router = router;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER.trace("Consumer(class=%s) initialized".formatted(
+                this.getClass().getSimpleName()), DataMapHolder.getLogMap());
     }
 
     /**
@@ -41,13 +48,15 @@ public class OfficersStreamConsumer {
             retryTopicSuffix = "-${company-metrics.consumer.appointments.stream.group-id}-retry",
             dltTopicSuffix = "-${company-metrics.consumer.appointments.stream.group-id}-error",
             autoCreateTopics = "false",
-            exclude = NonRetryableErrorException.class)
+            exclude = NonRetryableErrorException.class
+    )
     @KafkaListener(
             id = "${company-metrics.consumer.appointments.stream.topic}-consumer",
             topics = "${company-metrics.consumer.appointments.stream.topic}",
             groupId = "${company-metrics.consumer.appointments.stream.group-id}",
             autoStartup = "${company-metrics.consumer.appointments.stream.enable}",
-            containerFactory = "listenerContainerFactory")
+            containerFactory = "listenerContainerFactory"
+    )
     public void receive(Message<@NonNull ResourceChangedData> resourceChangedDataMessage,
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,

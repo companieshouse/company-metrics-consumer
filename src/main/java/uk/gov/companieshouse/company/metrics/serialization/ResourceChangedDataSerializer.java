@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.serialization;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
 import java.nio.charset.StandardCharsets;
 import org.apache.avro.io.DatumWriter;
@@ -22,18 +22,16 @@ public class ResourceChangedDataSerializer implements Serializer<Object> {
 
     @Override
     public byte[] serialize(String topic, Object payload) {
-
         try {
             if (payload == null) {
                 return null;
             }
 
-            if (payload instanceof byte[]) {
-                return (byte[]) payload;
+            if (payload instanceof byte[] bytes) {
+                return bytes;
             }
 
-            if (payload instanceof ResourceChangedData) {
-                ResourceChangedData resourceChangedData = (ResourceChangedData) payload;
+            if (payload instanceof ResourceChangedData resourceChangedData) {
                 DatumWriter<ResourceChangedData> writer = new SpecificDatumWriter<>();
                 EncoderFactory encoderFactory = EncoderFactory.get();
 
@@ -44,11 +42,10 @@ public class ResourceChangedDataSerializer implements Serializer<Object> {
             }
 
             return payload.toString().getBytes(StandardCharsets.UTF_8);
+
         } catch (Exception ex) {
-            LOGGER.error("Serialization exception while writing to byte array",
-                    ex, DataMapHolder.getLogMap());
-            throw new NonRetryableErrorException("Serialization exception while "
-                    + "writing to byte array", ex);
+            LOGGER.error("Serialization exception while writing to byte array", ex, DataMapHolder.getLogMap());
+            throw new NonRetryableErrorException("Serialization exception while writing to byte array", ex);
         }
     }
 }

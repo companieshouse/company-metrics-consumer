@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.company.metrics.consumer;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
+import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
 import org.jspecify.annotations.NonNull;
@@ -30,25 +31,36 @@ public class RegistersStreamConsumer {
 
     private final MetricsRouter registersRouter;
 
-    public RegistersStreamConsumer(MetricsRouter registersRouter) {
+    public RegistersStreamConsumer(final MetricsRouter registersRouter) {
         this.registersRouter = registersRouter;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER.trace("Consumer(class=%s) initialized".formatted(
+                this.getClass().getSimpleName()), DataMapHolder.getLogMap());
     }
 
     /**
      * Receives Main topic messages.
      */
-    @RetryableTopic(attempts = "${company-metrics.consumer.registers.stream.retry-attempts}",
+    @RetryableTopic(
+            attempts = "${company-metrics.consumer.registers.stream.retry-attempts}",
             backOff = @BackOff(delayString = "${company-metrics.consumer.registers.stream.backoff-delay}"),
             sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
             retryTopicSuffix = "-${company-metrics.consumer.registers.stream.group-id}-retry",
             dltTopicSuffix = "-${company-metrics.consumer.registers.stream.group-id}-error",
             dltStrategy = DltStrategy.FAIL_ON_ERROR,
             autoCreateTopics = "false",
-            exclude = NonRetryableErrorException.class)
-    @KafkaListener(topics = "${company-metrics.consumer.registers.stream.topic}",
+            exclude = NonRetryableErrorException.class
+    )
+    @KafkaListener(
+            id = "${company-metrics.consumer.registers.stream.topic}-consumer",
+            topics = "${company-metrics.consumer.registers.stream.topic}",
             groupId = "${company-metrics.consumer.registers.stream.group-id}",
             autoStartup = "${company-metrics.consumer.registers.stream.enable}",
-            containerFactory = "listenerContainerFactory")
+            containerFactory = "listenerContainerFactory"
+    )
     public void receive(Message<@NonNull ResourceChangedData> resourceChangedMessage,
                         @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) String partition,

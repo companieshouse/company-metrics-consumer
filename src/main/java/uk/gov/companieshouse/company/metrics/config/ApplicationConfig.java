@@ -29,8 +29,7 @@ public class ApplicationConfig implements WebMvcConfigurer {
             @Value("${api.company-metrics-api-key}") String apiKey,
             @Value("${api.api-url}") String apiUrl) {
         return () -> {
-            InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(
-                    apiKey));
+            InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(apiKey));
             internalApiClient.setBasePath(apiUrl);
             return internalApiClient;
         };

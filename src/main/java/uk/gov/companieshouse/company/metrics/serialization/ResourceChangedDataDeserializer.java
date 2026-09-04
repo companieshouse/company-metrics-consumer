@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.company.metrics.serialization;
 
-import static uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication.APPLICATION_NAME_SPACE;
+import static uk.gov.companieshouse.company.metrics.Application.APPLICATION_NAME_SPACE;
 
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
@@ -26,9 +26,10 @@ public class ResourceChangedDataDeserializer implements Deserializer<ResourceCha
     public ResourceChangedData deserialize(String topic, byte[] data) {
         try {
             Decoder decoder = DecoderFactory.get().binaryDecoder(data, null);
-            DatumReader<ResourceChangedData> reader =
-                    new ReflectDatumReader<>(ResourceChangedData.class);
+            DatumReader<ResourceChangedData> reader = new ReflectDatumReader<>(ResourceChangedData.class);
+
             return reader.read(null, decoder);
+
         } catch (Exception ex) {
             LOGGER.error("De-Serialization exception while converting to Avro schema object",
                     ex, DataMapHolder.getLogMap());

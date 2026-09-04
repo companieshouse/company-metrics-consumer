@@ -33,7 +33,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import uk.gov.companieshouse.company.metrics.CompanyMetricsConsumerApplication;
+import uk.gov.companieshouse.company.metrics.Application;
 import uk.gov.companieshouse.company.metrics.exception.NonRetryableErrorException;
 import uk.gov.companieshouse.company.metrics.exception.RetryableErrorException;
 import uk.gov.companieshouse.company.metrics.processor.MetricsRouter;
@@ -42,7 +42,7 @@ import uk.gov.companieshouse.company.metrics.util.TestUtils;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-@SpringBootTest(classes = CompanyMetricsConsumerApplication.class)
+@SpringBootTest(classes = Application.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @EmbeddedKafka(
         topics = {

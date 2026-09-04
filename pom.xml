@@ -27,6 +27,7 @@
     <!-- Build Configuration -->
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
+
     <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
@@ -43,7 +44,7 @@
     <spring-boot-starter-aop.version>4.0.0-M2</spring-boot-starter-aop.version>
 
     <!-- Internal Dependencies -->
-    <ch-boms.version>0.1.16</ch-boms.version>
+    <ch-boms.version>0.1.17</ch-boms.version>
 
     <!-- 3rd Party dependencies -->
     <test-containers.version>1.21.4</test-containers.version>
@@ -51,7 +52,7 @@
     <map-struct.version>1.6.3</map-struct.version>
 
     <!-- Test -->
-    <assertj-core.version>3.27.3</assertj-core.version>
+<!--    <assertj-core.version>3.27.3</assertj-core.version>-->
     <io-cucumber.version>7.21.1</io-cucumber.version>
     <wiremock.standalone.version>3.13.1</wiremock.standalone.version>
 
@@ -166,8 +167,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.kafka</groupId>
-      <artifactId>spring-kafka</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-kafka</artifactId>
     </dependency>
 
     <!-- Internal Dependencies -->
