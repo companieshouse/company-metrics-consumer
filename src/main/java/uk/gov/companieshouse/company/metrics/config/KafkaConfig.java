@@ -91,6 +91,7 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<@NonNull String, @NonNull ResourceChangedData> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
+        factory.getContainerProperties().setObservationEnabled(true);
         factory.setConcurrency(listenerConcurrency);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
 
@@ -117,7 +118,9 @@ public class KafkaConfig {
     public KafkaTemplate<@NonNull String, @NonNull Object> kafkaTemplate(ProducerFactory<@NonNull String, Object> producerFactory) {
         LOGGER.info("kafkaTemplate(listeners=%d) method called.".formatted(producerFactory.getListeners().size()));
 
-        return new KafkaTemplate<>(producerFactory);
+        KafkaTemplate<@NonNull String, @NonNull Object> template = new KafkaTemplate<>(producerFactory);
+        template.setObservationEnabled(true);
+        return template;
     }
 
 }
